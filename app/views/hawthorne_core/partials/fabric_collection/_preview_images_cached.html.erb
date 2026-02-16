@@ -1,0 +1,57 @@
+<%# html partial to display a list of fabric collection preview images %>
+
+<%# html partial path: preview images (cached) > picture image type > picture image %>
+
+<%= month_nbr_charlie %>
+
+<%
+
+  # create the cache key ...
+  # ex key (viewing all fabric collections on the riley blake site): fabric-collection-preview-images-all-1884166-152-553
+  # 'all' is the identifier passed in - viewing all collections
+  # '1884166' is the sum of the fabric collection ids
+  # '152' is the number of fabric collections released
+  # '553' is the sum of the release date months for the fabric collections not released
+
+  fabric_collection_id_sum = 0
+  fabric_collections.each { |obj| fabric_collection_id_sum += obj.fabric_collection_id }
+
+  nbr_fabric_collections_released = 0
+  fabric_collections.each { |obj| nbr_fabric_collections_released += 1 if obj.released? }
+
+  nbr_months_fabric_collections_not_released = 0
+  fabric_collections.each { |obj| nbr_months_fabric_collections_not_released += month_nbr(obj.release_date) unless obj.released? }
+
+  cache_key = 'fabric-collection-preview-images-' + cache_identifier + '-' +
+              fabric_collection_id_sum.to_s + '-' +
+              nbr_fabric_collections_released.to_s + '-' +
+              nbr_months_fabric_collections_not_released.to_s
+
+%>
+
+<% Rails.cache.delete('views/' + cache_key) if @clear_fragment_cache %>
+<% cache cache_key, skip_digest: true, expires_in: 1.day do %>
+  <% fabric_collections.each do |fabric_collection| %>
+    <% if fabric_collection.preview_image? %>
+      <div style='display: inline-block; padding: 0.125rem; position: relative;'>
+        <%= link_to fabric_collection_link(fabric_collection), class: 'image' do %>
+          <%= render partial: '/core/partials/picture_image_type',
+                     locals: {
+                       image: fabric_collection.preview_image,
+                       image_type: fabric_collection_preview_image_type,
+                       alt_text: fabric_collection.handle + ' Preview'
+                     }
+          %>
+        <% end %>
+        <% unless fabric_collection.released? %>
+          <div style='position: absolute; bottom: 15.0%; right: 3.0%; max-width: 40%;'>
+            <img src='https://core-bucket-core.s3.us-east-1.amazonaws.com/<%= Core::Site.this_site_name.downcase.parameterize %>/month-overlay/<%= month(fabric_collection.release_date).downcase %>.png' alt='Arriving <%= month(fabric_collection.release_date) %>'>
+          </div>
+        <% end %>
+        <div style='display:inline-block; width: 0; height: 0; overflow: hidden;'>
+          <%= fabric_collection.handle %>
+        </div>
+      </div>
+    <% end %>
+  <% end %>
+<% end %>
