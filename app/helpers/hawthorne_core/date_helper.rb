@@ -1,5 +1,4 @@
-module HawthorneCore
-  module DateHelper
+  module HawthorneCore::DateHelper
 
     # -----------------------------------------------------------------------------
 
@@ -38,4 +37,3 @@ module HawthorneCore
     # -----------------------------------------------------------------------------
 
   end
-end

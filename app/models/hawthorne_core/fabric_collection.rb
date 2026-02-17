@@ -15,6 +15,12 @@ module HawthorneCore
 
       # -----------------------------------------------------------------------------
 
+      def id
+        fabric_collection_id
+      end
+
+      # -----------------------------------------------------------------------------
+
       # build the fabric collection show page html title
       # ex: Berry Market Fabric Collection | Beverly McCullough
       def html_title_show(designer)
