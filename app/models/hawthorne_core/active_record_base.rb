@@ -1,3 +1,5 @@
+# v3.0
+
 module HawthorneCore
 
   class ActiveRecordBase < ActiveRecord::Base

@@ -1,6 +1,4 @@
-# v1.1 (CORE)
-
-module Core::Application::User
+module HawthorneCore::User
   extend ActiveSupport::Concern
 
   included do
