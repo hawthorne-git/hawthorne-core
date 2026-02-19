@@ -1,0 +1,3 @@
+List of session attributes used within the gem ...
+
+user_session_validated

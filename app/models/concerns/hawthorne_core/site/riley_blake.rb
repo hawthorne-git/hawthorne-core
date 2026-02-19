@@ -8,7 +8,7 @@ module HawthorneCore::Site::RileyBlake
     # -----------------------------------------------------------------------------
 
     def self.riley_blake_name
-      'RILEY_BLAKE'
+      HawthorneCore::AppConfig::RILEY_BLAKE_SITE_NAME
     end
 
     def self.riley_blake_id

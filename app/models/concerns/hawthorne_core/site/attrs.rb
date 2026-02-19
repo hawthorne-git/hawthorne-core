@@ -9,14 +9,14 @@ module HawthorneCore::Site::Attrs
 
     # get the sites header version
     def self.header_version
-      where(site_id: this_site_id).pick(:header_version)
+      where(site_id: HawthorneCore::Site.this_site_id).pick(:header_version)
     end
 
     # -------------------------
 
     # get the sites footer version
     def self.footer_version
-      where(site_id: this_site_id).pick(:footer_version)
+      where(site_id: HawthorneCore::Site.this_site_id).pick(:footer_version)
     end
 
     # -----------------------------------------------------------------------------

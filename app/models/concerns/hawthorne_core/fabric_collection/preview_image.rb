@@ -1,3 +1,5 @@
+# v3.0
+
 module HawthorneCore::FabricCollection::PreviewImage
   extend ActiveSupport::Concern
 
@@ -7,14 +9,14 @@ module HawthorneCore::FabricCollection::PreviewImage
 
     # -----------------------------------------------------------------------------
 
-    #  get the preview image - the image shown when viewing a list of fabric collections
+    #  get the preview image - used when viewing a list of fabric collections
     def preview_image
       preview_image_2025
     end
 
     # determine if a preview image exists
     def preview_image?
-      !preview_image.attachment.nil?
+      preview_image.attached?
     end
 
     # -----------------------------------------------------------------------------

@@ -1,23 +1,19 @@
 # v3.0
 
-module HawthorneCore
+class HawthorneCore::ActiveRecordBase < ActiveRecord::Base
 
-  class ActiveRecordBase < ActiveRecord::Base
+  # ----------------------------------------------------------------
 
-    # ----------------------------------------------------------------
+  self.abstract_class = true
 
-    self.abstract_class = true
+  # ----------------------------------------------------------------
 
-    # ----------------------------------------------------------------
+  connects_to database:
+                {
+                  writing: :primary,
+                  reading: :primary_replica,
+                }
 
-    connects_to database:
-                  {
-                    writing: :primary,
-                    reading: :primary_replica,
-                  }
-
-    # ----------------------------------------------------------------
-
-  end
+  # ----------------------------------------------------------------
 
 end

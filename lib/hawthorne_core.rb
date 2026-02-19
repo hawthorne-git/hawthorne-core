@@ -1,5 +1,6 @@
-require "hawthorne_core/engine" if defined?(Rails)
-require "zeitwerk"
+require 'hawthorne_core/app_config'
+require 'hawthorne_core/engine'
+require 'zeitwerk'
 
 module HawthorneCore
 end

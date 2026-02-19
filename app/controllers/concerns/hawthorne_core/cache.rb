@@ -1,4 +1,4 @@
-# v3.0XXX
+# v3.0
 
 module HawthorneCore::Cache
   extend ActiveSupport::Concern
@@ -8,7 +8,7 @@ module HawthorneCore::Cache
     # ---------------------------------------------------------------------------
 
     # determine if the pages cache should be cleared
-    # when true, any cached segments (page / action / fragment) is re-cached
+    # when true, any cached segments (page / action / fragment) are expired
     def clear_cache?
       params.key?(:cc)
     end

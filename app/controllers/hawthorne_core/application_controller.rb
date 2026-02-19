@@ -4,7 +4,8 @@ class HawthorneCore::ApplicationController < ActionController::Base
 
   include HawthorneCore::Cache,
           HawthorneCore::Database,
-          HawthorneCore::User,
+          HawthorneCore::UserAuthentication,
+          HawthorneCore::UserSession,
           HawthorneCore::UserValidation
 
   helper HawthorneCore::AwsHelper,
@@ -28,16 +29,14 @@ class HawthorneCore::ApplicationController < ActionController::Base
   # set the sites header / footer versions in the cache
   before_action :set_site_header_footer_versions_in_cache
 
-  # CORE ... validate that the users (cookie) session is found in the database - only call if the token is blank
-  # before_action :validate_site_user_session, if: proc { session[:site_user_token_validated].blank? }
+  # validate that the users session is captured in the database - if not previously validated
+  before_action :validate_user_session, if: proc { !user_session_validated? }
 
-  # CORE ... determine if the users (cookie) session is created - only call if the token is blank
-  # before_action :create_site_user_session, if: proc { cookies[:site_user_token].blank? }
+  # create the users session - if it does not exist
+  before_action :create_user_session, if: proc { !user_session? }
 
   # CORE ... determine if the user is signed in
   # before_action :is_signed_in
-
-
 
   # ---------------------------------------------------------------------------
 
