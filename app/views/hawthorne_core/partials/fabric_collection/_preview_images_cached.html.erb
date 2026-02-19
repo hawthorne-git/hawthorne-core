@@ -1,4 +1,4 @@
-<%# v3.0 %>
+<%# v3.0XXX %>
 
 <%#
 
@@ -33,7 +33,7 @@ html partial (cached) to display a list of fabric collection preview images
 
 %>
 
-<% Rails.cache.delete('views/' + cache_key) if @clear_fragment_cache %>
+<% Rails.cache.delete('views/' + cache_key) if @clear_cache %>
 <% cache cache_key, skip_digest: true, expires_in: 1.day do %>
 
   <% fabric_collections.each do |fabric_collection| %>

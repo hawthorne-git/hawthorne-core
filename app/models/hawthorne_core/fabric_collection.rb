@@ -2,6 +2,12 @@ module HawthorneCore
 
     class FabricCollection < Administration::Repository::Fabric::FabricCollection
 
+      # -----------------------------------------------------------------------------
+
+      self.table_name = 'fabric_collections'
+
+      # -----------------------------------------------------------------------------
+
       include HawthorneCore::FabricCollection::PreviewImage,
               HawthorneCore::FabricCollection::Supplier
 
