@@ -10,11 +10,11 @@ module HawthorneCore
 
     # define the list of valid site names
 
-    RILEY_BLAKE_SITE_NAME = 'RILEY_BLAKE'
+    RILEY_BLAKE_ENV_SITE_NAME = 'RILEY_BLAKE'
 
-    VALID_SITE_NAMES =
+    VALID_ENV_SITE_NAMES =
       [
-        RILEY_BLAKE_SITE_NAME
+        RILEY_BLAKE_ENV_SITE_NAME
       ].freeze
 
     # -----------------------------------------------------------------------------
@@ -22,7 +22,7 @@ module HawthorneCore
     # fetch SITE_NAME ... if not found or invalid, raise an exception
     def self.site_name
       site_name = fetch_env_attr('SITE_NAME')
-      raise "Invalid SITE_NAME: " + site_name unless VALID_SITE_NAMES.include?(site_name)
+      raise "Invalid SITE_NAME: " + site_name unless VALID_ENV_SITE_NAMES.include?(site_name)
       site_name
     end
 

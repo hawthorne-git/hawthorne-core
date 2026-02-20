@@ -77,16 +77,16 @@ module HawthorneCore::UserValidation
       !passcode_valid?(passcode)
     end
 
-    # --------------------------------------------------------------------------- Sign In / Out
+    # --------------------------------------------------------------------------- Validate: Signed In / Out
 
     # validates that the user is signed in
-    # if not, redirect the user to the sign in page
+    # if not, redirect the user to the sign-in page
     def validate_signed_in
       redirect_to sign_in_path unless @signed_in
     end
 
     # validates that the user is signed out
-    # if not, redirect the user to the sign out action
+    # if not, redirect the user to the sign-out action
     def validate_signed_out
       redirect_to sign_out_path if @signed_in
     end

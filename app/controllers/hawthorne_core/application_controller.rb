@@ -1,6 +1,6 @@
 # v3.0XXX
 
-class HawthorneCore::ApplicationController < ActionController::Base
+class HawthorneCore::ApplicationController < ::ApplicationController
 
   include HawthorneCore::Cache,
           HawthorneCore::Database,

@@ -1,0 +1,46 @@
+<%# v1.1 (CORE) %>
+
+<div class='title'>Sign In</div>
+
+<%= turbo_frame_tag 'sign_in_failed_turbo_frame' do %>
+  <%= render partial: '/core/user/partials/sign_in_failed' if @sign_in_failed %>
+<% end %>
+
+<div class='form'>
+
+  <%= form_with url: sign_in_path do |f| %>
+
+    <div class='form_input'>
+      <label class='form_input'>email address</label>
+      <%= f.text_field :email_address, class: 'form_input', value: params[:email_address], required: true, maxlength: 320 %>
+    </div>
+
+    <div class='form_input' style='position: relative;'>
+      <label class='form_input'>password</label>
+      <%= f.password_field :passcode, class: 'form_input', required: true, maxlength: 100, autofocus: params[:email_address].present? %>
+      <span class='passcode_eye'>
+          <img src='https://core-bucket-core.s3.amazonaws.com/<%= Core::Site.this_site_name.downcase.parameterize %>/passcode_eye.png' class='passcode_eye' onclick='togglePasscode()'>
+        </span>
+    </div>
+
+    <div class='form_input'>
+      <%= f.check_box :keep_signed_in, class: 'form_input' %> Keep me signed in
+    </div>
+
+    <div class='form_submit'>
+      <%= f.submit 'Sign In' %>
+    </div>
+
+  <% end %>
+
+</div>
+
+<%= render partial: '/core/user/partials/single_sign_on' %>
+
+<div class='vertical_space'></div>
+
+<div>
+  <%= link_to 'Reset Password', reset_password_request_path %> / <%= link_to 'Sign Up', sign_up_path, data: { turbo: 'false' } %>
+</div>
+
+<%= render partial: '/core/user/partials/toggle_passcode_js' %>

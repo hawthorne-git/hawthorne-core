@@ -16,7 +16,13 @@ class HawthorneCore::Site < HawthorneCore::ActiveRecordBase
   # define the list of site ids
   SITE_IDS =
     {
-      riley_blake_name => riley_blake_id
+      riley_blake_env_name => riley_blake_id
+    }
+
+  # define the list of site names
+  SITE_NAMES =
+    {
+      riley_blake_env_name => riley_blake_name
     }
 
   # -----------------------------------------------------------------------------
@@ -24,6 +30,11 @@ class HawthorneCore::Site < HawthorneCore::ActiveRecordBase
   # get the site id, from the ENV attribute SITE_NAME ... if not found, raise an exception
   def self.this_site_id
     SITE_IDS.fetch(HawthorneCore::AppConfig.site_name) { raise env_site_name_exception('this_site_id') }
+  end
+
+  # get the site name, from the ENV attribute SITE_NAME ... if not found, raise an exception
+  def self.this_site_name
+    SITE_NAMES.fetch(HawthorneCore::AppConfig.site_name) { raise env_site_name_exception('this_site_name') }
   end
 
   # -----------------------------------------------------------------------------
