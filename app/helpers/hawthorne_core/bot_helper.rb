@@ -12,7 +12,7 @@ module HawthorneCore::BotHelper
 
   # ----------------------------------------------------------------
 
-  # determine if the http request is a bot from the referer, user agent, and ip address
+  # determine if the http request is a bot from the referer, site_user agent, and ip address
   def self.bot?(request)
     referer_bot?(request.env['HTTP_REFERER']) || user_agent_bot?(request.env['HTTP_USER_AGENT']) || ip_address_bot?(request.env['HTTP_CF_CONNECTING_IP'])
   end
@@ -35,7 +35,7 @@ module HawthorneCore::BotHelper
 
   # ------------------
 
-  # determine if the http request is a bot, from the user agent
+  # determine if the http request is a bot, from the site_user agent
   def self.user_agent_bot?(user_agent)
     USER_AGENT_BOTS.include?(user_agent&.downcase)
   end

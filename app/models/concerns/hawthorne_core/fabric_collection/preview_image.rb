@@ -5,6 +5,8 @@ module HawthorneCore::FabricCollection::PreviewImage
 
   included do
 
+    # -----------------------------------------------------------------------------
+
     has_one_attached :preview_image_2025
 
     # -----------------------------------------------------------------------------

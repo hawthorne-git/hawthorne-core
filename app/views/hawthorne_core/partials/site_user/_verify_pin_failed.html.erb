@@ -1,0 +1,9 @@
+<%# v3.0 %>
+
+<div class='error'>
+  <div class='vertical_space_small'></div>
+  <%= 'Pin has expired, a new pin has been sent' if @pin_inactive %>
+  <%= 'Too many failed attempts, a new pin has been sent' if @max_allowed_pin_attempts_reached %>
+  <%= 'Pin does not match, please check for a typo' if @pin_does_not_match %>
+  <div class='vertical_space_small'></div>
+</div>

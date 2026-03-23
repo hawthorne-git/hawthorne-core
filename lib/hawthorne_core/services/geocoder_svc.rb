@@ -1,34 +1,29 @@
 # v3.0
 
-# Geocoder service
+# GeocoderSvc service
 class HawthorneCore::Services::GeocoderSvc
 
   # ----------------------------------------------------------------
 
-  def self.set_user_session_location(site_user_session_id)
+  # find a location (city, region, country, postal) by an ip address
+  def self.find_location_by_ip_address(ip_address)
 
-    # return if not in production
-    return unless Rails.env.production?
+    # return if the ip address if not set
+    return if ip_address.blank?
 
-    # find the site user session
-    # return if the session is not found, or if the ip address is not set
-    site_user_session = HawthorneCore::SiteUserSession.find_by(site_user_session_id: site_user_session_id)
-    return if site_user_session&.ip_address.blank?
-
-    # find the location by the ip address
-    # return if a location is not returned
-    location = Geocoder.search(site_user_session.ip_address)&.first
+    # find the location
+    # return if the location is not set
+    # TODO: treat this like an API call ... log it
+    location = Geocoder.search(ip_address)&.first
     return unless location
 
-    # set the location into the site user session
-    ActiveRecordBase.connected_to(role: :writing) do
-      site_user_session.update(
-        city: location.city,
-        region: location.region,
-        country: location.country,
-        postal: location.postal
-      )
-    end
+    # return the location (as a hash)
+    {
+      city: location.city,
+      region: location.region,
+      country: location.country,
+      postal: location.postal
+    }
 
   end
 

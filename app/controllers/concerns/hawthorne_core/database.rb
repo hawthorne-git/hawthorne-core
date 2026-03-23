@@ -9,16 +9,16 @@ module HawthorneCore::Database
 
     # used around actions / segments of code,
     # to connect to a read-only database
-    def connect_to_read_database
-      HawthorneCore::ActiveRecordBase.connected_to(role: :reading) { yield }
+    def with_reading
+      HawthorneCore::ActiveRecordBase.with_reading { yield }
     end
 
     # ---------------------------------------------------------------------------
 
     # used around actions / segments of code,
     # to connect to the primary database, for writing
-    def connect_to_writing_database
-      HawthorneCore::ActiveRecordBase.connected_to(role: :writing) { yield }
+    def with_writing
+      HawthorneCore::ActiveRecordBase.with_writing { yield }
     end
 
     # ---------------------------------------------------------------------------

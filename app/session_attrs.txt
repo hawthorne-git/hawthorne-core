@@ -1,3 +1,7 @@
 List of session attributes used within the gem ...
 
+site_user_id
+
 user_session_validated
+
+return_to_after_sign_in

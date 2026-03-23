@@ -16,4 +16,14 @@ class HawthorneCore::ActiveRecordBase < ActiveRecord::Base
 
   # ----------------------------------------------------------------
 
+  def with_reading(&block) = self.class.with_reading(&block)
+  def with_writing(&block) = self.class.with_writing(&block)
+
+  class << self
+    def with_reading(&block) = HawthorneCore::ActiveRecordBase.connected_to(role: :reading, &block)
+    def with_writing(&block) = HawthorneCore::ActiveRecordBase.connected_to(role: :writing, &block)
+  end
+
+  # ----------------------------------------------------------------
+
 end

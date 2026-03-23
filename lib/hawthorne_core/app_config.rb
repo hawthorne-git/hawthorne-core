@@ -8,7 +8,25 @@ module HawthorneCore
 
     # -----------------------------------------------------------------------------
 
-    # define the list of valid site names
+    def self.braintree_environment = fetch_env_attr('BRAINTREE_ENVIRONMENT')
+
+    def self.braintree_merchant_id = fetch_env_attr('BRAINTREE_MERCHANT_ID')
+
+    def self.braintree_private_key = fetch_env_attr('BRAINTREE_PRIVATE_KEY')
+
+    def self.braintree_public_key = fetch_env_attr('BRAINTREE_PUBLIC_KEY')
+
+    def self.mailer_send_api_token = fetch_env_attr('MAILER_SEND_API_TOKEN')
+
+    def self.site_base_url = fetch_env_attr('SITE_BASE_URL')
+
+    def self.twilio_password = fetch_env_attr('TWILIO_PASSWORD')
+
+    def self.twilio_us_phone_number = fetch_env_attr('TWILIO_US_PHONE_NUMBER')
+
+    def self.twilio_username = fetch_env_attr('TWILIO_USERNAME')
+
+    # ----------------------------------------------------------------------------- Site Names
 
     RILEY_BLAKE_ENV_SITE_NAME = 'RILEY_BLAKE'
 
@@ -17,9 +35,6 @@ module HawthorneCore
         RILEY_BLAKE_ENV_SITE_NAME
       ].freeze
 
-    # -----------------------------------------------------------------------------
-
-    # fetch SITE_NAME ... if not found or invalid, raise an exception
     def self.site_name
       site_name = fetch_env_attr('SITE_NAME')
       raise "Invalid SITE_NAME: " + site_name unless VALID_ENV_SITE_NAMES.include?(site_name)

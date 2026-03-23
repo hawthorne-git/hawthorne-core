@@ -22,18 +22,18 @@ module HawthorneCore::UserSession
     # create the users session - if not a bot
     def create_user_session
 
-      # return, and do not create a user session if the request is determined to be a bot
+      # return, and do not create a site_user session if the request is determined to be a bot
       return if HawthorneCore::BotHelper.bot?(request)
 
-      # create the user session
-      site_user_session = HawthorneCore::SiteUserSession.create_record(request, session[:user_id])
+      # create the site_user session
+      site_user_session = HawthorneCore::SiteUserSession.create_record(request, session[:site_user_id])
 
-      # set the user session token (as a cookie), and mark the session as validated
+      # set the site_user session token (as a cookie), and mark the session as validated
       cookies[:user_session_token] = { value: site_user_session.token, expires: 1.month, same_site: :strict }
       session[:user_session_validated] = true
 
       # kick off a job to capture the users session location
-      HawthorneCore::CaptureUserSessionLocationJob.perform_later(site_user_session.id)
+      HawthorneCore::SiteUser::CaptureUserSessionLocationJob.perform_later(site_user_session.id)
 
     end
 
@@ -43,17 +43,17 @@ module HawthorneCore::UserSession
     # to be true ... a cookie defining the users session MUST exist, and this cookie value MUST exist in the database
     def validate_user_session
 
-      # if a user session token does not exist as a cookie ...
-      # set the user session as NOT validated and return
+      # if a site_user session token does not exist as a cookie ...
+      # set the site_user session as NOT validated and return
       unless cookies.key?(:user_session_token)
         session[:user_session_validated] = false
         return
       end
 
-      # a user session token exists as a cookie ...
+      # a site_user session token exists as a cookie ...
 
       #  if this token does NOT exist in the database ...
-      #  set the user session as NOT validated, delete the cookie, and return
+      #  set the site_user session as NOT validated, delete the cookie, and return
       unless HawthorneCore::SiteUserSession.record_exists_with_token?(cookies[:user_session_token])
         session[:user_session_validated] = false
         cookies.delete(:user_session_token)

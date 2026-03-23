@@ -7,16 +7,17 @@ module HawthorneCore::Site::RileyBlake
 
     # -----------------------------------------------------------------------------
 
-    def self.riley_blake_env_name
-      HawthorneCore::AppConfig::RILEY_BLAKE_ENV_SITE_NAME
-    end
+    CONFIG =
+      {
+        env_name: HawthorneCore::AppConfig::RILEY_BLAKE_ENV_SITE_NAME,
+        id: 50,
+        name: 'Hawthorne at Riley Blake',
+        contact_email: 'hello@rileyblakeathawthorne.com',
+        mailer_send_welcome_template_id: 'neqvygmmvz5g0p7w'
+      }.freeze
 
-    def self.riley_blake_id
-      50
-    end
-
-    def self.riley_blake_name
-      'Hawthorne at Riley Blake'
+    CONFIG.each do |key, value|
+      define_singleton_method(('riley_blake_' + key.to_s)) { value }
     end
 
     # -----------------------------------------------------------------------------

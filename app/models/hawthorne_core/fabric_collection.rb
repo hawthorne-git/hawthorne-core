@@ -1,13 +1,11 @@
 class HawthorneCore::FabricCollection < Administration::Repository::Fabric::FabricCollection
 
+  include HawthorneCore::FabricCollection::PreviewImage,
+          HawthorneCore::FabricCollection::Supplier
+
   # -----------------------------------------------------------------------------
 
   self.table_name = 'fabric_collections'
-
-  # -----------------------------------------------------------------------------
-
-  include HawthorneCore::FabricCollection::PreviewImage,
-          HawthorneCore::FabricCollection::Supplier
 
   # -----------------------------------------------------------------------------
 
@@ -19,9 +17,7 @@ class HawthorneCore::FabricCollection < Administration::Repository::Fabric::Fabr
 
   # -----------------------------------------------------------------------------
 
-  def id
-    fabric_collection_id
-  end
+  def id = fabric_collection_id
 
   # -----------------------------------------------------------------------------
 

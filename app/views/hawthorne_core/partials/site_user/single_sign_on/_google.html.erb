@@ -1,0 +1,23 @@
+<%# v3.0XXX %>
+
+<script src='https://accounts.google.com/gsi/client' async defer></script>
+
+<% # https://developers.google.com/identity/gsi/web/reference/html-reference %>
+<div id='g_id_onload'
+     data-client_id='<%= ENV['GOOGLE_CLIENT_ID'] %>'
+     data-auto_prompt='false'
+     data-login_uri='/core/webhook/sso_google/ngcwnmptfx'
+     data-ux_mode='popup'>
+</div>
+
+<% # https://developers.google.com/identity/gsi/web/reference/html-reference#visual-attributes %>
+<div class='g_id_signin'
+     data-type='icon'
+     data-theme='outline'
+     data-size='large'
+     data-width='400'
+     data-text=''
+     data-shape='circle'
+     data-logo_alignment='center'
+     style='margin-bottom: 5px;'>
+</div>

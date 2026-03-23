@@ -10,7 +10,16 @@ module HawthorneCore
 
     # validate that required hawthorne core env variables exist
     initializer 'hawthorne_core.validate_env' do
+      HawthorneCore::AppConfig.braintree_environment
+      HawthorneCore::AppConfig.braintree_merchant_id
+      HawthorneCore::AppConfig.braintree_private_key
+      HawthorneCore::AppConfig.braintree_public_key
+      HawthorneCore::AppConfig.mailer_send_api_token
+      HawthorneCore::AppConfig.site_base_url
       HawthorneCore::AppConfig.site_name
+      HawthorneCore::AppConfig.twilio_password
+      HawthorneCore::AppConfig.twilio_us_phone_number
+      HawthorneCore::AppConfig.twilio_username
     end
 
   end

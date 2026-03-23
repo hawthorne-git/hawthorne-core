@@ -8,17 +8,15 @@ class HawthorneCore::SiteUserSession < HawthorneCore::ActiveRecordBase
 
   # -----------------------------------------------------------------------------
 
-  def id
-    site_user_session_id
-  end
+  def id = site_user_session_id
 
   # -----------------------------------------------------------------------------
 
   # creates a record ... using the request
   def self.create_record(request, site_user_id)
-    HawthorneCore::ActiveRecordBase.connected_to(role: :writing) do
-      HawthorneCore::SiteUserSession.create(
-        token: [*('a'..'z'), *('A'..'Z'), *('0'..'9')].shuffle[0, 30].join,
+    with_writing do
+      create(
+        token: SecureRandom.alphanumeric(30),
         site_id: HawthorneCore::Site.this_site_id,
         site_user_id: site_user_id,
         ip_address: request.env['HTTP_CF_CONNECTING_IP'],
@@ -33,7 +31,7 @@ class HawthorneCore::SiteUserSession < HawthorneCore::ActiveRecordBase
 
   # determine if a record exists with the token
   def self.record_exists_with_token?(token)
-    HawthorneCore::SiteUserSession.exists?(token: token)
+    exists?(token: token)
   end
 
   # -----------------------------------------------------------------------------

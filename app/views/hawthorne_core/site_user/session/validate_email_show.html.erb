@@ -1,0 +1,40 @@
+<%# v3.0XXX %>
+
+<div class='title'>Verify Email Address</div>
+
+<div class='vertical_space'></div>
+
+<div>
+  We sent a confirmation email to: <%= @site_user_email_address %>
+  <br><br>
+  Click the link within this email or enter the PIN below to continue
+</div>
+
+<div class='vertical_space'></div>
+
+<div class='form'>
+
+  <%= form_with url: validate_email_path do |f| %>
+
+    <div class='form_input'>
+      <label class='form_input'>pin</label>
+      <%= f.text_field :pin, required: true, maxlength: 12, autofocus: true %>
+    </div>
+
+    <div class='form_submit'>
+      <%= f.submit 'Continue' %>
+    </div>
+
+  <% end %>
+
+</div>
+
+<div class='vertical_space'></div>
+
+<div>
+  Didn’t receive the email? Resend
+  <div class='vertical_space'></div>
+  Typo in your email address? Sign-Up
+</div>
+
+<%#= render partial: '/core/site_user/partials/single_sign_on' %>
