@@ -1,4 +1,4 @@
-# v3.0
+# v3.0XXX
 
 # log an exception
 class HawthorneCore::LogExceptionJob < HawthorneCore::ApplicationJob

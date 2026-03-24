@@ -1,3 +1,5 @@
+# v3.0XXX
+
 class HawthorneCore::FabricCollection < Administration::Repository::Fabric::FabricCollection
 
   include HawthorneCore::FabricCollection::PreviewImage,

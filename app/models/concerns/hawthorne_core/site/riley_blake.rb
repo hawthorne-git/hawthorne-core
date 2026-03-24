@@ -10,7 +10,7 @@ module HawthorneCore::Site::RileyBlake
     CONFIG =
       {
         env_name: HawthorneCore::AppConfig::RILEY_BLAKE_ENV_SITE_NAME,
-        id: 50,
+        id: 1,
         name: 'Hawthorne at Riley Blake',
         contact_email: 'hello@rileyblakeathawthorne.com',
         mailer_send_welcome_template_id: 'neqvygmmvz5g0p7w'

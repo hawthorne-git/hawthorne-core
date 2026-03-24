@@ -3,25 +3,11 @@
 class HawthorneCore::ApplicationController < ::ApplicationController
 
   include HawthorneCore::Cache,
-          HawthorneCore::Database,
           HawthorneCore::UserAuthentication,
-          HawthorneCore::UserSession,
+          HawthorneCore::UserSessionIssuer,
           HawthorneCore::UserValidation
 
-  helper HawthorneCore::AwsHelper,
-         HawthorneCore::CalcHelper,
-         HawthorneCore::DateHelper,
-         HawthorneCore::ImageHelper,
-         HawthorneCore::ImageTypeHelper,
-         HawthorneCore::LinkHelper,
-         HawthorneCore::ProductHelper
-
   # ---------------------------------------------------------------------------
-
-  # by default for all controllers, connect to a read database
-  around_action :with_reading
-
-  # -------------------------
 
   # set an attribute, denoting if the page is to be re-cached
   before_action :set_clear_cache_attr
@@ -35,8 +21,9 @@ class HawthorneCore::ApplicationController < ::ApplicationController
   # create the users session - if it does not exist
   before_action :create_user_session, if: proc { !user_session? }
 
-  # CORE ... determine if the site_user is signed in
-  before_action :signed_in?
+  # CORE ... determine if the user is signed in
+  # TODO
+  #before_action :signed_in?
 
   # ---------------------------------------------------------------------------
 

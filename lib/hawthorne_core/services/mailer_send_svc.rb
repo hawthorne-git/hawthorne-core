@@ -78,9 +78,9 @@ class HawthorneCore::Services::MailerSendSvc
 
     # log the user action / exception (if caught)
     if result[:success]
-      HawthorneCore::SiteUserAction::Log.email_sent(site_user_id, { type: email_type, email_address: email_address, personalization: personalization, mailer_send_message_id: result[:message_id] })
+      HawthorneCore::UserAction::Log.email_sent(site_user_id, { type: email_type, email_address: email_address, personalization: personalization, mailer_send_message_id: result[:message_id] })
     else
-      HawthorneCore::SiteUserAction::Log.email_sent_failure(site_user_id, HawthorneCore::SiteUserAction::FailureReason.exception_caught, { type: email_type, email_address: email_address, personalization: personalization, exception_message: result[:exception_message] })
+      HawthorneCore::UserAction::Log.email_sent_failure(site_user_id, HawthorneCore::UserAction::FailureReason.exception_caught, { type: email_type, email_address: email_address, personalization: personalization, exception_message: result[:exception_message] })
       HawthorneCore::SiteException.log('HawthorneCore::Services::MailerSendSvc.send_email', { type: email_type, site_user_id: site_user_id, email_address: email_address }, result[:exception])
     end
 

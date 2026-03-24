@@ -1,4 +1,4 @@
-# v3.0
+# v3.0XXX
 
 # log an api call
 class HawthorneCore::LogApiCallJob < HawthorneCore::ApplicationJob

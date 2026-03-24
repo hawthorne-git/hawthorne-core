@@ -1,4 +1,4 @@
-# v3.0
+# v3.0XXX
 
 # sends a user a welcome email
 class HawthorneCore::Email::SendWelcomeEmailJob < HawthorneCore::ApplicationJob

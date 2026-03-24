@@ -1,4 +1,4 @@
-# v3.0
+# v3.0XXX
 
 module HawthorneCore::UserValidation
   extend ActiveSupport::Concern
@@ -27,17 +27,15 @@ module HawthorneCore::UserValidation
 
     # --------------------------------------------------------------------------- Phone Number
 
-    # determine if a phone number is valid - US ONLY
+    # determine if a phone number is valid - US / CANADA ONLY
     def phone_number_valid?(phone_number)
       digits = phone_number.to_s.gsub(/\D/, '')
       digits = digits[1..] if digits.length == 11 && digits.start_with?('1')
       digits.length == 10
     end
 
-    # determine if a phone number is invalid - US ONLY
-    def phone_number_invalid?(phone_number)
-      !phone_number_valid?(phone_number)
-    end
+    # determine if a phone number is invalid - US / CANADA ONLY
+    def phone_number_invalid?(phone_number) = !phone_number_valid?(phone_number)
 
     # --------------------------------------------------------------------------- Validate: Signed In / Out
 
@@ -47,7 +45,7 @@ module HawthorneCore::UserValidation
       redirect_to sign_in_path unless @signed_in
     end
 
-    # validates that the site user is signed-out
+    # validates that the site user is signed-out ()
     # if not, redirect the site user to the logout action
     def validate_signed_out?
       redirect_to sign_out_path if @signed_in

@@ -8,14 +8,6 @@ module HawthorneCore
 
     # -----------------------------------------------------------------------------
 
-    def self.braintree_environment = fetch_env_attr('BRAINTREE_ENVIRONMENT')
-
-    def self.braintree_merchant_id = fetch_env_attr('BRAINTREE_MERCHANT_ID')
-
-    def self.braintree_private_key = fetch_env_attr('BRAINTREE_PRIVATE_KEY')
-
-    def self.braintree_public_key = fetch_env_attr('BRAINTREE_PUBLIC_KEY')
-
     def self.mailer_send_api_token = fetch_env_attr('MAILER_SEND_API_TOKEN')
 
     def self.site_base_url = fetch_env_attr('SITE_BASE_URL')

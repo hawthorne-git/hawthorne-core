@@ -9,9 +9,7 @@ module HawthorneCore::Cache
 
     # determine if the pages cache should be cleared
     # when true, any cached segments (page / action / fragment) are expired
-    def clear_cache?
-      params.key?(:cc)
-    end
+    def clear_cache? = params.key?(:cc)
 
     # -------------------------
 
@@ -36,7 +34,9 @@ module HawthorneCore::Cache
     # ex cache key: fabric-collection-controller-index-243
     # ex cache key with header and footer versions: fabric-collection-controller-index-243-h1-f1
     def cache_key_with_header_footer_versions(cache_key)
-      cache_key + '-h' + Rails.cache.read(:header_version).to_s + '-f' + Rails.cache.read(:footer_version).to_s
+      header_version = Rails.cache.read(:header_version) || 0
+      footer_version = Rails.cache.read(:footer_version) || 0
+      "#{cache_key}-h#{header_version}-f#{footer_version}"
     end
 
     # ---------------------------------------------------------------------------

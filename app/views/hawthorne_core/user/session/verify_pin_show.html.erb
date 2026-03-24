@@ -1,0 +1,33 @@
+<%# v3.0 %>
+
+<div class='title'>Verify Pin</div>
+
+<%= turbo_frame_tag 'verify_pin_failed_turbo_frame' do %>
+  <%= render partial: '/hawthorne_core/partials/user/verify_pin_failed' if @verify_pin_failed %>
+<% end %>
+
+<div class='form'>
+
+  <%= form_with url: verify_pin_path do |f| %>
+
+    <%= hidden_field_tag :token, @site_user.token %>
+
+    <div class='form_input'>
+      <%
+        pin_label = 'pin'
+        pin_label = "pin - sent via email to: #{@site_user.email_address}" if @pin_delivery_method == HawthorneCore::User::PIN_VIA_EMAIL
+        pin_label = "pin - sent via text message to: #{@site_user.phone_number_masked}" if @pin_delivery_method == HawthorneCore::User::PIN_VIA_PHONE
+      %>
+      <label class='form_input'><%= pin_label %></label>
+      <%= f.text_field :pin, class: 'form_input', required: true, maxlength: 100, autofocus: true, autocomplete: :off %>
+    </div>
+
+    <div class='form_submit'>
+      <%= f.submit 'Continue' %>
+    </div>
+
+  <% end %>
+
+</div>
+
+<%= render partial: '/hawthorne_core/partials/user/single_sign_on' %>

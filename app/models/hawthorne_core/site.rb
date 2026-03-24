@@ -1,12 +1,14 @@
 # v3.0
 
-class HawthorneCore::Site < HawthorneCore::ActiveRecordBase
+class HawthorneCore::Site < HawthorneCore::ActiveRecordBaseApp
 
   include HawthorneCore::Site::RileyBlake
 
   # -----------------------------------------------------------------------------
 
   self.table_name = 'sites'
+
+  def id = site_id
 
   # -----------------------------------------------------------------------------
 
@@ -60,14 +62,14 @@ class HawthorneCore::Site < HawthorneCore::ActiveRecordBase
 
   # get the sites header version
   def self.header_version
-    where(site_id: HawthorneCore::Site.this_site_id).pick(:header_version)
+    with_reading { where(site_id: this_site_id).pick(:header_version) }
   end
 
   # -------------------------
 
   # get the sites footer version
   def self.footer_version
-    where(site_id: HawthorneCore::Site.this_site_id).pick(:footer_version)
+    with_reading { where(site_id: this_site_id).pick(:footer_version) }
   end
 
   # -----------------------------------------------------------------------------
@@ -77,7 +79,7 @@ class HawthorneCore::Site < HawthorneCore::ActiveRecordBase
   # in the case where site name is not expected,
   # return the raised exception - which includes the method name and ENV['SITE_NAME']
   def self.env_site_name_exception(method_name)
-    'Exception: Unexpected ENV["SITE_NAME"] in method HawthorneCore::Site.' + method_name + ', ENV["SITE_NAME"] = "' + HawthorneCore::AppConfig.site_name + '"'
+    %(Exception: Unexpected ENV["SITE_NAME"] in method HawthorneCore::Site.#{method_name}, ENV["SITE_NAME"] = "#{HawthorneCore::AppConfig.site_name}")
   end
 
   # -----------------------------------------------------------------------------

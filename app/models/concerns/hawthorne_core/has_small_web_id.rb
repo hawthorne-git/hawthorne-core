@@ -1,4 +1,4 @@
-# v3.0
+# v3.0XXX
 
 module HawthorneCore::HasSmallWebId
   extend ActiveSupport::Concern

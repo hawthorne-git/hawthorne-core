@@ -11,19 +11,19 @@ class HawthorneCore::Services::BraintreeSvc
   def self.create_user(site_user_id)
 
     # find the user by id
-    site_user = HawthorneCore::SiteUser.
+    site_user = HawthorneCore::User.
       select(:site_user_id, :braintree_id, :email_address).
       find_by(site_user_id: site_user_id)
 
     # in the unexpected case where the user is not found, return
     unless site_user
-      HawthorneCore::SiteUserAction::Log.braintree_customer_id_attached_failure(nil, HawthorneCore::SiteUserAction::FailureReason.unexpected_state, { message: 'Site User not found with id', site_user_id: site_user_id })
+      HawthorneCore::UserAction::Log.braintree_customer_id_attached_failure(nil, HawthorneCore::UserAction::FailureReason.unexpected_state, { message: 'Site User not found with id', site_user_id: site_user_id })
       return
     end
 
     # in the unexpected case where the user already has a braintree account attached, return
     if site_user.braintree_account?
-      HawthorneCore::SiteUserAction::Log.braintree_customer_id_attached_failure(site_user.id, HawthorneCore::SiteUserAction::FailureReason.unexpected_state, { message: 'Braintree account already attached', site_user_id: site_user_id, braintree_id: site_user.braintree_id })
+      HawthorneCore::UserAction::Log.braintree_customer_id_attached_failure(site_user.id, HawthorneCore::UserAction::FailureReason.unexpected_state, { message: 'Braintree account already attached', site_user_id: site_user_id, braintree_id: site_user.braintree_id })
       return
     end
 
@@ -34,7 +34,7 @@ class HawthorneCore::Services::BraintreeSvc
     begin
       result = client.customer.create(id: braintree_id, email: site_user.email_address)
     rescue StandardError => e
-      HawthorneCore::SiteUserAction::Log.braintree_customer_id_attached_failure(site_user.id, HawthorneCore::SiteUserAction::FailureReason.exception_caught, { braintree_id: braintree_id, email_address: site_user.email_address, exception_class: e.class, exception_message: e.message })
+      HawthorneCore::UserAction::Log.braintree_customer_id_attached_failure(site_user.id, HawthorneCore::UserAction::FailureReason.exception_caught, { braintree_id: braintree_id, email_address: site_user.email_address, exception_class: e.class, exception_message: e.message })
       HawthorneCore::SiteException.log('HawthorneCore::Services::BraintreeSvc.create_user', { braintree_id: braintree_id, email_address: site_user.email_address }, e)
       return
     end
@@ -43,7 +43,7 @@ class HawthorneCore::Services::BraintreeSvc
     unless result.success?
       errors = result.errors.map { |e| { code: e.code, message: e.message } }
       errors.each do |error|
-        HawthorneCore::SiteUserAction::Log.braintree_customer_id_attached_failure(site_user.id, HawthorneCore::SiteUserAction::FailureReason.unexpected_state, { braintree_id: braintree_id, email_address: site_user.email_address, error: error })
+        HawthorneCore::UserAction::Log.braintree_customer_id_attached_failure(site_user.id, HawthorneCore::UserAction::FailureReason.unexpected_state, { braintree_id: braintree_id, email_address: site_user.email_address, error: error })
       end
       return
     end
@@ -85,7 +85,7 @@ class HawthorneCore::Services::BraintreeSvc
   def self.generate_customer_token
     loop do
       candidate = SecureRandom.alphanumeric(36).upcase
-      return candidate unless HawthorneCore::SiteUser.exists?(braintree_id: candidate)
+      return candidate unless HawthorneCore::User.exists?(braintree_id: candidate)
     end
   end
 

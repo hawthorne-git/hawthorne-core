@@ -1,4 +1,4 @@
-# v3.0
+# v3.0XXX
 
 # sends a user a text with their pin
 class HawthorneCore::Text::SendPinJob < HawthorneCore::ApplicationJob
@@ -10,19 +10,19 @@ class HawthorneCore::Text::SendPinJob < HawthorneCore::ApplicationJob
   def perform(site_user_id)
 
     # find the user by id
-    site_user = HawthorneCore::SiteUser.
+    site_user = HawthorneCore::User.
       select(:site_user_id, :phone_number, :pin, :pin_created_at, :nbr_failed_pin_attempts).
       find_by(site_user_id: site_user_id)
 
     # exit unless the user is found
     unless site_user
-      HawthorneCore::SiteUserAction::Log.text_message_sent_failure(nil, HawthorneCore::SiteUserAction::FailureReason.unexpected_state, { type: HawthorneCore::Services::TwilioTextSvc.verification_pin, message: 'Site User not found', site_user_id: site_user_id })
+      HawthorneCore::UserAction::Log.text_message_sent_failure(nil, HawthorneCore::UserAction::FailureReason.unexpected_state, { type: HawthorneCore::Services::TwilioTextSvc.verification_pin, message: 'Site User not found', site_user_id: site_user_id })
       return
     end
 
     # exit unless the pin is active
     unless site_user.pin_active?
-      HawthorneCore::SiteUserAction::Log.text_message_sent_failure(site_user.id, HawthorneCore::SiteUserAction::FailureReason.pin_expired, { type: HawthorneCore::Services::TwilioTextSvc.verification_pin, pin: site_user.pin, pin_created_at: site_user.pin_created_at })
+      HawthorneCore::UserAction::Log.text_message_sent_failure(site_user.id, HawthorneCore::UserAction::FailureReason.pin_expired, { type: HawthorneCore::Services::TwilioTextSvc.verification_pin, pin: site_user.pin, pin_created_at: site_user.pin_created_at })
       return
     end
 
