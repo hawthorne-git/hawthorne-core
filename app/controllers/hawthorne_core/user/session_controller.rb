@@ -27,7 +27,7 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
     email_address = params[:email_address].to_s.downcase.strip
 
     # ----------------------
-    
+
     # validate that the email address does not have a syntax error
     # if invalid, return back to the sign-in page
     unless email_address_syntax_valid?(email_address)
@@ -40,47 +40,28 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
 
     # find the user to sign-in
     user = HawthorneCore::User.
-      select(:user_id, :small_web_id, :email_address, :email_address_verified, :phone_number, :phone_number_verified, :pin, :pin_created_at, :pin_default_delivery, :nbr_failed_pin_attempts).
+      select(:user_id, :token, :email_address, :email_address_verified, :phone_number, :phone_number_verified, :pin, :pin_created_at, :pin_default_delivery, :pin_failed_attempts_count).
       find_by(email_address: email_address)
 
-    # if a user account exists with this email address ...
-    if user
+    # if the user exists, log that the user has accessed the site
+    user.log_site_access_for_user if user
 
-      # if the user has verified phone + email, but does not have a default deliver ... ask the user how to send the pin
-      if user.no_pin_default_delivery?
-        redirect_to select_pin_delivery_method(token: user.token) and return #TODO ...
-        return
-      end
+    # if a user does not exist ... create the user record - and in doing so, log that the user has accessed the site
+    user = HawthorneCore::User.create_record(email_address, request.remote_ip, cookies[:user_session_token]) unless user
 
-      # refresh the users pin
-      user.refresh_pin
+    # refresh the users pin (if needed)
+    user.refresh_pin
 
-      # if the users default pin delivery is via email ... send the pin via email
-      if user.pin_default_delivery_via_email?
-        pin_delivery_method = HawthorneCore::User::PIN_VIA_EMAIL
-        HawthorneCore::Email::SendPinJob.perform_later(user.id) if user.pin_default_delivery_via_email?
-      end
+    # if the users default pin delivery is via email ... send the pin via email
+    HawthorneCore::Email::SendPinJob.perform_later(user.id) if user.pin_default_delivery_via_email?
 
-      # if the users default pin delivery is via phone ... send the pin via text message
-      if user.pin_default_delivery_via_phone?
-        pin_delivery_method = HawthorneCore::User::PIN_VIA_PHONE
-        HawthorneCore::Text::SendPinJob.perform_later(user.id) if user.pin_default_delivery_via_phone?
-      end
+    return if true
 
-      # in the unexpected case where the pin delivery method is not an expected value, set it to email
-      unless HawthorneCore::User::PIN_DELIVERY_METHODS.include?(pin_delivery_method)
-        HawthorneCore::SiteException.log('HawthorneCore::User::SessionController.sign_in', { message: 'unexpected pin_delivery_method value', pin_delivery_method: pin_delivery_method, user_id: user.id }, nil)
-        pin_delivery_method = HawthorneCore::User::PIN_VIA_EMAIL
-        HawthorneCore::Email::SendPinJob.perform_later(user.id) if user.pin_default_delivery_via_email?
-      end
+    # if the users default pin delivery is via phone ... send the pin via text message
+    HawthorneCore::Text::SendPinJob.perform_later(user.id) if user.pin_default_delivery_via_phone?
 
-      redirect_to verify_pin_path(token: user.token, pin_delivery_method: pin_delivery_method) and return
-
-    end
-
-    # ----------------------
-
-    # else a user account does NOT exist with this email address ...
+    # redirect the user to verify their pin
+    redirect_to verify_pin_path(token: user.token, pin_delivery_method: user.pin_default_delivery)
 
     # ----------------------
 
@@ -204,7 +185,7 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
     # verify the users email address (if not done prior)
     # create the user a braintree account (if not done prior)
     user.verify_email_address
-    #user.create_braintree_account
+    # user.create_braintree_account
 
     # if this is the users first sign-in (on site) ...
     # send the user a welcome email

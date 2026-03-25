@@ -25,7 +25,7 @@ module HawthorneCore::UserValidation
 
     end
 
-    # --------------------------------------------------------------------------- Phone Number
+    # --------------------------------------------------------------------------- Phone Number: Syntax
 
     # determine if a phone number is valid - US / CANADA ONLY
     def phone_number_valid?(phone_number)
@@ -37,7 +37,7 @@ module HawthorneCore::UserValidation
     # determine if a phone number is invalid - US / CANADA ONLY
     def phone_number_invalid?(phone_number) = !phone_number_valid?(phone_number)
 
-    # --------------------------------------------------------------------------- Validate: Signed In / Out
+    # --------------------------------------------------------------------------- Signed In / Out
 
     # validates that the site user is signed-in
     # if not, redirect the site user to the login page

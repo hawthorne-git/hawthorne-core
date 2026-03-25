@@ -2,6 +2,12 @@
 
 module HawthorneCore::UserAction::Log
 
+  # ----------------------------------------------------------------------------- Account
+
+  def self.account_created(user_id, note, ip_address, user_session_token)
+    success(user_id, action(:account_created), note, ip_address, user_session_token)
+  end
+
   # ----------------------------------------------------------------------------- Email
 
   def self.email_sent(user_id, note)

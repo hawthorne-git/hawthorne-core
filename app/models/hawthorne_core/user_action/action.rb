@@ -6,6 +6,7 @@ module HawthorneCore::UserAction::Action
 
   ACTIONS =
     {
+      account_created: 'ACCOUNT CREATED',
       email_sent: 'EMAIL SENT',
       email_address_verified: 'EMAIL ADDRESS VERIFIED',
       pin_cleared: 'PIN CLEARED',

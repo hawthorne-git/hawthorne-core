@@ -1,0 +1,62 @@
+# v3.0
+
+module HawthorneCore::HasToken
+  extend ActiveSupport::Concern
+
+  included do
+
+    # ---------------------------------------------------------------------------------
+
+    # before creating a record,
+    # set the records token attribute
+    before_validation :set_token, on: :create
+
+    # ---------------------------------------------------------------------------------
+
+    # length of 1: 29 unique values
+    # length of 2: 841
+    # length of 3: 24,389
+    # length of 4: 707,281
+    # length of 5: 20,511,149 (20 million)
+    # length of 6: 594,823,321 (594 million)
+    # length of 7: 17,249,876,309 (17 billion)
+    # length of 8: 500,246,412,961 (500 billion)
+    # length of 9: 14,507,145,975,869 (14 trillion)
+    # length of 10: 420,707,233,300,201 (420 trillion)
+
+    # ---------------------------------------------------------------------------------
+
+    ALPHABET = 'BCDFGHJKLMNPQRSTVWXYZ23456789'.chars
+
+    TOKEN_LENGTHS =
+      {
+        'users' => 8
+      }.freeze
+
+    # ---------------------------------------------------------------------------------
+
+    private
+
+    # set the token
+    # the length of the token is based on the object type (table name)
+    def set_token
+      token_length = TOKEN_LENGTHS[self.class.table_name]
+      self.token = generate_unique_token(token_length)
+    end
+
+    # ------------------------
+
+    # generates a (unique) token at a specified length
+    # if the token is already in use, generate another
+    def generate_unique_token(length)
+      loop do
+        candidate = Array.new(length) { ALPHABET[SecureRandom.random_number(ALPHABET.length)] }.join
+        return candidate unless self.class.exists?(token: candidate)
+      end
+    end
+
+    # ---------------------------------------------------------------------------------
+
+  end
+
+end

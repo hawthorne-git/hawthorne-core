@@ -12,8 +12,4 @@ class HawthorneCore::UserAction < HawthorneCore::ActiveRecordBaseLog
 
   # -----------------------------------------------------------------------------
 
-  def self.max_nbr_pin_authentication_attempts = 5
-
-  # -----------------------------------------------------------------------------
-
 end
