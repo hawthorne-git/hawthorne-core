@@ -56,6 +56,12 @@ module HawthorneCore::UserAction::Log
     failure(nil, action(:sign_in), failure_reason, note, ip_address, user_session_token)
   end
 
+  # ----------------------------------------------------------------------------- Sign-In (via Cookie)
+
+  def self.sign_in_via_cookie(user_id, note)
+    success_admin(user_id, action(:sign_in_via_cookie), note)
+  end
+
   # ----------------------------------------------------------------------------- Text Message
 
   def self.text_message_sent(user_id, note)

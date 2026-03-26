@@ -25,7 +25,7 @@ module HawthorneCore::UserSessionIssuer
       user_session = HawthorneCore::UserSession.create_record(session[:user_id], request)
 
       # set the user session token (as a cookie), and mark the session as validated
-      cookies[:user_session_token] = { value: user_session.token, expires: 1.month, same_site: :strict }
+      cookies[:user_session_token] = { value: user_session.token, expires: 1.month.from_now, httponly: true, secure: Rails.env.production?, same_site: :lax }
       session[:user_session_validated] = true
 
       # kick off a job to capture the users session location

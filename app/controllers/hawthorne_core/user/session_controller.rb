@@ -217,6 +217,9 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
     session[:user_id] = user.id
     HawthorneCore::UserAction::Log.sign_in(user.id)
 
+    # attach the user to their user session
+    HawthorneCore::UserSession.find_by(token: cookies[:user_session_token])&.update_columns(user_id: user.id)
+
     # verify the users email address (if the pin was sent via email and the users email address has not been verified prior)
     user.verify_email_address if pin_delivery_method == HawthorneCore::User::PIN_VIA_EMAIL
 
@@ -225,7 +228,7 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
     first_sign_in_on_site = user.first_sign_in_on_site?
 
     # log the users site sign-in ...
-    # this is a record for each user / site that captures the users first sign-in, last sign-in, and #sign-ins
+    # this is a record for each user / site that captures the users first sign-in, last sign-in, #sign-ins, and if they should be kept as signed in
     user.log_site_sign_in(keep_signed_in)
 
     # if this is the users first sign-in (on site) ... send the user a welcome email

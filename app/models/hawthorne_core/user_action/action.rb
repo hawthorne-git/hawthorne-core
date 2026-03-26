@@ -13,6 +13,7 @@ module HawthorneCore::UserAction::Action
       pin_created: 'PIN CREATED',
       pin_verified: 'PIN VERIFIED',
       sign_in: 'SIGN-IN',
+      sign_in_via_cookie: 'SIGN-IN VIA COOKIE',
       text_message_sent: 'TEXT MESSAGE SENT'
     }.freeze
 
