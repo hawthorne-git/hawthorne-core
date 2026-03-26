@@ -21,8 +21,6 @@ class HawthorneCore::UserSite < HawthorneCore::ActiveRecordBaseApp
     create!(user_id: user_id, user_created_on_site: true)
   end
 
-  # -----------------------------------------------------------------------------
-
   # create a user site record for a known user, if the user has never accessed the site
   def self.log_site_access_for_user(user_id)
     create!(user_id: user_id) unless user_site_access_exist?(user_id)

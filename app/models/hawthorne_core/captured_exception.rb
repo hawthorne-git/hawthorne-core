@@ -10,6 +10,8 @@ class HawthorneCore::CapturedException < HawthorneCore::ActiveRecordBaseLog
 
   def id = captured_exception_id
 
+  def self.create_record(**attrs) = create!(attrs)
+
   # -----------------------------------------------------------------------------
 
   # log a captured exception ... in a job

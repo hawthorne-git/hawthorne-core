@@ -2,6 +2,8 @@
 
 class HawthorneCore::UserSession < HawthorneCore::ActiveRecordBaseLog
 
+  include HawthorneCore::HasSiteId
+
   # -----------------------------------------------------------------------------
 
   self.table_name = 'user_sessions'
@@ -12,9 +14,8 @@ class HawthorneCore::UserSession < HawthorneCore::ActiveRecordBaseLog
 
   # creates a record ... using the request
   def self.create_record(user_id, request)
-    create(
+    create!(
       token: SecureRandom.alphanumeric(30),
-      site_id: HawthorneCore::Site.this_site_id,
       user_id: user_id,
       ip_address: request.remote_ip,
       http_referer: request.env['HTTP_REFERER'],

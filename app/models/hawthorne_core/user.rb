@@ -16,7 +16,7 @@ class HawthorneCore::User < HawthorneCore::ActiveRecordBaseApp
 
   def id = user_id
 
-  # ----------------------------------------------------------------------------- Create Record
+  # -----------------------------------------------------------------------------
 
   # create the user record, returning it ... and log that the user was created on the site
   def self.create_record(email_address, ip_address, user_session_token)

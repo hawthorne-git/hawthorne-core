@@ -55,10 +55,10 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
     # if the users default pin delivery is via email ... send the pin via email
     HawthorneCore::Email::SendPinJob.perform_later(user.id) if user.pin_default_delivery_via_email?
 
-    return if true
-
     # if the users default pin delivery is via phone ... send the pin via text message
     HawthorneCore::Text::SendPinJob.perform_later(user.id) if user.pin_default_delivery_via_phone?
+
+    return if true
 
     # redirect the user to verify their pin
     redirect_to verify_pin_path(token: user.token, pin_delivery_method: user.pin_default_delivery)
