@@ -39,7 +39,7 @@ class HawthorneCore::Text::SendPinJob < HawthorneCore::ApplicationJob
     end
 
     # the pin is active, send the text message
-    HawthorneCore::Services::TwilioTextSvc.send_verification_pin(user.id, user.phone_number, user.pin)
+    #HawthorneCore::Services::TwilioTextSvc.send_verification_pin(user.id, user.phone_number, user.pin)
 
   end
 

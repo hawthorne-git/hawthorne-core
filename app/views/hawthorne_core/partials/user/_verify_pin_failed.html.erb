@@ -2,8 +2,9 @@
 
 <div class='error'>
   <div class='vertical_space_small'></div>
-  <%= 'Pin has expired, a new pin has been sent' if @pin_inactive %>
-  <%= 'Too many failed attempts, a new pin has been sent' if @max_allowed_pin_attempts_reached %>
-  <%= 'Pin does not match, please check for a typo' if @pin_does_not_match %>
+  <%= 'Your PIN has expired, so we’ve sent you a new one' if @pin_expired %>
+  <%= 'There have been too many unsuccessful attempts, so we’ve sent you a new PIN' if @pin_max_failed_attempts_reached %>
+  <%= 'That PIN doesn’t match. Please check for a typo and try again' if @pin_not_match %>
+  <%= 'We couldn’t verify that PIN, so we sent you a new one' if @pin_not_set %>
   <div class='vertical_space_small'></div>
 </div>

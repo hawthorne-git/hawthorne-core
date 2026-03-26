@@ -17,6 +17,8 @@ module HawthorneCore::User::PinVerification
 
     PIN_VIA_PHONE = 'PHONE'.freeze
 
+    PIN_DELIVERY_METHODS = [PIN_VIA_EMAIL, PIN_VIA_PHONE].freeze
+
     # -----------------------------------------------------------------------------
 
     def pin_default_delivery_via_email? = (pin_default_delivery == PIN_VIA_EMAIL)
@@ -27,15 +29,15 @@ module HawthorneCore::User::PinVerification
 
     def pin_active? = pin_set? && !pin_expired? && !pin_max_failed_attempts_reached?
 
-    def pin_expired? = (pin_created_at < PIN_EXPIRATION_IN_MINUTES.minutes.ago)
+    def pin_set? = pin.present? && pin_created_at.present?
+
+    def pin_expired? = pin_created_at.nil? || (pin_created_at < PIN_EXPIRATION_IN_MINUTES.minutes.ago)
 
     def pin_max_failed_attempts_reached? = (pin_failed_attempts_count >= PIN_MAX_FAILED_ATTEMPTS_ALLOWED)
 
-    def pin_set? = pin.present? && pin_created_at.present?
-
     # ------------------------
 
-    def pin_match?(pin_to_match) = (pin == pin_to_match.gsub(/\D/, '').to_i)
+    def pin_match?(pin_to_match) = (pin == pin_to_match.gsub(/\D/, ''))
 
     # -----------------------------------------------------------------------------
 
