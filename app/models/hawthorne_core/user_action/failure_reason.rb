@@ -10,11 +10,13 @@ module HawthorneCore::UserAction::FailureReason
       email_taken: 'EMAIL TAKEN',
       exception_caught: 'EXCEPTION_CAUGHT',
       pin_expired: 'PIN EXPIRED',
+      pin_max_failed_attempts_reached: 'PIN MAX FAILED ATTEMPTS REACHED',
       pin_not_match: 'PIN DOES NOT MATCH',
+      pin_not_set: 'PIN NOT SET',
       phone_number_syntax_error: 'PHONE NUMBER SYNTAX ERROR',
-      site_user_not_created: 'SITE USER NOT CREATED',
-      site_user_not_found: 'SITE USER NOT FOUND',
-      unexpected_state: 'UNEXPECTED_STATE'
+      unexpected_state: 'UNEXPECTED_STATE',
+      user_not_created: 'USER NOT CREATED',
+      user_not_found: 'USER NOT FOUND'
     }.freeze
 
   REASONS.each do |key, value|

@@ -137,7 +137,7 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
 
     # in the unexpected case where the pin delivery method is not an expected value, set it to email
     unless HawthorneCore::User::PIN_DELIVERY_METHODS.include?(pin_delivery_method)
-      HawthorneCore::SiteException.log('HawthorneCore::User::SessionController.verify_pin', { message: 'unexpected pin_delivery_method value', pin_delivery_method: pin_delivery_method, user_id: user.id }, nil)
+      HawthorneCore::CapturedException.log('HawthorneCore::User::SessionController.verify_pin', { message: 'unexpected pin_delivery_method value', pin_delivery_method: pin_delivery_method, user_id: user.id }, nil)
       pin_delivery_method = HawthorneCore::User::PIN_VIA_EMAIL
     end
 

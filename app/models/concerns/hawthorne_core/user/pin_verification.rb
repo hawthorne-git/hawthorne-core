@@ -25,11 +25,13 @@ module HawthorneCore::User::PinVerification
 
     # ------------------------
 
-    def pin_active? = pin.present? && pin_created_at.present? && !pin_expired? && !pin_max_failed_attempts_allowed?
+    def pin_active? = pin_set? && !pin_expired? && !pin_max_failed_attempts_reached?
 
     def pin_expired? = (pin_created_at < PIN_EXPIRATION_IN_MINUTES.minutes.ago)
 
-    def pin_max_failed_attempts_allowed? = (pin_failed_attempts_count >= PIN_MAX_FAILED_ATTEMPTS_ALLOWED)
+    def pin_max_failed_attempts_reached? = (pin_failed_attempts_count >= PIN_MAX_FAILED_ATTEMPTS_ALLOWED)
+
+    def pin_set? = pin.present? && pin_created_at.present?
 
     # ------------------------
 

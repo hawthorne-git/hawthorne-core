@@ -65,7 +65,7 @@ class HawthorneCore::Services::TwilioTextSvc
       HawthorneCore::UserAction::Log.text_message_sent(site_user_id, { type: text_message_type, phone_number: phone_number, twilio_message_id: result[:sid] })
     else
       HawthorneCore::UserAction::Log.text_message_sent_failure(site_user_id, HawthorneCore::UserAction::FailureReason.exception_caught, { type: text_message_type, phone_number: phone_number, exception_message: result[:exception_message] })
-      HawthorneCore::SiteException.log('HawthorneCore::Services::TwilioTextSvc.send_text_message', { type: text_message_type, site_user_id: site_user_id, phone_number: phone_number }, result[:exception])
+      HawthorneCore::CapturedException.log('HawthorneCore::Services::TwilioTextSvc.send_text_message', { type: text_message_type, site_user_id: site_user_id, phone_number: phone_number }, result[:exception])
     end
 
   end

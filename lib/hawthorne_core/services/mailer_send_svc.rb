@@ -1,4 +1,4 @@
-# v3.0XXX
+# v3.0
 
 # Mailer Send email service ... ex: send transactions emails (pin / back in stock / order confirmation)
 # https://developers.mailersend.com/#mailersend-api
@@ -13,11 +13,10 @@ class HawthorneCore::Services::MailerSendSvc
   # ----------------------------------------------------------------
 
   # send a verification pin via email
-  def self.send_verification_pin(site_user_id, site_user_token, email_address, pin)
-    email_address = 'charlieprezzano@gmail.com'
-    magic_link_url = HawthorneCore::AppConfig.site_base_url + '/verify-pin-via-magic-link?token=' + site_user_token + '&pin=' + pin.to_s
+  def self.send_verification_pin(user_id, user_token, email_address, pin)
+    magic_link_url = HawthorneCore::AppConfig.site_base_url + '/verify-pin-via-magic-link?token=' + user_token + '&pin=' + pin.to_s
     personalization = verification_pin_personalization(email_address, magic_link_url, pin)
-    send_email(VERIFICATION_PIN, site_user_id, email_address, verification_pin_subject, verification_pin_template, personalization)
+    send_email(VERIFICATION_PIN, user_id, email_address, verification_pin_subject, verification_pin_template, personalization)
   end
 
   # ----------------------------------------------------------------
@@ -33,15 +32,12 @@ class HawthorneCore::Services::MailerSendSvc
 
   # ----------------------------------------------------------------
 
-  # define who the email address is from (ex: contat@hawthornesupplyco.com)
   def self.from_email_address = HawthorneCore::Site.this_site_contact_email
 
-  # define who the name of the email address is from (ex: Hawthorne Supply Co)
   def self.from_email_address_name = HawthorneCore::Site.this_site_name
 
   # ----------------------------------------------------------------
 
-  # build the personalization attribute, which is email address + data
   def self.personalization_with_email_address(email_address, data) = { email: email_address, data: data }
 
   # ----------------------
@@ -55,15 +51,15 @@ class HawthorneCore::Services::MailerSendSvc
   # ----------------------------------------------------------------
 
   # send an email
-  def self.send_email(email_type, site_user_id, email_address, subject, template_id, personalization)
+  def self.send_email(email_type, user_id, email_address, subject, template_id, personalization)
 
     # send the email, via mailer send
     result = mailer_send_email(email_address, subject, template_id, personalization)
 
     # log the email
-    HawthorneCore::SiteEmail.create_record(
+    HawthorneCore::SentEmail.create_record(
+      user_id: user_id,
       email_service: 'MAILER_SEND',
-      site_user_id: site_user_id,
       email_type: email_type,
       service_template_id: template_id,
       from_email_address: from_email_address,
@@ -78,10 +74,10 @@ class HawthorneCore::Services::MailerSendSvc
 
     # log the user action / exception (if caught)
     if result[:success]
-      HawthorneCore::UserAction::Log.email_sent(site_user_id, { type: email_type, email_address: email_address, personalization: personalization, mailer_send_message_id: result[:message_id] })
+      HawthorneCore::UserAction::Log.email_sent(user_id, { email_type: email_type, email_address: email_address, personalization: personalization, mailer_send_message_id: result[:message_id] })
     else
-      HawthorneCore::UserAction::Log.email_sent_failure(site_user_id, HawthorneCore::UserAction::FailureReason.exception_caught, { type: email_type, email_address: email_address, personalization: personalization, exception_message: result[:exception_message] })
-      HawthorneCore::SiteException.log('HawthorneCore::Services::MailerSendSvc.send_email', { type: email_type, site_user_id: site_user_id, email_address: email_address }, result[:exception])
+      HawthorneCore::UserAction::Log.email_sent_failure(user_id, HawthorneCore::UserAction::FailureReason.exception_caught, { email_type: email_type, email_address: email_address, personalization: personalization, exception_message: result[:exception_message] })
+      HawthorneCore::CapturedException.log('HawthorneCore::Services::MailerSendSvc.send_email', { email_type: email_type, user_id: user_id, email_address: email_address }, result[:exception])
     end
 
   end

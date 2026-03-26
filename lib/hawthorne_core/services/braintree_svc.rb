@@ -35,7 +35,7 @@ class HawthorneCore::Services::BraintreeSvc
       result = client.customer.create(id: braintree_id, email: site_user.email_address)
     rescue StandardError => e
       HawthorneCore::UserAction::Log.braintree_customer_id_attached_failure(site_user.id, HawthorneCore::UserAction::FailureReason.exception_caught, { braintree_id: braintree_id, email_address: site_user.email_address, exception_class: e.class, exception_message: e.message })
-      HawthorneCore::SiteException.log('HawthorneCore::Services::BraintreeSvc.create_user', { braintree_id: braintree_id, email_address: site_user.email_address }, e)
+      HawthorneCore::CapturedException.log('HawthorneCore::Services::BraintreeSvc.create_user', { braintree_id: braintree_id, email_address: site_user.email_address }, e)
       return
     end
 
