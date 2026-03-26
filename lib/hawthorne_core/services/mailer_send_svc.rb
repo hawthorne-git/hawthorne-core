@@ -8,15 +8,22 @@ class HawthorneCore::Services::MailerSendSvc
 
   VERIFICATION_PIN = 'VERIFICATION PIN'.freeze
 
-  def self.verification_pin = VERIFICATION_PIN
+  WELCOME_EMAIL = 'WELCOME EMAIL'.freeze
 
   # ----------------------------------------------------------------
 
-  # send a verification pin via email
-  def self.send_verification_pin(user_id, user_token, email_address, pin)
-    magic_link_url = HawthorneCore::AppConfig.site_base_url + '/verify-pin-via-magic-link?token=' + user_token + '&pin=' + pin.to_s
+  # send verification pin
+  def self.send_verification_pin(user_id, user_token, email_address, pin, keep_signed_in)
+    magic_link_url = HawthorneCore::AppConfig.site_base_url + '/verify-pin-via-magic-link?token=' + user_token + '&pin=' + pin.to_s + '&keep_signed_in=' + keep_signed_in.to_s
     personalization = verification_pin_personalization(email_address, magic_link_url, pin)
     send_email(VERIFICATION_PIN, user_id, email_address, verification_pin_subject, verification_pin_template, personalization)
+  end
+
+  # ----------------------------------------------------------------
+
+  # send welcome email
+  def self.send_welcome_email(user_id, email_address)
+    send_email(WELCOME_EMAIL, user_id, email_address, welcome_email_subject, welcome_email_template, nil)
   end
 
   # ----------------------------------------------------------------
@@ -47,6 +54,12 @@ class HawthorneCore::Services::MailerSendSvc
   def self.verification_pin_template = '0r83ql3vnkmgzw1j'
 
   def self.verification_pin_personalization(email_address, magic_link_url, pin) = personalization_with_email_address(email_address, { magic_link_url: magic_link_url, pin: pin })
+
+  # ----------------------
+
+  def self.welcome_email_subject = 'Welcome to ' + HawthorneCore::Site.this_site_name
+
+  def self.welcome_email_template = HawthorneCore::Site.this_site_mailer_send_welcome_email_template_id
 
   # ----------------------------------------------------------------
 

@@ -12,6 +12,7 @@
 
     <%= hidden_field_tag :token, @user.token %>
     <%= hidden_field_tag :pin_delivery_method, params[:pin_delivery_method] %>
+    <%= hidden_field_tag :keep_signed_in, params[:keep_signed_in] %>
 
     <div class='form_input'>
       <%

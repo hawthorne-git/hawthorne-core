@@ -1,4 +1,4 @@
-# v3.0XXX
+# v3.0
 
 class HawthorneCore::User::SessionController < HawthorneCore::ApplicationController
 
@@ -25,6 +25,7 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
 
     # get the page attributes
     email_address = params[:email_address].to_s.downcase.strip
+    keep_signed_in = params[:keep_signed_in]
 
     # ----------------------
 
@@ -53,13 +54,13 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
     user.refresh_pin
 
     # if the users default pin delivery is via email ... send the pin via email
-    HawthorneCore::Email::SendPinJob.perform_later(user.id) if user.pin_default_delivery_via_email?
+    HawthorneCore::Email::SendPinJob.perform_later(user.id, keep_signed_in) if user.pin_default_delivery_via_email?
 
     # if the users default pin delivery is via phone ... send the pin via text message
     HawthorneCore::Text::SendPinJob.perform_later(user.id) if user.pin_default_delivery_via_phone?
 
     # redirect the user to verify their pin
-    redirect_to verify_pin_path(token: user.token, pin_delivery_method: user.pin_default_delivery)
+    redirect_to verify_pin_path(token: user.token, pin_delivery_method: user.pin_default_delivery, keep_signed_in: keep_signed_in)
 
     # ----------------------
 
@@ -111,11 +112,20 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
   # verify the users pin, to sign-in / sign-up
   def verify_pin
 
+    # ----------------------
+
+    # prior to verifying ... determine if the user is already signed in
+    # this will be true when the user signs-in on a different tab - ex: clicks magic link
+    redirect_to account_path and return if @signed_in
+
+    # ----------------------
+
     # get the page attributes
     user_token = params[:token]
     pin = params[:pin]
     pin_delivery_method = params[:pin_delivery_method]
     from_magic_link = params[:from_magic_link]
+    keep_signed_in = params[:keep_signed_in].to_i
 
     # ----------------------
 
@@ -201,30 +211,32 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
     # the pin is verified!
     # clear the pin - it is one time use only
     HawthorneCore::UserAction::Log.pin_verified(user.id, request.remote_ip, cookies[:user_session_token])
-    # user.clear_pin
+    user.clear_pin
 
     # sign-in the user
-    # session[:user_id] = user.id
+    session[:user_id] = user.id
     HawthorneCore::UserAction::Log.sign_in(user.id)
 
-    # verify the users email address (if the pin was sent via email and not verified prior)
+    # verify the users email address (if the pin was sent via email and the users email address has not been verified prior)
     user.verify_email_address if pin_delivery_method == HawthorneCore::User::PIN_VIA_EMAIL
 
     # determine if this is the users first sign-in on this site
     # if true, a welcome email is sent
     first_sign_in_on_site = user.first_sign_in_on_site?
-    first_sign_in_on_site = true
 
     # log the users site sign-in ...
     # this is a record for each user / site that captures the users first sign-in, last sign-in, and #sign-ins
-    user.log_site_sign_in
+    user.log_site_sign_in(keep_signed_in)
+
+    # if this is the users first sign-in (on site) ... send the user a welcome email
+    HawthorneCore::Email::SendWelcomeEmailJob.perform_later(user.id, user.email_address) if first_sign_in_on_site
 
     # create the user a stripe account (if not done prior)
     # TODO ... need to care if hawthorne site or not ... put this on the user site record?
     # user.create_stripe_account
 
-    # if this is the users first sign-in (on site) ... send the user a welcome email
-    HawthorneCore::Email::SendWelcomeEmailJob.perform_later(user.id, user.email_address) if first_sign_in_on_site
+    # redirect the user to view their account
+    redirect_to account_path
 
   end
 

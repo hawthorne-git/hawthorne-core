@@ -21,9 +21,8 @@ class HawthorneCore::ApplicationController < ::ApplicationController
   # create the users session - if it does not exist
   before_action :create_user_session, if: proc { !user_session? }
 
-  # CORE ... determine if the user is signed in
-  # TODO
-  #before_action :signed_in?
+  # determine if the user is signed in
+  before_action :signed_in?
 
   # ---------------------------------------------------------------------------
 

@@ -1,8 +1,6 @@
 HawthorneCore::Engine.routes.draw do
 
-  # ----------------------------------------------------------------------------
-
-  # ----------------------
+  # ---------------------------------------------------------------------------- Account
 
   get 'sign-in', to: 'user/session#sign_in_show'
   post 'sign-in', to: 'user/session#sign_in'

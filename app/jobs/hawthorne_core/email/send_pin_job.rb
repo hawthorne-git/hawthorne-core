@@ -7,7 +7,7 @@ class HawthorneCore::Email::SendPinJob < HawthorneCore::ApplicationJob
 
   # ----------------------------------------------------------------
 
-  def perform(user_id)
+  def perform(user_id, keep_signed_in)
 
     # find the user by id
     user = HawthorneCore::User.
@@ -39,7 +39,7 @@ class HawthorneCore::Email::SendPinJob < HawthorneCore::ApplicationJob
     end
 
     # the pin is active, send the email
-    HawthorneCore::Services::MailerSendSvc.send_verification_pin(user.id, user.token, user.email_address, user.pin)
+    HawthorneCore::Services::MailerSendSvc.send_verification_pin(user.id, user.token, user.email_address, user.pin, keep_signed_in)
 
   end
 
