@@ -7,6 +7,7 @@ module HawthorneCore::UserAction::FailureReason
   REASONS =
     {
       email_identical: 'EMAIL IDENTICAL',
+      email_recently_sent: 'EMAIL RECENTLY SENT',
       email_syntax_error: 'EMAIL SYNTAX ERROR',
       email_taken: 'EMAIL TAKEN',
       exception_caught: 'EXCEPTION_CAUGHT',

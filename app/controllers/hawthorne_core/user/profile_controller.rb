@@ -68,7 +68,7 @@ class HawthorneCore::User::ProfileController < HawthorneCore::ApplicationControl
       select(:user_id, :email_address).
       find_by(user_id: session[:user_id])
 
-    # clear the users update email address attributes
+    # clear the users email address update attributes
     @user.clear_email_address_update_attrs
 
     # ----------------------
@@ -111,7 +111,7 @@ class HawthorneCore::User::ProfileController < HawthorneCore::ApplicationControl
     # if identical - log it, return back and display an error message
     if user.email_address == new_email_address
       @update_email_address_failed = @new_email_address_identical = true
-      HawthorneCore::UserAction::Log.update_profile_email_failure(session[:user_id], HawthorneCore::UserAction::FailureReason.email_identical, { email_address: user.email_address, new_email_address: new_email_address }, request.remote_ip, cookies[:user_session_token])
+      HawthorneCore::UserAction::Log.update_profile_email_failure(session[:user_id], HawthorneCore::UserAction::FailureReason.email_identical, { current_email_address: user.email_address, new_email_address: new_email_address }, request.remote_ip, cookies[:user_session_token])
       render turbo_stream: turbo_stream.update('update_email_address_failed_turbo_frame', partial: '/hawthorne_core/partials/user/update_email_address_failed') and return
     end
 
@@ -125,11 +125,14 @@ class HawthorneCore::User::ProfileController < HawthorneCore::ApplicationControl
 
     # ----------------------
 
-    # set the users new email address attributes
+    # the new email address is valid!
+
+    # set the users email address update attributes
+    # the user needs to verify their new email address, via a pin, prior to updating their profile in the database
     user.set_email_address_update_attrs(new_email_address)
 
     # send the user an email with a pin to verify their new email address
-    HawthorneCore::Email::SendUpdateEmailAddressPinJob.perform_later(user.id)
+    HawthorneCore::Email::SendEmailAddressUpdatePinJob.perform_later(user.id)
 
     # ----------------------
 
@@ -147,6 +150,24 @@ class HawthorneCore::User::ProfileController < HawthorneCore::ApplicationControl
       select(:user_id, :email_address, :new_email_address).
       find_by(user_id: session[:user_id])
 
+    # ----------------------
+
+    #TODO:
+    @html_title = 'Update Email Address | My Account'
+    @breadcrumbs = [
+      { title: 'My Account', link: account_path },
+      { title: 'Profile', link: profile_path },
+      { title: 'Update Email Address', link: nil }
+    ]
+
+  end
+
+  # -----------------------------------------------------------------------------
+
+  # resend the user their pin, to update the email address
+  def email_address_update_resend_pin
+    HawthorneCore::Email::SendEmailAddressUpdatePinJob.perform_later(session[:user_id])
+    redirect_to profile_email_address_update_verify_pin_path
   end
 
   # -----------------------------------------------------------------------------
@@ -166,7 +187,7 @@ class HawthorneCore::User::ProfileController < HawthorneCore::ApplicationControl
 
     # ----------------------
 
-    # in the unexpected case where the pin is not set - log it ...
+    # in the unexpected case where the pin is not set - log it
     # refresh the users pin, email the pin, then return back and display an error message
     unless user.email_address_update_pin_set?
       @verify_pin_failed = @pin_not_set = true
@@ -175,7 +196,7 @@ class HawthorneCore::User::ProfileController < HawthorneCore::ApplicationControl
       render turbo_stream: turbo_stream.update('verify_pin_failed_turbo_frame', partial: '/hawthorne_core/partials/user/verify_pin_failed') and return
     end
 
-    # in the unexpected case where the pin is expired - log it ...
+    # in the unexpected case where the pin is expired - log it
     # refresh the users pin, email the pin, then return back and display an error message
     if user.email_address_update_pin_expired?
       @verify_pin_failed = @pin_expired = true
@@ -184,7 +205,7 @@ class HawthorneCore::User::ProfileController < HawthorneCore::ApplicationControl
       render turbo_stream: turbo_stream.update('verify_pin_failed_turbo_frame', partial: '/hawthorne_core/partials/user/verify_pin_failed') and return
     end
 
-    # in the unexpected case where the max number of failed attempts reached - log it ...
+    # in the unexpected case where the max number of failed attempts reached - log it
     # refresh the users pin, email the pin, then return back and display an error message
     if user.email_address_update_pin_max_failed_attempts_reached?
       @verify_pin_failed = @pin_max_failed_attempts_reached = true

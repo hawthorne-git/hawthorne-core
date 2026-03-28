@@ -6,7 +6,7 @@ class HawthorneCore::Services::MailerSendSvc
 
   # ----------------------------------------------------------------
 
-  EMAIL_ADDRESS_UPDATE_VERIFICATION_PIN = 'UPDATE EMAIL ADDRESS VERIFICATION PIN'.freeze
+  EMAIL_ADDRESS_UPDATE_VERIFICATION_PIN = 'EMAIL ADDRESS UPDATE VERIFICATION PIN'.freeze
   def self.email_address_update_verification_pin = EMAIL_ADDRESS_UPDATE_VERIFICATION_PIN
 
   VERIFICATION_PIN = 'VERIFICATION PIN'.freeze

@@ -22,7 +22,9 @@ HawthorneCore::Engine.routes.draw do
   get 'profile-email-address-update', to: 'user/profile#email_address_update_show'
   post 'profile-email-address-update-validation', to: 'user/profile#email_address_update_validation'
   get 'profile-email-address-update-verify-pin', to: 'user/profile#email_address_update_verify_pin_show'
+  get 'profile-email-address-update-resend-pin', to: 'user/profile#email_address_update_resend_pin'
   post 'profile-email-address-update-verify-pin', to: 'user/profile#email_address_update_verify_pin'
+
 
   # ----------------------
 

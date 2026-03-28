@@ -13,6 +13,8 @@ module HawthorneCore::User::PinVerification
 
     PIN_MAX_FAILED_ATTEMPTS_ALLOWED = 5.freeze
 
+    PIN_RECENTLY_SENT_IN_SECONDS = 30.freeze
+
     PIN_VIA_EMAIL = 'EMAIL'.freeze
 
     PIN_VIA_PHONE = 'PHONE'.freeze
@@ -28,9 +30,13 @@ module HawthorneCore::User::PinVerification
     # ----------------------------------------------------------------------------- SIGN IN
 
     def pin_active? = pin_set? && !pin_expired? && !pin_max_failed_attempts_reached?
+
     def pin_set? = pin.present? && pin_created_at.present?
+
     def pin_expired? = pin_created_at.nil? || (pin_created_at < PIN_EXPIRATION_IN_MINUTES.minutes.ago)
+
     def pin_max_failed_attempts_reached? = (pin_failed_attempts_count >= PIN_MAX_FAILED_ATTEMPTS_ALLOWED)
+
     def pin_match?(pin_to_match) = (pin == pin_to_match.gsub(/\D/, ''))
 
     # ------------------------
@@ -60,14 +66,19 @@ module HawthorneCore::User::PinVerification
 
     # ------------------------
 
+    # increment the number of failed attempts with pin
     def add_pin_failed_attempt = update_columns(pin_failed_attempts_count: (pin_failed_attempts_count.to_i + 1))
 
     # ----------------------------------------------------------------------------- EMAIL ADDRESS: UPDATE
 
     def email_address_update_pin_active? = email_address_update_pin_set? && !email_address_update_pin_expired? && !email_address_update_pin_max_failed_attempts_reached?
+
     def email_address_update_pin_set? = new_email_address_pin.present? && new_email_address_pin_created_at.present?
+
     def email_address_update_pin_expired? = new_email_address_pin_created_at.nil? || (new_email_address_pin_created_at < PIN_EXPIRATION_IN_MINUTES.minutes.ago)
+
     def email_address_update_pin_max_failed_attempts_reached? = (new_email_address_pin_failed_attempts_count >= PIN_MAX_FAILED_ATTEMPTS_ALLOWED)
+
     def email_address_update_pin_match?(pin_to_match) = (new_email_address_pin == pin_to_match.gsub(/\D/, ''))
 
     # ------------------------
@@ -94,12 +105,30 @@ module HawthorneCore::User::PinVerification
       attrs = { new_email_address_pin: SecureRandom.random_number(PIN_RANGE), new_email_address_pin_created_at: Time.current, new_email_address_pin_failed_attempts_count: 0 }
       update_columns(attrs)
       HawthorneCore::UserAction::Log.email_address_update_attrs_set(id, attrs)
-      HawthorneCore::Email::SendUpdateEmailAddressPinJob.perform_later(id)
+      HawthorneCore::Email::SendEmailAddressUpdatePinJob.perform_later(id)
     end
 
     # ------------------------
 
+    # increment the number of failed attempts with pin
     def add_email_address_update_pin_failed_attempt = update_columns(new_email_address_pin_failed_attempts_count: (new_email_address_pin_failed_attempts_count.to_i + 1))
+
+    # ------------------------
+
+    # determine if an email, with this email address update pin, was recently sent
+    def email_address_update_pin_recently_sent?
+      HawthorneCore::UserAction.
+        where(
+          site_id: HawthorneCore::Site.this_site_id,
+          user_id: id,
+          action: HawthorneCore::UserAction::Action::ACTIONS.fetch(:email_sent),
+          success: true
+        ).
+        where("note->>'email_type' = ?", HawthorneCore::Services::MailerSendSvc.email_address_update_verification_pin).
+        where("note->'personalization'->'data'->>'pin' = ?", new_email_address_pin).
+        where('created_at >= ?', PIN_RECENTLY_SENT_IN_SECONDS.seconds.ago).
+        exists?
+    end
 
     # ----------------------------------------------------------------------------- UPDATE: PHONE NUMBER
 
