@@ -83,7 +83,7 @@ module HawthorneCore::User::PinVerification
 
     # ------------------------
 
-    # clear the update email address attributes - log it
+    # clear the email address update attributes - log it
     def clear_email_address_update_attrs
       update_columns(new_email_address: nil, new_email_address_pin: nil, new_email_address_pin_created_at: nil, new_email_address_pin_failed_attempts_count: nil)
       HawthorneCore::UserAction::Log.email_address_update_attrs_cleared(id)
@@ -91,7 +91,7 @@ module HawthorneCore::User::PinVerification
 
     # ------------------------
 
-    # set the update email address attributes - log it
+    # set the email address update attributes - log it
     def set_email_address_update_attrs(new_email_address)
       attrs = { new_email_address: new_email_address, new_email_address_pin: SecureRandom.random_number(PIN_RANGE), new_email_address_pin_created_at: Time.current, new_email_address_pin_failed_attempts_count: 0 }
       update_columns(attrs)
@@ -132,6 +132,50 @@ module HawthorneCore::User::PinVerification
 
     # ----------------------------------------------------------------------------- UPDATE: PHONE NUMBER
 
+    def phone_number_update_pin_active? = phone_number_update_pin_set? && !phone_number_update_pin_expired? && !phone_number_update_pin_max_failed_attempts_reached?
+
+    def phone_number_update_pin_set? = new_phone_number_pin.present? && new_phone_number_pin_created_at.present?
+
+    def phone_number_update_pin_expired? = new_phone_number_pin_created_at.nil? || (new_phone_number_pin_created_at < PIN_EXPIRATION_IN_MINUTES.minutes.ago)
+
+    def phone_number_update_pin_max_failed_attempts_reached? = (new_phone_number_pin_failed_attempts_count >= PIN_MAX_FAILED_ATTEMPTS_ALLOWED)
+
+    def phone_number_update_pin_match?(pin_to_match) = (new_phone_number_pin == pin_to_match.gsub(/\D/, ''))
+
+    # ------------------------
+
+    # clear the phone number update attributes - log it
+    def clear_phone_number_update_attrs
+      update_columns(new_phone_number: nil, new_phone_number_pin: nil, new_phone_number_pin_created_at: nil, new_phone_number_pin_failed_attempts_count: nil)
+      HawthorneCore::UserAction::Log.phone_number_update_attrs_cleared(id)
+    end
+
+    # ------------------------
+
+    # set the phone number attributes - log it
+    def set_phone_number_update_attrs(new_phone_number)
+      attrs = { new_phone_number: new_phone_number, new_phone_number_pin: SecureRandom.random_number(PIN_RANGE), new_phone_number_pin_created_at: Time.current, new_phone_number_pin_failed_attempts_count: 0 }
+      update_columns(attrs)
+      HawthorneCore::UserAction::Log.phone_number_update_attrs_set(id, attrs)
+    end
+
+    # ------------------------
+
+    # refresh the users phone number update pin, then send it via text message
+    def refresh_phone_number_update_pin_then_send_it
+      attrs = { new_phone_number_pin: SecureRandom.random_number(PIN_RANGE), new_phone_number_pin_created_at: Time.current, new_phone_number_pin_failed_attempts_count: 0 }
+      update_columns(attrs)
+      HawthorneCore::UserAction::Log.phone_number_update_attrs_set(id, attrs)
+      #HawthorneCore::Email::SendEmailAddressUpdatePinJob.perform_later(id)
+    end
+
+    # ------------------------
+
+    # increment the number of failed attempts with pin
+    def add_phone_number_update_pin_failed_attempt = update_columns(new_phone_number_pin_failed_attempts_count: (new_phone_number_pin_failed_attempts_count.to_i + 1))
+
+    # ------------------------
+    #
     # -----------------------------------------------------------------------------
 
   end

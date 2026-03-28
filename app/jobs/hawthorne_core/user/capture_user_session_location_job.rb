@@ -21,7 +21,7 @@ class HawthorneCore::User::CaptureUserSessionLocationJob < HawthorneCore::Applic
     return unless location
 
     # set the location into the user session
-    ActiveRecordBaseLog.with_writing { user_session.update!(location.slice(:city, :region, :country)) }
+    user_session.update!(location.slice(:city, :region, :country))
 
   end
 

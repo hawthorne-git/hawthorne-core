@@ -19,12 +19,17 @@ HawthorneCore::Engine.routes.draw do
   get 'profile', to: 'user/profile#show'
   post 'profile', to: 'user/profile#update'
 
-  get 'profile-email-address-update', to: 'user/profile#email_address_update_show'
-  post 'profile-email-address-update-validation', to: 'user/profile#email_address_update_validation'
-  get 'profile-email-address-update-verify-pin', to: 'user/profile#email_address_update_verify_pin_show'
-  get 'profile-email-address-update-resend-pin', to: 'user/profile#email_address_update_resend_pin'
-  post 'profile-email-address-update-verify-pin', to: 'user/profile#email_address_update_verify_pin'
+  get 'profile-email-address-update', to: 'user/profile_email_address_update#show'
+  post 'profile-email-address-update-verify', to: 'user/profile_email_address_update#verify'
+  get 'profile-email-address-update-verify-pin', to: 'user/profile_email_address_update#verify_pin_show'
+  get 'profile-email-address-update-resend-pin', to: 'user/profile_email_address_update#resend_pin'
+  post 'profile-email-address-update-verify-pin', to: 'user/profile_email_address_update#verify_pin'
 
+  get 'profile-phone-number-update', to: 'user/profile_phone_number_update#show'
+  post 'profile-phone-number-update-verify', to: 'user/profile_phone_number_update#verify'
+  get 'profile-phone-number-update-verify-pin', to: 'user/profile_phone_number_update#verify_pin_show'
+  get 'profile-phone-number-update-resend-pin', to: 'user/profile_phone_number_update#resend_pin'
+  post 'profile-phone-number-update-verify-pin', to: 'user/profile_phone_number_update#verify_pin'
 
   # ----------------------
 

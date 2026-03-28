@@ -10,8 +10,8 @@ module HawthorneCore::UserSessionIssuer
     # determine if the users session exists (as a cookie)
     def user_session? = cookies.key?(:user_session_token)
 
-    # determine if the users session has been validated
-    def user_session_validated? = session[:user_session_validated]
+    # determine if the users session has been verified
+    def user_session_verified? = session[:user_session_verified]
 
     # ---------------------------------------------------------------------------
 
@@ -24,9 +24,9 @@ module HawthorneCore::UserSessionIssuer
       # create the user session
       user_session = HawthorneCore::UserSession.create_record(session[:user_id], request)
 
-      # set the user session token (as a cookie), and mark the session as validated
+      # set the user session token (as a cookie), and mark the session as verified
       cookies[:user_session_token] = { value: user_session.token, expires: 1.month.from_now, httponly: true, secure: Rails.env.production?, same_site: :lax }
-      session[:user_session_validated] = true
+      session[:user_session_verified] = true
 
       # kick off a job to capture the users session location
       HawthorneCore::User::CaptureUserSessionLocationJob.perform_later(user_session.id)
@@ -35,29 +35,26 @@ module HawthorneCore::UserSessionIssuer
 
     # ---------------------------------------------------------------------------
 
-    # validate the users session
+    # verify the users session
     # to be true ... a cookie defining the users session MUST exist, and this cookie value MUST exist in the database
-    def validate_user_session
+    def verify_user_session
 
       # if a user session token does not exist as a cookie ...
-      # set the user session as NOT validated and return
-      unless cookies.key?(:user_session_token)
-        session[:user_session_validated] = false
-        return
-      end
+      # set the user session as NOT verified and return
+      (session[:user_session_verified] = false; return) unless cookies.key?(:user_session_token)
 
       # a user session token exists as a cookie ...
 
       #  if this token does NOT exist in the database ...
-      #  set the user session as NOT validated, delete the cookie, and return
+      #  set the user session as NOT verified, delete the cookie, and return
       unless HawthorneCore::UserSession.record_exists_with_token?(cookies[:user_session_token])
-        session[:user_session_validated] = false
+        session[:user_session_verified] = false
         cookies.delete(:user_session_token)
         return
       end
 
-      # the user session is validated
-      session[:user_session_validated] = true
+      # the user session is verified
+      session[:user_session_verified] = true
 
     end
 

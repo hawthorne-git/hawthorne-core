@@ -4,9 +4,9 @@ class HawthorneCore::UserController < HawthorneCore::ApplicationController
 
   # -----------------------------------------------------------------------------
 
-  # validate that the user is signed in prior to these actions
+  # verify that the user is signed in prior to these actions
   # if the user is not signed in ... the user is redirected to the sign-in page
-  before_action :validate_signed_in?, only: [
+  before_action :verify_signed_in?, only: [
     :show
   ]
 

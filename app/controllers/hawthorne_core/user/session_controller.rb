@@ -4,15 +4,13 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
 
   # -----------------------------------------------------------------------------
 
-  # validate that the user is signed in prior to these actions
-  # if the user is not signed in ... the user is redirected to the sign-in page
-  before_action :validate_signed_in?, only: [
+  # verify that the user is signed in prior to these actions
+  before_action :verify_signed_in?, only: [
     :sign_out
   ]
 
-  # validate that the user is signed out prior to these actions
-  # if the user is signed in ... the user is redirected to their account page
-  before_action :validate_signed_out?, only: [
+  # verify that the user is signed out prior to these actions
+  before_action :verify_signed_out?, only: [
     :sign_in,
     :sign_in_show,
     :verify_pin,
@@ -44,7 +42,7 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
 
     # ----------------------
 
-    # validate that the email address does not have a syntax error
+    # verify that the email address does not have a syntax error
     # if invalid - log it, return back and display an error message
     unless email_address_syntax_valid?(email_address)
       @sign_in_failed = @email_address_syntax_error = true

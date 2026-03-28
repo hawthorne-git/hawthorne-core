@@ -13,7 +13,7 @@ module HawthorneCore::Cache
 
     # -------------------------
 
-    # set an attribute, denoting if the page is to be re-cached
+    # set an attribute, noting if the page is to be re-cached
     def set_clear_cache_attr
       @clear_cache = clear_cache?
     end

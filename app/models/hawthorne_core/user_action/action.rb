@@ -11,6 +11,8 @@ module HawthorneCore::UserAction::Action
       email_address_verified: 'EMAIL ADDRESS VERIFIED',
       email_address_update_attrs_cleared: 'EMAIL ADDRESS UPDATE ATTRIBUTES CLEARED',
       email_address_update_attrs_set: 'EMAIL ADDRESS UPDATE ATTRIBUTES SET',
+      phone_number_update_attrs_cleared: 'PHONE NUMBER UPDATE ATTRIBUTES CLEARED',
+      phone_number_update_attrs_set: 'PHONE NUMBER UPDATE ATTRIBUTES SET',
       pin_cleared: 'PIN CLEARED',
       pin_created: 'PIN CREATED',
       pin_verified: 'PIN VERIFIED',

@@ -8,7 +8,7 @@ module HawthorneCore
 
     isolate_namespace HawthorneCore
 
-    # validate that required hawthorne core env variables exist
+    # verify that required hawthorne core env variables exist
     initializer 'hawthorne_core.validate_env' do
       HawthorneCore::AppConfig.mailer_send_api_token
       HawthorneCore::AppConfig.site_base_url

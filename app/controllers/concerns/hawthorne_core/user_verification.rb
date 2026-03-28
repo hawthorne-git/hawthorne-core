@@ -1,6 +1,6 @@
 # v3.0XXX
 
-module HawthorneCore::UserValidation
+module HawthorneCore::UserVerification
   extend ActiveSupport::Concern
 
   included do
@@ -25,9 +25,6 @@ module HawthorneCore::UserValidation
 
     end
 
-    # --------------------------------------------------------------------------- Email Address: Taken
-
-
     # --------------------------------------------------------------------------- Phone Number: Syntax
 
     # determine if a phone number is valid - US / CANADA ONLY
@@ -37,20 +34,17 @@ module HawthorneCore::UserValidation
       digits.length == 10
     end
 
-    # determine if a phone number is invalid - US / CANADA ONLY
-    def phone_number_invalid?(phone_number) = !phone_number_valid?(phone_number)
-
     # --------------------------------------------------------------------------- Signed In / Out
 
     # validates that the site user is signed in
     # if not, the user is redirected to the sign-in page
-    def validate_signed_in?
+    def verify_signed_in?
       redirect_to sign_in_path unless @signed_in
     end
 
     # validates that the site user is signed out
     # if not, the user is redirected to their account page
-    def validate_signed_out?
+    def verify_signed_out?
       redirect_to account_path if @signed_in
     end
 
