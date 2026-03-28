@@ -18,10 +18,20 @@ module HawthorneCore::UserAction::Log
     failure_admin(user_id, action(:email_sent), failure_reason, note)
   end
 
-  # ----------------------------------------------------------------------------- Email Address - Verified
+  # ------------------------
 
   def self.email_address_verified(user_id, note)
     success_admin(user_id, action(:email_address_verified), note)
+  end
+
+  # ----------------------------------------------------------------------------- Email (Update)
+
+  def self.email_address_update_attrs_cleared(user_id)
+    success_admin(user_id, action(:email_address_update_attrs_cleared), nil)
+  end
+
+  def self.email_address_update_attrs_set(user_id, note)
+    success_admin(user_id, action(:email_address_update_attrs_set), note)
   end
 
   # ----------------------------------------------------------------------------- Pin
@@ -46,6 +56,22 @@ module HawthorneCore::UserAction::Log
     failure(user_id, action(:pin_verified), failure_reason, note, ip_address, user_session_token)
   end
 
+  # ----------------------------------------------------------------------------- Profile
+
+  def self.update_profile(user_id, note, ip_address, user_session_token)
+    success(user_id, action(:profile_updated), note, ip_address, user_session_token)
+  end
+
+  # ------------------------
+
+  def self.update_profile_email(user_id, note, ip_address, user_session_token)
+    success(user_id, action(:profile_email_updated), note, ip_address, user_session_token)
+  end
+
+  def self.update_profile_email_failure(user_id, failure_reason, note, ip_address, user_session_token)
+    failure(user_id, action(:profile_email_updated), failure_reason, note, ip_address, user_session_token)
+  end
+
   # ----------------------------------------------------------------------------- Sign-In
 
   def self.sign_in(user_id)
@@ -60,6 +86,12 @@ module HawthorneCore::UserAction::Log
 
   def self.sign_in_via_cookie(user_id, note)
     success_admin(user_id, action(:sign_in_via_cookie), note)
+  end
+
+  # ----------------------------------------------------------------------------- Sign-Out
+
+  def self.sign_out(user_id, ip_address, user_session_token)
+    success(user_id, action(:sign_out), nil, ip_address, user_session_token)
   end
 
   # ----------------------------------------------------------------------------- Text Message

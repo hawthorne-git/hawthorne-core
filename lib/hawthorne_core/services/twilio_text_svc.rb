@@ -6,7 +6,6 @@ class HawthorneCore::Services::TwilioTextSvc
   # ----------------------------------------------------------------
 
   VERIFICATION_PIN = 'VERIFICATION PIN'.freeze
-
   def self.verification_pin = VERIFICATION_PIN
 
   # ----------------------------------------------------------------

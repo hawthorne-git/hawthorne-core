@@ -7,7 +7,7 @@ module HawthorneCore::User::SingleSignOn
 
     # -----------------------------------------------------------------------------
 
-    # determine if the user has ONLY signed-in via sso
+    # determine if the user has ONLY signed in via sso
     # this is true when there does not exist ANY traditional successful sign-ins
     def only_sign_in_via_sso?(email_address)
       HawthorneCore::UserAction.

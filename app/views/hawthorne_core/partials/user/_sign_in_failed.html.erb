@@ -1,6 +1,7 @@
 <%# v3.0 %>
 
 <div class='error'>
-  <%= render partial: '/hawthorne_core/partials/user/message/create_site_user_record_failed' if @create_site_user_record_failed %>
-  <%= render partial: '/hawthorne_core/partials/user/message/email_address_failed' if @email_address_failed %>
+  <div class='vertical_space_small'></div>
+  <%= raw('Your email address doesn’t look valid<br>Please check for a typo and try again') if @email_address_syntax_error %>
+  <div class='vertical_space_small'></div>
 </div>

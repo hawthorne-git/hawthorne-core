@@ -11,10 +11,10 @@ module HawthorneCore::User::EmailVerification
 
     # -----------------------------------------------------------------------------
 
-    # verify a users email address ... if not previously verified
+    # verify a users email address - log it ... if not previously verified
     def verify_email_address
       return if email_address_verified?
-      update!(email_address_verified: true)
+      update_columns(email_address_verified: true)
       HawthorneCore::UserAction::Log.email_address_verified(id, { email_address: email_address })
     end
 

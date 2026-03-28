@@ -1,0 +1,29 @@
+<%# v3.0 %>
+
+<div class='title'>Update Email Address</div>
+
+<%= turbo_frame_tag 'update_email_address_failed_turbo_frame' do %>
+  <%= render partial: '/hawthorne_core/partials/user/update_email_address_failed' if @update_email_address_failed %>
+<% end %>
+
+<div class='form'>
+
+  <%= form_with url: profile_email_address_update_validation_path do |f| %>
+
+    <div class='form_input'>
+      <label class='form_input'>current email address</label>
+      <%= f.text_field :current_email_address, value: @user.email_address, disabled: true, required: false, maxlength: 320 %>
+    </div>
+
+    <div class='form_input'>
+      <label class='form_input'>new email address</label>
+      <%= f.text_field :new_email_address, required: true, maxlength: 320, autofocus: true, value: 'charlie@hawthornesupplyco.com' %>
+    </div>
+
+    <div class='form_submit'>
+      <%= f.submit 'Continue' %>
+    </div>
+
+  <% end %>
+
+</div>

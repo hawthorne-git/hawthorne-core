@@ -1,0 +1,30 @@
+<%# v3.0 %>
+
+<div class='title'>Profile</div>
+
+<div class='form'>
+
+  <%= form_with url: profile_path do |f| %>
+
+    <div class='form_input'>
+      <label class='form_input'>name</label>
+      <%= f.text_field :full_name, value: @user.full_name, required: false, maxlength: 100 %>
+    </div>
+
+    <div class='form_input'>
+      <label class='form_input'>email address - <%= link_to 'update', profile_email_address_update_path %></label>
+      <%= f.text_field :email_address, value: @user.email_address, disabled: true, required: false, maxlength: 320 %>
+    </div>
+
+    <div class='form_input'>
+      <label class='form_input'>phone number</label>
+      <%= f.text_field :phone_number, value: @user.phone_number, required: false, maxlength: 100 %>
+    </div>
+
+    <div class='form_submit'>
+      <%= f.submit 'Update Profile' %>
+    </div>
+
+  <% end %>
+
+</div>

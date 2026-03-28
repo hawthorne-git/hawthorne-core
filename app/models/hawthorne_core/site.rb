@@ -18,6 +18,12 @@ class HawthorneCore::Site < HawthorneCore::ActiveRecordBaseApp
       riley_blake_env_name => riley_blake_contact_email
     }
 
+  # define the list of site email from taglines
+  SITE_EMAIL_FROM_TAGLINES =
+    {
+      riley_blake_env_name => riley_blake_email_from_tagline
+    }
+
   # define the list of site ids
   SITE_IDS =
     {
@@ -38,39 +44,21 @@ class HawthorneCore::Site < HawthorneCore::ActiveRecordBaseApp
 
   # -----------------------------------------------------------------------------
 
-  # get the site id, from the ENV attribute SITE_NAME
-  def self.this_site_id
-    SITE_IDS.fetch(HawthorneCore::AppConfig.site_name) { raise env_site_name_exception('this_site_id') }
-  end
+  def self.this_site_contact_email = SITE_CONTACT_EMAILS.fetch(HawthorneCore::AppConfig.site_name) { raise env_site_name_exception('this_site_contact_email') }
 
-  # get the site name, from the ENV attribute SITE_NAME
-  def self.this_site_name
-    SITE_NAMES.fetch(HawthorneCore::AppConfig.site_name) { raise env_site_name_exception('this_site_name') }
-  end
+  def self.this_site_email_from_tagline = SITE_EMAIL_FROM_TAGLINES.fetch(HawthorneCore::AppConfig.site_name) { raise env_site_name_exception('this_site_email_from_tagline') }
 
-  # get the site contact email, from the ENV attribute SITE_NAME
-  def self.this_site_contact_email
-    SITE_CONTACT_EMAILS.fetch(HawthorneCore::AppConfig.site_name) { raise env_site_name_exception('this_site_contact_email') }
-  end
+  def self.this_site_id = SITE_IDS.fetch(HawthorneCore::AppConfig.site_name) { raise env_site_name_exception('this_site_id') }
 
-  # get the site mailer send welcome email template id, from the ENV attribute SITE_NAME
-  def self.this_site_mailer_send_welcome_email_template_id
-    SITE_MAILER_SEND_WELCOME_EMAIL_TEMPLATE_IDS.fetch(HawthorneCore::AppConfig.site_name) { raise env_site_name_exception('this_site_mailer_send_welcome_email_template_id') }
-  end
+  def self.this_site_mailer_send_welcome_email_template_id = SITE_MAILER_SEND_WELCOME_EMAIL_TEMPLATE_IDS.fetch(HawthorneCore::AppConfig.site_name) { raise env_site_name_exception('this_site_mailer_send_welcome_email_template_id') }
+
+  def self.this_site_name = SITE_NAMES.fetch(HawthorneCore::AppConfig.site_name) { raise env_site_name_exception('this_site_name') }
 
   # -----------------------------------------------------------------------------
 
-  # get the sites header version
-  def self.header_version
-    with_reading { where(site_id: this_site_id).pick(:header_version) }
-  end
+  def self.header_version = with_reading { where(site_id: this_site_id).pick(:header_version) }
 
-  # -------------------------
-
-  # get the sites footer version
-  def self.footer_version
-    with_reading { where(site_id: this_site_id).pick(:footer_version) }
-  end
+  def self.footer_version = with_reading { where(site_id: this_site_id).pick(:footer_version) }
 
   # -----------------------------------------------------------------------------
 

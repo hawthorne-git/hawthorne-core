@@ -13,6 +13,7 @@ module HawthorneCore::Site::RileyBlake
         id: 1,
         name: 'Hawthorne at Riley Blake',
         contact_email: 'hello@rileyblakeathawthorne.com',
+        email_from_tagline: 'Lindsay, Charlie, and your friends at Hawthorne',
         mailer_send_welcome_template_id: 'neqvygmmvz5g0p7w'
       }.freeze
 

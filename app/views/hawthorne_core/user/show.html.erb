@@ -2,4 +2,36 @@
 
 <div class='title'>My Account</div>
 
-here in my account ...
+<%# ------------------------------------------- %>
+
+<hr class='section'>
+<div class='vertical_space'></div>
+
+<%# ------------------------------------------- Profile / Sign Out %>
+
+<div style='display: table; margin: auto; text-align: left;'>
+  <div style='display: table-row;'>
+    <div style='display: table-cell;'>Name:</div>
+    <div style='display: table-cell; padding-left: 0.5rem; padding-top: 0.75rem;'><%= @user.full_name %></div>
+  </div>
+  <div style='display: table-row;'>
+    <div style='display: table-cell; padding-top: 0.75rem;'>Email:</div>
+    <div style='display: table-cell; padding-left: 0.5rem;'><%= @user.email_address %></div>
+  </div>
+  <% if @user.phone_number? %>
+    <div style='display: table-row;'>
+      <div style='display: table-cell; padding-top: 0.75rem;'>Phone:</div>
+      <div style='display: table-cell; padding-left: 0.5rem; padding-top: 0.75rem;'><%= @user.phone_number %></div>
+    </div>
+  <% end %>
+</div>
+
+<div class='vertical_space'></div>
+
+<%= link_to 'Profile', profile_path %>&nbsp;&nbsp;/&nbsp;&nbsp;<%= link_to 'Sign Out', sign_out_path, data: { turbo: 'false' } %>
+
+<%# ------------------------------------------- %>
+
+<div class='vertical_space'></div>
+<hr class='section'>
+<div class='vertical_space'></div>

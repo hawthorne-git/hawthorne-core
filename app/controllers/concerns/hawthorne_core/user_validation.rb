@@ -25,6 +25,9 @@ module HawthorneCore::UserValidation
 
     end
 
+    # --------------------------------------------------------------------------- Email Address: Taken
+
+
     # --------------------------------------------------------------------------- Phone Number: Syntax
 
     # determine if a phone number is valid - US / CANADA ONLY
@@ -39,16 +42,16 @@ module HawthorneCore::UserValidation
 
     # --------------------------------------------------------------------------- Signed In / Out
 
-    # validates that the site user is signed-in
-    # if not, redirect the site user to the login page
+    # validates that the site user is signed in
+    # if not, the user is redirected to the sign-in page
     def validate_signed_in?
       redirect_to sign_in_path unless @signed_in
     end
 
-    # validates that the site user is signed-out ()
-    # if not, redirect the site user to the logout action
+    # validates that the site user is signed out
+    # if not, the user is redirected to their account page
     def validate_signed_out?
-      redirect_to sign_out_path if @signed_in
+      redirect_to account_path if @signed_in
     end
 
     # ---------------------------------------------------------------------------
