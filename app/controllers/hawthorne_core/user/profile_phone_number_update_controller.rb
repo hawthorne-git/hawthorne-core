@@ -181,4 +181,36 @@ class HawthorneCore::User::ProfilePhoneNumberUpdateController < HawthorneCore::A
 
   # -----------------------------------------------------------------------------
 
+  # clear the users phone number
+  def clear
+
+    # ----------------------
+
+    # find the user
+    user = HawthorneCore::User.
+      select(:user_id, :phone_number).
+      find_by(user_id: session[:user_id])
+
+    # ----------------------
+
+    # temporarily capture the old phone numbers, for logging
+    old_phone_number = user.phone_number
+    new_phone_number = nil
+
+    # remove the users phone number,
+    # and set the pin default delivery to EMAIL as they no longer have a phone number
+    user.update_columns(phone_number: new_phone_number, pin_default_delivery: HawthorneCore::User::PIN_VIA_EMAIL)
+
+    # log it
+    HawthorneCore::UserAction::Log.update_profile_phone_number(user.id, { old_phone_number: old_phone_number, new_phone_number: new_phone_number }, request.remote_ip, cookies[:user_session_token])
+
+    # ----------------------
+
+    # redirect the user to view their account
+    redirect_to account_path
+
+  end
+
+  # -----------------------------------------------------------------------------
+
 end

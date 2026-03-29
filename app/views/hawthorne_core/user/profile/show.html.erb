@@ -12,12 +12,17 @@
     </div>
 
     <div class='form_input'>
-      <label class='form_input'>email address - <%= link_to 'update', profile_email_address_update_path %></label>
+      <label class='form_input'>email address - <%= link_to 'update', profile_email_address_update_path, data: { turbo: :false } %></label>
       <%= f.text_field :email_address, value: @user.email_address, disabled: true, required: false, maxlength: 320 %>
     </div>
 
     <div class='form_input'>
-      <label class='form_input'>phone number - <%= link_to 'update', profile_phone_number_update_path %></label>
+      <label class='form_input'>
+        phone number - <%= link_to @user.phone_number.blank? ? 'add' : 'clear', profile_phone_number_update_path, data: { turbo: :false } %>
+        <% if @user.phone_number.present? %>
+        (<%= link_to 'clear', profile_phone_number_clear_path, data: { turbo_method: :delete, turbo_confirm: 'Are you sure you want to remove your phone number from your account?' } %>)
+        <% end %>
+      </label>
       <%= f.text_field :phone_number, value: HawthorneCore::Helpers::PhoneNumber.us_format(@user.phone_number), disabled: true, required: false, maxlength: 100 %>
     </div>
 

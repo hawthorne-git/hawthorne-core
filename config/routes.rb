@@ -32,6 +32,7 @@ HawthorneCore::Engine.routes.draw do
   get 'profile-phone-number-update-verify-pin', to: 'user/profile_phone_number_update#verify_pin_show'
   get 'profile-phone-number-update-resend-pin', to: 'user/profile_phone_number_update#resend_pin'
   post 'profile-phone-number-update-verify-pin', to: 'user/profile_phone_number_update#verify_pin'
+  delete 'profile-phone-number-clear', to: 'user/profile_phone_number_update#clear'
 
   # ----------------------
 
