@@ -9,6 +9,9 @@ class HawthorneCore::Email::SendPinJob < HawthorneCore::ApplicationJob
 
   def perform(user_id, keep_signed_in)
 
+    # for user action logs, set the email type
+    type = HawthorneCore::Services::MailerSendSvc::SIGN_IN_VERIFICATION_PIN
+
     # find the user by id
     user = HawthorneCore::User.
       select(:user_id, :token, :email_address, :pin, :pin_created_at, :pin_failed_attempts_count).
@@ -16,30 +19,21 @@ class HawthorneCore::Email::SendPinJob < HawthorneCore::ApplicationJob
 
     # exit unless the user is found
     unless user
-      HawthorneCore::UserAction::Log.email_sent_failure(nil, HawthorneCore::UserAction::FailureReason.unexpected_state, { email_type: HawthorneCore::Services::MailerSendSvc.verification_pin, message: 'User not found', user_id: user_id })
+      HawthorneCore::UserAction::Log.email_sent_failure(nil, HawthorneCore::UserAction::FailureReason.unexpected_state, { email_type: type, message: 'User not found', user_id: user_id })
       return
     end
 
-    # exit unless the pin is set
-    unless user.pin_set?
-      HawthorneCore::UserAction::Log.email_sent_failure(user.id, HawthorneCore::UserAction::FailureReason.pin_not_set, { email_type: HawthorneCore::Services::MailerSendSvc.verification_pin, pin: user.pin, pin_created_at: user.pin_created_at })
-      return
-    end
+    # if the pin is inactive, refresh
+    user.refresh_sign_in_pin unless user.sign_in_pin_active?
 
-    # exit if the pin has expired
-    if user.pin_expired?
-      HawthorneCore::UserAction::Log.email_sent_failure(user.id, HawthorneCore::UserAction::FailureReason.pin_expired, { email_type: HawthorneCore::Services::MailerSendSvc.verification_pin, pin: user.pin, pin_created_at: user.pin_created_at })
-      return
-    end
-
-    # exit if the max number of failed attempts reached
-    if user.pin_max_failed_attempts_reached?
-      HawthorneCore::UserAction::Log.email_sent_failure(user.id, HawthorneCore::UserAction::FailureReason.pin_max_failed_attempts_reached, { email_type: HawthorneCore::Services::MailerSendSvc.verification_pin, pin: user.pin, pin_created_at: user.pin_created_at, pin_failed_attempts_count: user.pin_failed_attempts_count })
+    # exit if an email with this pin was recently sent to the user
+    if user.sign_in_pin_recently_sent_via_email?
+      HawthorneCore::UserAction::Log.email_sent_failure(user.id, HawthorneCore::UserAction::FailureReason.email_recently_sent, { email_type: type, pin: user.pin })
       return
     end
 
     # the pin is active, send the email
-    HawthorneCore::Services::MailerSendSvc.send_verification_pin(user.id, user.token, user.email_address, user.pin, keep_signed_in)
+    HawthorneCore::Services::MailerSendSvc.send_sign_in_verification_pin(user.id, user.token, user.email_address, user.pin, keep_signed_in)
 
   end
 

@@ -4,8 +4,7 @@ class HawthorneCore::ApplicationController < ::ApplicationController
 
   include HawthorneCore::Cache,
           HawthorneCore::UserAuthentication,
-          HawthorneCore::UserSessionIssuer,
-          HawthorneCore::UserVerification
+          HawthorneCore::UserSessionIssuer
 
   # ---------------------------------------------------------------------------
 

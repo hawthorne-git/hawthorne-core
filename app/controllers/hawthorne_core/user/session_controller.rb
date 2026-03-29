@@ -44,9 +44,9 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
 
     # verify that the email address does not have a syntax error
     # if invalid - log it, return back and display an error message
-    unless email_address_syntax_valid?(email_address)
+    unless HawthorneCore::Helpers::EmailAddress.syntax_valid?(email_address)
       @sign_in_failed = @email_address_syntax_error = true
-      HawthorneCore::UserAction::Log.sign_in_failure(HawthorneCore::UserAction::FailureReason.email_syntax_error, { email_address: email_address }, request.remote_ip, cookies[:user_session_token])
+      HawthorneCore::UserAction::Log.sign_in_failure(HawthorneCore::UserAction::FailureReason.email_address_syntax_error, { email_address: email_address }, request.remote_ip, cookies[:user_session_token])
       render turbo_stream: turbo_stream.update('sign_in_failed_turbo_frame', partial: '/hawthorne_core/partials/user/sign_in_failed') and return
     end
 
@@ -64,11 +64,11 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
     user = HawthorneCore::User.create_record(email_address, request.remote_ip, cookies[:user_session_token]) unless user
 
     # refresh the users pin (if needed)
-    user.refresh_pin
+    user.refresh_sign_in_pin
 
     # send the user their pin via default delivery, email or text
-    HawthorneCore::Email::SendPinJob.perform_later(user.id, keep_signed_in) if user.pin_default_delivery_via_email?
-    HawthorneCore::Text::SendPinJob.perform_later(user.id) if user.pin_default_delivery_via_phone?
+    HawthorneCore::Email::SendPinJob.perform_later(user.id, keep_signed_in) if user.sign_in_pin_default_delivery_via_email?
+    HawthorneCore::Text::SendPinJob.perform_later(user.id) if user.sign_in_pin_default_delivery_via_phone?
 
     # redirect the user to verify their pin
     redirect_to verify_pin_path(token: user.token, pin_delivery_method: user.pin_default_delivery, keep_signed_in: keep_signed_in)
@@ -108,7 +108,7 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
 
     # in the unexpected case where the users token is not present - log it, return back to the sign-in page
     unless user_token.present?
-      HawthorneCore::UserAction::Log.pin_verified_failure(nil, HawthorneCore::UserAction::FailureReason.unexpected_state, { controller_action: 'verify_pin_show', message: 'Token not present' }, request.remote_ip, cookies[:user_session_token])
+      HawthorneCore::UserAction::Log.sign_in_pin_verified_failure(nil, HawthorneCore::UserAction::FailureReason.unexpected_state, { controller_action: 'verify_pin_show', message: 'Token not present' }, request.remote_ip, cookies[:user_session_token])
       redirect_to sign_in_path and return
     end
 
@@ -119,7 +119,7 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
 
     # in the unexpected case where the user is not found - log it, return back to the sign-in page
     unless @user
-      HawthorneCore::UserAction::Log.pin_verified_failure(nil, HawthorneCore::UserAction::FailureReason.unexpected_state, { controller_action: 'verify_pin_show', message: 'User not found with token', token: user_token }, request.remote_ip, cookies[:user_session_token])
+      HawthorneCore::UserAction::Log.sign_in_pin_verified_failure(nil, HawthorneCore::UserAction::FailureReason.unexpected_state, { controller_action: 'verify_pin_show', message: 'User not found with token', token: user_token }, request.remote_ip, cookies[:user_session_token])
       redirect_to sign_in_path and return
     end
 
@@ -157,7 +157,7 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
 
     # in the unexpected case where the users token is not present - log it, return back to the sign-in page
     unless user_token.present?
-      HawthorneCore::UserAction::Log.pin_verified_failure(nil, HawthorneCore::UserAction::FailureReason.unexpected_state, { controller_action: 'verify_pin', message: 'Token not present' }, request.remote_ip, cookies[:user_session_token])
+      HawthorneCore::UserAction::Log.sign_in_pin_verified_failure(nil, HawthorneCore::UserAction::FailureReason.unexpected_state, { controller_action: 'verify_pin', message: 'Token not present' }, request.remote_ip, cookies[:user_session_token])
       redirect_to sign_in_path and return
     end
 
@@ -168,15 +168,15 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
 
     # in the unexpected case where the user is not found - log it, return back to the sign-in page
     unless user
-      HawthorneCore::UserAction::Log.pin_verified_failure(nil, HawthorneCore::UserAction::FailureReason.unexpected_state, { controller_action: 'verify_pin', message: 'Site User not found with token', token: user_token }, request.remote_ip, cookies[:user_session_token])
+      HawthorneCore::UserAction::Log.sign_in_pin_verified_failure(nil, HawthorneCore::UserAction::FailureReason.unexpected_state, { controller_action: 'verify_pin', message: 'Site User not found with token', token: user_token }, request.remote_ip, cookies[:user_session_token])
       redirect_to sign_in_path and return
     end
 
     # ----------------------
 
     # in the unexpected case where the pin delivery method is not an expected value - log it, return back to the sign-in page
-    unless HawthorneCore::User::PIN_DELIVERY_METHODS.include?(pin_delivery_method)
-      HawthorneCore::UserAction::Log.pin_verified_failure(user.id, HawthorneCore::UserAction::FailureReason.unexpected_state, { controller_action: 'verify_pin', message: 'Unexpected pin delivery method', pin_delivery_method: pin_delivery_method }, request.remote_ip, cookies[:user_session_token])
+    unless HawthorneCore::User::SIGN_IN_PIN_DELIVERY_METHODS.include?(pin_delivery_method)
+      HawthorneCore::UserAction::Log.sign_in_pin_verified_failure(user.id, HawthorneCore::UserAction::FailureReason.unexpected_state, { controller_action: 'verify_pin', message: 'Unexpected pin delivery method', pin_delivery_method: pin_delivery_method }, request.remote_ip, cookies[:user_session_token])
       redirect_to sign_in_path and return
     end
 
@@ -184,30 +184,30 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
 
     # in the unexpected case where the pin is not set - log it ...
     # refresh the users pin, send the pin via the prior delivery method, then return back and display an error message
-    unless user.pin_set?
+    unless user.sign_in_pin_set?
       @verify_pin_failed = @pin_not_set = true
-      HawthorneCore::UserAction::Log.pin_verified_failure(user.id, HawthorneCore::UserAction::FailureReason.pin_not_set, { pin: user.pin, pin_created_at: user.pin_created_at }, request.remote_ip, cookies[:user_session_token])
-      user.refresh_pin_then_send_it(pin_delivery_method)
+      HawthorneCore::UserAction::Log.sign_in_pin_verified_failure(user.id, HawthorneCore::UserAction::FailureReason.pin_not_set, { pin: user.pin, pin_created_at: user.pin_created_at }, request.remote_ip, cookies[:user_session_token])
+      user.refresh_sign_in_pin_then_send_it(pin_delivery_method)
       redirect_to verify_pin_path(token: user.token, pin_delivery_method: pin_delivery_method, error_message: 'PIN_NOT_SET') and return if from_magic_link
       render turbo_stream: turbo_stream.update('verify_pin_failed_turbo_frame', partial: '/hawthorne_core/partials/user/verify_pin_failed') and return
     end
 
     # in the unexpected case where the pin is expired - log it ...
     # refresh the users pin, send the pin via the prior delivery method, then return back and display an error message
-    if user.pin_expired?
+    if user.sign_in_pin_expired?
       @verify_pin_failed = @pin_expired = true
-      HawthorneCore::UserAction::Log.pin_verified_failure(user.id, HawthorneCore::UserAction::FailureReason.pin_expired, { pin: user.pin, pin_created_at: user.pin_created_at }, request.remote_ip, cookies[:user_session_token])
-      user.refresh_pin_then_send_it(pin_delivery_method)
+      HawthorneCore::UserAction::Log.sign_in_pin_verified_failure(user.id, HawthorneCore::UserAction::FailureReason.pin_expired, { pin: user.pin, pin_created_at: user.pin_created_at }, request.remote_ip, cookies[:user_session_token])
+      user.refresh_sign_in_pin_then_send_it(pin_delivery_method)
       redirect_to verify_pin_path(token: user.token, pin_delivery_method: pin_delivery_method, error_message: 'PIN_EXPIRED') and return if from_magic_link
       render turbo_stream: turbo_stream.update('verify_pin_failed_turbo_frame', partial: '/hawthorne_core/partials/user/verify_pin_failed') and return
     end
 
     # in the unexpected case where the max number of failed attempts reached - log it ...
     # refresh the users pin, send the pin via the prior delivery method, then return back and display an error message
-    if user.pin_max_failed_attempts_reached?
+    if user.sign_in_pin_max_failed_attempts_reached?
       @verify_pin_failed = @pin_max_failed_attempts_reached = true
-      HawthorneCore::UserAction::Log.pin_verified_failure(user.id, HawthorneCore::UserAction::FailureReason.pin_max_failed_attempts_reached, { pin: user.pin, pin_created_at: user.pin_created_at, pin_failed_attempts_count: user.pin_failed_attempts_count }, request.remote_ip, cookies[:user_session_token])
-      user.refresh_pin_then_send_it(pin_delivery_method)
+      HawthorneCore::UserAction::Log.sign_in_pin_verified_failure(user.id, HawthorneCore::UserAction::FailureReason.pin_max_failed_attempts_reached, { pin: user.pin, pin_created_at: user.pin_created_at, pin_failed_attempts_count: user.pin_failed_attempts_count }, request.remote_ip, cookies[:user_session_token])
+      user.refresh_sign_in_pin_then_send_it(pin_delivery_method)
       redirect_to verify_pin_path(token: user.token, pin_delivery_method: pin_delivery_method, error_message: 'PIN_MAX_FAILED_ATTEMPTS_REACHED') and return if from_magic_link
       render turbo_stream: turbo_stream.update('verify_pin_failed_turbo_frame', partial: '/hawthorne_core/partials/user/verify_pin_failed') and return
     end
@@ -216,14 +216,14 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
     # if the entered pin does not match - log it, increment the number of failed attempts
     # if the max number of failed attempts reached ... refresh the users pin, send the pin via the prior delivery method
     # lastly, when the entered pin does not match, return back and display an error message
-    unless user.pin_match?(pin)
+    unless user.sign_in_pin_match?(pin)
       @verify_pin_failed = true
-      HawthorneCore::UserAction::Log.pin_verified_failure(user.id, HawthorneCore::UserAction::FailureReason.pin_not_match, { entered_pin: pin, pin_to_match: user.pin }, request.remote_ip, cookies[:user_session_token])
-      user.add_pin_failed_attempt
-      if user.pin_max_failed_attempts_reached?
+      HawthorneCore::UserAction::Log.sign_in_pin_verified_failure(user.id, HawthorneCore::UserAction::FailureReason.pin_not_match, { entered_pin: pin, pin_to_match: user.pin }, request.remote_ip, cookies[:user_session_token])
+      user.add_sign_in_pin_failed_attempt
+      if user.sign_in_pin_max_failed_attempts_reached?
         @pin_max_failed_attempts_reached = true
         error_message = 'PIN_MAX_FAILED_ATTEMPTS_REACHED'
-        user.refresh_pin_then_send_it(pin_delivery_method)
+        user.refresh_sign_in_pin_then_send_it(pin_delivery_method)
       else
         @pin_not_match = true
         error_message = 'PIN_NOT_MATCH'
@@ -236,8 +236,8 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
 
     # the pin is verified - log it
     # clear the pin - it is one time use only
-    HawthorneCore::UserAction::Log.pin_verified(user.id, request.remote_ip, cookies[:user_session_token])
-    user.clear_pin
+    HawthorneCore::UserAction::Log.sign_in_pin_verified(user.id, request.remote_ip, cookies[:user_session_token])
+    user.clear_sign_in_pin?
 
     # sign-in the user - log it
     session[:user_id] = user.id

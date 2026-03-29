@@ -18,7 +18,7 @@
 
     <div class='form_input'>
       <label class='form_input'>phone number - <%= link_to 'update', profile_phone_number_update_path %></label>
-      <%= f.text_field :phone_number, value: @user.phone_number, required: false, maxlength: 100 %>
+      <%= f.text_field :phone_number, value: HawthorneCore::Helpers::PhoneNumber.us_format(@user.phone_number), disabled: true, required: false, maxlength: 100 %>
     </div>
 
     <div class='form_submit'>

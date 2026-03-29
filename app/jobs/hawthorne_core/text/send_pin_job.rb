@@ -9,6 +9,9 @@ class HawthorneCore::Text::SendPinJob < HawthorneCore::ApplicationJob
 
   def perform(user_id)
 
+    # for user action logs, set the text message type
+    type = HawthorneCore::Services::TwilioTextSvc::SIGN_IN_VERIFICATION_PIN
+
     # find the user by id
     user = HawthorneCore::User.
       select(:user_id, :phone_number, :pin, :pin_created_at, :pin_failed_attempts_count).
@@ -16,30 +19,21 @@ class HawthorneCore::Text::SendPinJob < HawthorneCore::ApplicationJob
 
     # exit unless the user is found
     unless user
-      HawthorneCore::UserAction::Log.email_sent_failure(nil, HawthorneCore::UserAction::FailureReason.unexpected_state, { type: HawthorneCore::Services::TwilioTextSvc.verification_pin, message: 'User not found', user_id: user_id })
+      HawthorneCore::UserAction::Log.text_message_sent_failure(nil, HawthorneCore::UserAction::FailureReason.unexpected_state, { text_message_type: type, message: 'User not found', user_id: user_id })
       return
     end
 
-    # exit unless the pin is set
-    unless user.pin_set?
-      HawthorneCore::UserAction::Log.email_sent_failure(user.id, HawthorneCore::UserAction::FailureReason.pin_not_set, { type: HawthorneCore::Services::TwilioTextSvc.verification_pin, pin: user.pin, pin_created_at: user.pin_created_at })
-      return
-    end
+    # if the pin is inactive, refresh
+    user.refresh_sign_in_pin unless user.sign_in_pin_active?
 
-    # exit if the pin has expired
-    if user.pin_expired?
-      HawthorneCore::UserAction::Log.email_sent_failure(user.id, HawthorneCore::UserAction::FailureReason.pin_expired, { type: HawthorneCore::Services::TwilioTextSvc.verification_pin, pin: user.pin, pin_created_at: user.pin_created_at })
-      return
-    end
-
-    # exit if the max number of failed attempts reached
-    if user.pin_max_failed_attempts_reached?
-      HawthorneCore::UserAction::Log.email_sent_failure(user.id, HawthorneCore::UserAction::FailureReason.pin_max_failed_attempts_reached, { type: HawthorneCore::Services::TwilioTextSvc.verification_pin, pin: user.pin, pin_created_at: user.pin_created_at, pin_failed_attempts_count: user.pin_failed_attempts_count })
+    # exit if a text message with this pin was recently sent to the user
+    if user.sign_in_pin_recently_sent_via_text_message?
+      HawthorneCore::UserAction::Log.text_message_sent_failure(user.id, HawthorneCore::UserAction::FailureReason.text_message_recently_sent, { text_message_type: type, pin: user.pin })
       return
     end
 
     # the pin is active, send the text message
-    #HawthorneCore::Services::TwilioTextSvc.send_verification_pin(user.id, user.phone_number, user.pin)
+    HawthorneCore::Services::TwilioTextSvc.send_sign_in_verification_pin(user.id, user.phone_number, user.pin)
 
   end
 

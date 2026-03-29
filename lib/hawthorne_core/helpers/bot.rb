@@ -1,6 +1,6 @@
 # v3.0
 
-module HawthorneCore::BotHelper
+module HawthorneCore::Helpers::Bot
 
   # ----------------------------------------------------------------
 

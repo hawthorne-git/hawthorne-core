@@ -50,9 +50,9 @@ class HawthorneCore::User::ProfileEmailAddressUpdateController < HawthorneCore::
 
     # verify that the new email address does not have a syntax error
     # if invalid - log it, return back and display an error message
-    unless email_address_syntax_valid?(new_email_address)
+    unless HawthorneCore::Helpers::EmailAddress.syntax_valid?(new_email_address)
       @update_email_address_failed = @new_email_address_syntax_error = true
-      HawthorneCore::UserAction::Log.update_profile_email_failure(user.id, HawthorneCore::UserAction::FailureReason.email_syntax_error, { new_email_address: new_email_address }, request.remote_ip, cookies[:user_session_token])
+      HawthorneCore::UserAction::Log.update_profile_email_address_failure(user.id, HawthorneCore::UserAction::FailureReason.email_address_syntax_error, { new_email_address: new_email_address }, request.remote_ip, cookies[:user_session_token])
       render turbo_stream: turbo_stream.update('update_email_address_failed_turbo_frame', partial: '/hawthorne_core/partials/user/update_email_address_failed') and return
     end
 
@@ -60,15 +60,15 @@ class HawthorneCore::User::ProfileEmailAddressUpdateController < HawthorneCore::
     # if identical - log it, return back and display an error message
     if user.email_address == new_email_address
       @update_email_address_failed = @new_email_address_identical = true
-      HawthorneCore::UserAction::Log.update_profile_email_failure(session[:user_id], HawthorneCore::UserAction::FailureReason.email_identical, { current_email_address: user.email_address, new_email_address: new_email_address }, request.remote_ip, cookies[:user_session_token])
+      HawthorneCore::UserAction::Log.update_profile_email_address_failure(session[:user_id], HawthorneCore::UserAction::FailureReason.email_address_identical, { current_email_address: user.email_address, new_email_address: new_email_address }, request.remote_ip, cookies[:user_session_token])
       render turbo_stream: turbo_stream.update('update_email_address_failed_turbo_frame', partial: '/hawthorne_core/partials/user/update_email_address_failed') and return
     end
 
     # verify that the new email address is not taken
     # if taken - log it, return back and display an error message
-    if HawthorneCore::User.exists?(email_address: new_email_address)
+    if HawthorneCore::Helpers::EmailAddress.taken?(new_email_address)
       @update_email_address_failed = @new_email_address_taken = true
-      HawthorneCore::UserAction::Log.update_profile_email_failure(session[:user_id], HawthorneCore::UserAction::FailureReason.email_taken, { new_email_address: new_email_address }, request.remote_ip, cookies[:user_session_token])
+      HawthorneCore::UserAction::Log.update_profile_email_address_failure(session[:user_id], HawthorneCore::UserAction::FailureReason.email_address_taken, { new_email_address: new_email_address }, request.remote_ip, cookies[:user_session_token])
       render turbo_stream: turbo_stream.update('update_email_address_failed_turbo_frame', partial: '/hawthorne_core/partials/user/update_email_address_failed') and return
     end
 
@@ -112,7 +112,7 @@ class HawthorneCore::User::ProfileEmailAddressUpdateController < HawthorneCore::
 
   # -----------------------------------------------------------------------------
 
-  # resend the user their pin, to update the email address
+  # resend the user their pin, to update their email address
   def resend_pin
     HawthorneCore::Email::SendEmailAddressUpdatePinJob.perform_later(session[:user_id])
     redirect_to profile_email_address_update_verify_pin_path
@@ -120,7 +120,7 @@ class HawthorneCore::User::ProfileEmailAddressUpdateController < HawthorneCore::
 
   # -----------------------------------------------------------------------------
 
-  # verify the users pin, to update the email address
+  # verify the users pin, to update their email address
   def verify_pin
 
     # get the page attributes
@@ -139,7 +139,7 @@ class HawthorneCore::User::ProfileEmailAddressUpdateController < HawthorneCore::
     # refresh the users pin, email the pin, then return back and display an error message
     unless user.email_address_update_pin_set?
       @verify_pin_failed = @pin_not_set = true
-      HawthorneCore::UserAction::Log.update_profile_email_failure(user.id, HawthorneCore::UserAction::FailureReason.pin_not_set, { new_email_address_pin: user.new_email_address_pin, new_email_address_pin_created_at: user.new_email_address_pin_created_at }, request.remote_ip, cookies[:user_session_token])
+      HawthorneCore::UserAction::Log.update_profile_email_address_failure(user.id, HawthorneCore::UserAction::FailureReason.pin_not_set, { new_email_address_pin: user.new_email_address_pin, new_email_address_pin_created_at: user.new_email_address_pin_created_at }, request.remote_ip, cookies[:user_session_token])
       user.refresh_email_address_update_pin_then_send_it
       render turbo_stream: turbo_stream.update('verify_pin_failed_turbo_frame', partial: '/hawthorne_core/partials/user/verify_pin_failed') and return
     end
@@ -148,7 +148,7 @@ class HawthorneCore::User::ProfileEmailAddressUpdateController < HawthorneCore::
     # refresh the users pin, email the pin, then return back and display an error message
     if user.email_address_update_pin_expired?
       @verify_pin_failed = @pin_expired = true
-      HawthorneCore::UserAction::Log.update_profile_email_failure(user.id, HawthorneCore::UserAction::FailureReason.pin_expired, { new_email_address_pin: user.new_email_address_pin, new_email_address_pin_created_at: user.new_email_address_pin_created_at }, request.remote_ip, cookies[:user_session_token])
+      HawthorneCore::UserAction::Log.update_profile_email_address_failure(user.id, HawthorneCore::UserAction::FailureReason.pin_expired, { new_email_address_pin: user.new_email_address_pin, new_email_address_pin_created_at: user.new_email_address_pin_created_at }, request.remote_ip, cookies[:user_session_token])
       user.refresh_email_address_update_pin_then_send_it
       render turbo_stream: turbo_stream.update('verify_pin_failed_turbo_frame', partial: '/hawthorne_core/partials/user/verify_pin_failed') and return
     end
@@ -157,18 +157,18 @@ class HawthorneCore::User::ProfileEmailAddressUpdateController < HawthorneCore::
     # refresh the users pin, email the pin, then return back and display an error message
     if user.email_address_update_pin_max_failed_attempts_reached?
       @verify_pin_failed = @pin_max_failed_attempts_reached = true
-      HawthorneCore::UserAction::Log.update_profile_email_failure(user.id, HawthorneCore::UserAction::FailureReason.pin_max_failed_attempts_reached, { new_email_address_pin: user.new_email_address_pin, new_email_address_pin_created_at: user.new_email_address_pin_created_at, new_email_address_pin_failed_attempts_count: user.new_email_address_pin_failed_attempts_count }, request.remote_ip, cookies[:user_session_token])
+      HawthorneCore::UserAction::Log.update_profile_email_address_failure(user.id, HawthorneCore::UserAction::FailureReason.pin_max_failed_attempts_reached, { new_email_address_pin: user.new_email_address_pin, new_email_address_pin_created_at: user.new_email_address_pin_created_at, new_email_address_pin_failed_attempts_count: user.new_email_address_pin_failed_attempts_count }, request.remote_ip, cookies[:user_session_token])
       user.refresh_email_address_update_pin_then_send_it
       render turbo_stream: turbo_stream.update('verify_pin_failed_turbo_frame', partial: '/hawthorne_core/partials/user/verify_pin_failed') and return
     end
 
     # verify the pin - it is set, not expired, and has not reached the max number of failed attempts
     # if the entered pin does not match - log it, increment the number of failed attempts
-    # if the max number of failed attempts reached ... refresh the users pin, email the pin
+    # if the max number of failed attempts reached ... refresh the users pin, resend
     # lastly, when the entered pin does not match, return back and display an error message
     unless user.email_address_update_pin_match?(pin)
       @verify_pin_failed = true
-      HawthorneCore::UserAction::Log.update_profile_email_failure(user.id, HawthorneCore::UserAction::FailureReason.pin_not_match, { entered_pin: pin, pin_to_match: user.new_email_address_pin }, request.remote_ip, cookies[:user_session_token])
+      HawthorneCore::UserAction::Log.update_profile_email_address_failure(user.id, HawthorneCore::UserAction::FailureReason.pin_not_match, { entered_pin: pin, pin_to_match: user.new_email_address_pin }, request.remote_ip, cookies[:user_session_token])
       user.add_email_address_update_pin_failed_attempt
       if user.email_address_update_pin_max_failed_attempts_reached?
         @pin_max_failed_attempts_reached = true
@@ -193,7 +193,7 @@ class HawthorneCore::User::ProfileEmailAddressUpdateController < HawthorneCore::
     user.clear_email_address_update_attrs
 
     # log it
-    HawthorneCore::UserAction::Log.update_profile_email(user.id, { old_email_address: old_email_address, new_email_address: new_email_address }, request.remote_ip, cookies[:user_session_token])
+    HawthorneCore::UserAction::Log.update_profile_email_address(user.id, { old_email_address: old_email_address, new_email_address: new_email_address }, request.remote_ip, cookies[:user_session_token])
 
     # ----------------------
 

@@ -30,6 +30,10 @@ module HawthorneCore::UserAction::Log
     success_admin(user_id, action(:email_address_update_attrs_cleared), nil)
   end
 
+  def self.email_address_update_attrs_refreshed(user_id, note)
+    success_admin(user_id, action(:email_address_update_attrs_refreshed), note)
+  end
+
   def self.email_address_update_attrs_set(user_id, note)
     success_admin(user_id, action(:email_address_update_attrs_set), note)
   end
@@ -40,30 +44,12 @@ module HawthorneCore::UserAction::Log
     success_admin(user_id, action(:phone_number_update_attrs_cleared), nil)
   end
 
+  def self.phone_number_update_attrs_refreshed(user_id, note)
+    success_admin(user_id, action(:phone_number_update_attrs_refreshed), note)
+  end
+
   def self.phone_number_update_attrs_set(user_id, note)
     success_admin(user_id, action(:phone_number_update_attrs_set), note)
-  end
-
-  # ----------------------------------------------------------------------------- Pin
-
-  def self.pin_cleared(user_id)
-    success_admin(user_id, action(:pin_cleared), nil)
-  end
-
-  # ------------------------
-
-  def self.pin_created(user_id, note)
-    success_admin(user_id, action(:pin_created), note)
-  end
-
-  # ------------------------
-
-  def self.pin_verified(user_id, ip_address, user_session_token)
-    success(user_id, action(:pin_verified), nil, ip_address, user_session_token)
-  end
-
-  def self.pin_verified_failure(user_id, failure_reason, note, ip_address, user_session_token)
-    failure(user_id, action(:pin_verified), failure_reason, note, ip_address, user_session_token)
   end
 
   # ----------------------------------------------------------------------------- Profile
@@ -74,12 +60,22 @@ module HawthorneCore::UserAction::Log
 
   # ------------------------
 
-  def self.update_profile_email(user_id, note, ip_address, user_session_token)
-    success(user_id, action(:profile_email_updated), note, ip_address, user_session_token)
+  def self.update_profile_email_address(user_id, note, ip_address, user_session_token)
+    success(user_id, action(:profile_email_address_updated), note, ip_address, user_session_token)
   end
 
-  def self.update_profile_email_failure(user_id, failure_reason, note, ip_address, user_session_token)
-    failure(user_id, action(:profile_email_updated), failure_reason, note, ip_address, user_session_token)
+  def self.update_profile_email_address_failure(user_id, failure_reason, note, ip_address, user_session_token)
+    failure(user_id, action(:profile_email_address_updated), failure_reason, note, ip_address, user_session_token)
+  end
+
+  # ------------------------
+
+  def self.update_profile_phone_number(user_id, note, ip_address, user_session_token)
+    success(user_id, action(:profile_phone_number_updated), note, ip_address, user_session_token)
+  end
+
+  def self.update_profile_phone_number_failure(user_id, failure_reason, note, ip_address, user_session_token)
+    failure(user_id, action(:profile_phone_number_updated), failure_reason, note, ip_address, user_session_token)
   end
 
   # ----------------------------------------------------------------------------- Sign-In
@@ -92,10 +88,32 @@ module HawthorneCore::UserAction::Log
     failure(nil, action(:sign_in), failure_reason, note, ip_address, user_session_token)
   end
 
-  # ----------------------------------------------------------------------------- Sign-In (via Cookie)
+  # ------------------------
 
   def self.sign_in_via_cookie(user_id, note)
     success_admin(user_id, action(:sign_in_via_cookie), note)
+  end
+
+  # ----------------------------------------------------------------------------- Sign-In Pin
+
+  def self.sign_in_pin_cleared(user_id)
+    success_admin(user_id, action(:sign_in_pin_cleared), nil)
+  end
+
+  # ------------------------
+
+  def self.sign_in_pin_created(user_id, note)
+    success_admin(user_id, action(:sign_in_pin_created), note)
+  end
+
+  # ------------------------
+
+  def self.sign_in_pin_verified(user_id, ip_address, user_session_token)
+    success(user_id, action(:sign_in_pin_verified), nil, ip_address, user_session_token)
+  end
+
+  def self.sign_in_pin_verified_failure(user_id, failure_reason, note, ip_address, user_session_token)
+    failure(user_id, action(:sign_in_pin_verified), failure_reason, note, ip_address, user_session_token)
   end
 
   # ----------------------------------------------------------------------------- Sign-Out

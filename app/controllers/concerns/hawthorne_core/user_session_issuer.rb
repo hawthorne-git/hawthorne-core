@@ -19,7 +19,7 @@ module HawthorneCore::UserSessionIssuer
     def create_user_session
 
       # return, and do not create a user session if the request is determined to be a bot
-      return if HawthorneCore::BotHelper.bot?(request)
+      return if HawthorneCore::Helpers::Bot.bot?(request)
 
       # create the user session
       user_session = HawthorneCore::UserSession.create_record(session[:user_id], request)
