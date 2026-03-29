@@ -2,10 +2,8 @@
 
 class HawthorneCore::User < HawthorneCore::ActiveRecordBaseApp
 
-  include HawthorneCore::HasPhoneNumber,
-          HawthorneCore::HasToken,
+  include HawthorneCore::HasToken,
           HawthorneCore::User::EmailVerification,
-          HawthorneCore::User::PhoneVerification,
           HawthorneCore::User::PinVerification,
           HawthorneCore::User::SingleSignOn,
           HawthorneCore::User::SiteAccess

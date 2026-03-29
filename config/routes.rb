@@ -6,9 +6,11 @@ HawthorneCore::Engine.routes.draw do
   post 'sign-in', to: 'user/session#sign_in'
 
   get 'verify-pin', to: 'user/session#verify_pin_show'
-  post 'verify-pin', to: 'user/session#verify_pin'
-
   get 'verify-pin-via-magic-link', to: 'user/session#verify_pin',  defaults: { pin_delivery_method: HawthorneCore::User::PIN_VIA_EMAIL, from_magic_link: true }
+  get 'resend-pin', to: 'user/session#resend_pin'
+  get 'resend-pin-via-email', to: 'user/session#resend_pin_via_email'
+  get 'resend-pin-via-text', to: 'user/session#resend_pin_via_phone'
+  post 'verify-pin', to: 'user/session#verify_pin'
 
   # ----------------------
 

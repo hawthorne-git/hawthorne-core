@@ -62,8 +62,8 @@ module HawthorneCore::User::PinVerification
     # refresh the users pin, then send it via email / phone
     def refresh_sign_in_pin_then_send_it(delivery_method)
       refresh_sign_in_pin
-      HawthorneCore::Email::SendPinJob.perform_later(id) if (delivery_method == PIN_VIA_EMAIL)
-      HawthorneCore::Text::SendPinJob.perform_later(id) if (delivery_method == PIN_VIA_PHONE)
+      HawthorneCore::Email::SendSignInPinJob.perform_later(id) if (delivery_method == PIN_VIA_EMAIL)
+      HawthorneCore::Text::SendSignInPinJob.perform_later(id) if (delivery_method == PIN_VIA_PHONE)
     end
 
     # ------------------------

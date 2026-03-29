@@ -1,7 +1,7 @@
 # v3.0
 
-# sends a user an email with their pin
-class HawthorneCore::Email::SendPinJob < HawthorneCore::ApplicationJob
+# sends a user an email with their pin, to sign-in
+class HawthorneCore::Email::SendSignInPinJob < HawthorneCore::ApplicationJob
 
   queue_as :critical
 
@@ -32,7 +32,7 @@ class HawthorneCore::Email::SendPinJob < HawthorneCore::ApplicationJob
       return
     end
 
-    # the pin is active, send the email
+    # the pin was not recently sent, send the email
     HawthorneCore::Services::MailerSendSvc.send_sign_in_verification_pin(user.id, user.token, user.email_address, user.pin, keep_signed_in)
 
   end

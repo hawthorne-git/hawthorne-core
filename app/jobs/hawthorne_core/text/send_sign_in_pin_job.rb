@@ -1,7 +1,7 @@
 # v3.0
 
-# sends a user a text message with their pin
-class HawthorneCore::Text::SendPinJob < HawthorneCore::ApplicationJob
+# sends a user a text message with their pin, to sign-in
+class HawthorneCore::Text::SendSignInPinJob < HawthorneCore::ApplicationJob
 
   queue_as :critical
 
@@ -32,7 +32,7 @@ class HawthorneCore::Text::SendPinJob < HawthorneCore::ApplicationJob
       return
     end
 
-    # the pin is active, send the text message
+    # the pin was not recently sent, send the text message
     HawthorneCore::Services::TwilioTextSvc.send_sign_in_verification_pin(user.id, user.phone_number, user.pin)
 
   end

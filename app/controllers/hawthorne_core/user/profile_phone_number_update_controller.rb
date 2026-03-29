@@ -37,7 +37,7 @@ class HawthorneCore::User::ProfilePhoneNumberUpdateController < HawthorneCore::A
   def verify
 
     # get the page attributes
-    new_phone_number = params[:new_phone_number].to_s.downcase.strip
+    new_phone_number = params[:new_phone_number].to_s.strip
 
     # ----------------------
 
@@ -127,6 +127,8 @@ class HawthorneCore::User::ProfilePhoneNumberUpdateController < HawthorneCore::A
 
     # ----------------------
 
+    # if the pin is inactive ...
+    # refresh the pin, resend, then return back and display an error message
     unless user.phone_number_update_pin_active?
       @verify_pin_failed = true
       (@pin_not_set = true; failure_reason = HawthorneCore::UserAction::FailureReason.pin_not_set) unless user.phone_number_update_pin_set?

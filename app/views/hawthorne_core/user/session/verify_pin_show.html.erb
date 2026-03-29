@@ -1,6 +1,12 @@
 <%# v3.0 %>
 
-<div class='title'>Verify Pin</div>
+<div class='title'>Verify your PIN</div>
+
+<div class='vertical_space'></div>
+<% (delivery_label = 'emailed'; destination = @user.email_address) if @pin_delivery_method == HawthorneCore::User::PIN_VIA_EMAIL %>
+<% (delivery_label = 'texted'; destination = HawthorneCore::Helpers::PhoneNumber.masked(@user.phone_number)) if @pin_delivery_method == HawthorneCore::User::PIN_VIA_PHONE %>
+Enter the PIN we <%= delivery_label %> to: <%= destination %>
+<div class='vertical_space'></div>
 
 <%= turbo_frame_tag 'verify_pin_failed_turbo_frame' do %>
   <%= render partial: '/hawthorne_core/partials/user/verify_pin_failed' if @verify_pin_failed %>
@@ -10,17 +16,12 @@
 
   <%= form_with url: verify_pin_path do |f| %>
 
-    <%= hidden_field_tag :token, @user.token %>
-    <%= hidden_field_tag :pin_delivery_method, params[:pin_delivery_method] %>
-    <%= hidden_field_tag :keep_signed_in, params[:keep_signed_in] %>
+    <%= hidden_field_tag :token, @user_token %>
+    <%= hidden_field_tag :pin_delivery_method, @pin_delivery_method %>
+    <%= hidden_field_tag :keep_signed_in, @keep_signed_in %>
 
     <div class='form_input'>
-      <%
-        pin_label = 'pin'
-        pin_label = "pin - sent via email to: #{@user.email_address}" if @pin_delivery_method == HawthorneCore::User::PIN_VIA_EMAIL
-        pin_label = "pin - sent via text message to: #{@user.phone_number_masked}" if @pin_delivery_method == HawthorneCore::User::PIN_VIA_PHONE
-      %>
-      <label class='form_input'><%= pin_label %></label>
+      <label class='form_input'>verification pin</label>
       <%= f.text_field :pin, class: 'form_input', required: true, maxlength: 100, autofocus: true, autocomplete: :off %>
     </div>
 
@@ -31,5 +32,27 @@
   <% end %>
 
 </div>
+
+<div class='vertical_space'></div>
+Didn’t get the PIN?  <%= link_to 'Resend it', resend_pin_path(token: @user_token, pin_delivery_method: @pin_delivery_method, keep_signed_in: @keep_signed_in), data: { turbo: :false } %>
+<div class='vertical_space'></div>
+
+<% if (@pin_delivery_method == HawthorneCore::User::PIN_VIA_EMAIL) && @user.phone_number.present? %>
+  <div class='vertical_space'></div>
+  Send PIN by text message instead? <%= link_to 'Send text', resend_pin_via_text_path(token: @user_token, pin_delivery_method: @pin_delivery_method, keep_signed_in: @keep_signed_in), data: { turbo: :false } %>
+  <div class='vertical_space'></div>
+<% end %>
+
+<% if @pin_delivery_method == HawthorneCore::User::PIN_VIA_PHONE %>
+  <div class='vertical_space'></div>
+  Send PIN by email instead? <%= link_to 'Send email', resend_pin_via_email_path(token: @user_token, pin_delivery_method: @pin_delivery_method, keep_signed_in: @keep_signed_in), data: { turbo: :false } %>
+  <div class='vertical_space'></div>
+<% end %>
+
+<% if (@pin_delivery_method == HawthorneCore::User::PIN_VIA_EMAIL) && !@user.email_address_verified? %>
+  <div class='vertical_space'></div>
+  Need to change your email address? <%= link_to 'Start over', sign_in_path, data: { turbo: :false } %>
+  <div class='vertical_space'></div>
+<% end %>
 
 <%= render partial: '/hawthorne_core/partials/user/single_sign_on' %>
