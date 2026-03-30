@@ -1,4 +1,4 @@
-# v3.0XXX
+# v3.0
 
 class HawthorneCore::User < HawthorneCore::ActiveRecordBaseApp
 
@@ -16,7 +16,7 @@ class HawthorneCore::User < HawthorneCore::ActiveRecordBaseApp
 
   # -----------------------------------------------------------------------------
 
-  # create the user record, returning it ... and log that the user was created on the site
+  # create the user record, returning it ... and log that the user was created on this site
   def self.create_record(email_address, ip_address, user_session_token)
     user = create!(email_address: email_address)
     user.log_site_access_for_new_user

@@ -45,16 +45,16 @@ module HawthorneCore::UserAuthentication
 
     # ---------------------------------------------------------------------------
 
-    # validates that the site user is signed in
-    # if not, the user is redirected to the sign-in page
+    # verifies that the site user is signed in
+    # if not - the user is signed out, the user is redirected to the sign-in page
     def verify_signed_in?
       redirect_to sign_in_path unless @signed_in
     end
 
     # ----------------------
 
-    # validates that the site user is signed out
-    # if not, the user is redirected to their account page
+    # verifies that the site user is signed out
+    # if not - the user is signed in, the user is redirected to their account page
     def verify_signed_out?
       redirect_to account_path if @signed_in
     end

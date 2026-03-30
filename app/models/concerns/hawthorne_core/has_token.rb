@@ -26,8 +26,11 @@ module HawthorneCore::HasToken
 
     # ---------------------------------------------------------------------------------
 
+    # define the list of characters to use in creating the token
+    # note that certain characters have been removed to limit the chance of generating a 'naughty' word
     ALPHABET = 'BCDFGHJKLMNPQRSTVWXYZ23456789'.chars
 
+    # define the list of token lengths ... by the objects table name
     TOKEN_LENGTHS =
       {
         'users' => 8

@@ -23,12 +23,6 @@ module HawthorneCore::User::PinVerification
 
     SIGN_IN_PIN_DELIVERY_METHODS = [PIN_VIA_EMAIL, PIN_VIA_PHONE].freeze
 
-    # -----------------------------------------------------------------------------
-
-    def sign_in_pin_default_delivery_via_email? = (pin_default_delivery == PIN_VIA_EMAIL)
-
-    def sign_in_pin_default_delivery_via_phone? = (pin_default_delivery == PIN_VIA_PHONE)
-
     # ----------------------------------------------------------------------------- SIGN IN
 
     def sign_in_pin = pin
@@ -45,9 +39,13 @@ module HawthorneCore::User::PinVerification
 
     def sign_in_pin_match?(pin_to_match) = (pin == pin_to_match.gsub(/\D/, ''))
 
+    def sign_in_pin_default_delivery_via_email? = (pin_default_delivery == PIN_VIA_EMAIL)
+
+    def sign_in_pin_default_delivery_via_phone? = (pin_default_delivery == PIN_VIA_PHONE)
+
     # ------------------------
 
-    # clear the users pin - log it
+    # clear the users sign-in pin - log it
     def clear_sign_in_pin?
       update_columns(pin: nil, pin_created_at: nil, pin_failed_attempts_count: nil)
       HawthorneCore::UserAction::Log.sign_in_pin_cleared(id)
@@ -63,7 +61,7 @@ module HawthorneCore::User::PinVerification
       end
     end
 
-    # refresh the users pin, then send it via email / phone
+    # refresh the users pin, then send it via the specified delivery method (email / phone)
     def refresh_sign_in_pin_then_send_it(delivery_method)
       refresh_sign_in_pin
       HawthorneCore::Email::SendSignInPinJob.perform_later(id) if (delivery_method == PIN_VIA_EMAIL)
@@ -72,7 +70,7 @@ module HawthorneCore::User::PinVerification
 
     # ------------------------
 
-    # increment the number of failed attempts with pin
+    # increment the number of failed sign-in attempts with pin
     def add_sign_in_pin_failed_attempt = update_columns(pin_failed_attempts_count: (pin_failed_attempts_count.to_i + 1))
 
     # ------------------------

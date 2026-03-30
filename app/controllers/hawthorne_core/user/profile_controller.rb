@@ -41,7 +41,7 @@ class HawthorneCore::User::ProfileController < HawthorneCore::ApplicationControl
       select(:user_id, :full_name).
       find_by(user_id: session[:user_id])
 
-    # update the users name - log it
+    # update the users profile attributes - log it
     user.update_columns(full_name: full_name)
     HawthorneCore::UserAction::Log.update_profile(user.id, { full_name: full_name }, request.remote_ip, cookies[:user_session_token])
 

@@ -4,30 +4,19 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
 
   # -----------------------------------------------------------------------------
 
-  # verify that the user is signed in prior to these actions
-  before_action :verify_signed_in?, only: [
-    :sign_out
-  ]
+  # verify that the user is signed in prior to signing out
+  before_action :verify_signed_in?, only: [:sign_out]
 
-  # verify that the user is signed out prior to these actions
-  before_action :verify_signed_out?, only: [
-    :sign_in,
-    :sign_in_show,
-    :verify_pin,
-    :verify_pin_show
-  ]
+  # verify that the user is signed out prior to all action, but signing out
+  before_action :verify_signed_out?, except: [:sign_out]
 
   # -----------------------------------------------------------------------------
 
   # show the sign-in page ... also used for sign-up
   def sign_in_show
 
-    # ----------------------
-
     @html_title = 'Sign In | Sign Up'
     @meta_description = 'Sign into your ' + HawthorneCore::Site.this_site_name + ' account'
-
-    # ----------------------
 
   end
 
@@ -63,7 +52,7 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
     # if a user does not exist ... create the user record - and in doing so, log that the user has accessed the site
     user = HawthorneCore::User.create_record(email_address, request.remote_ip, cookies[:user_session_token]) unless user
 
-    # refresh the users pin (if needed)
+    # refresh the users pin
     user.refresh_sign_in_pin
 
     # send the user their pin via default delivery, email or text
@@ -80,7 +69,7 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
   # sign-out the user
   def sign_out
 
-    # update the user / site record, set keep_signed_in flag as FALSE - force the user to sign-in at next visit
+    # update the user / site record, as the user is forcing a sign-out - remove ability to keep signed in via cookie
     HawthorneCore::UserSite.log_site_sign_out(session[:user_id])
 
     # log that the user has signed out
@@ -126,8 +115,8 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
 
     # ----------------------
 
-    # when the user attempts to verify their pin via magic link (sent via email) ...
-    # if the pin is NOT verified, the user is re-directed to this show action to display an error message
+    # when the user attempts to verify their pin via magic link (sent in an email) ...
+    # if the pin is NOT verified, the user is re-directed to this action to display an error message
     if error_message.present?
       @verify_pin_failed = true
       @pin_expired = true if error_message == 'PIN_EXPIRED'
@@ -228,7 +217,7 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
       (@pin_max_failed_attempts_reached = true; error_message = 'PIN_MAX_FAILED_ATTEMPTS_REACHED'; failure_reason = HawthorneCore::UserAction::FailureReason.pin_max_failed_attempts_reached) if user.sign_in_pin_max_failed_attempts_reached?
       HawthorneCore::UserAction::Log.sign_in_pin_verified_failure(user.id, failure_reason, { pin: user.pin, pin_created_at: user.pin_created_at, pin_failed_attempts_count: user.pin_failed_attempts_count }, request.remote_ip, cookies[:user_session_token])
       user.refresh_sign_in_pin_then_send_it(pin_delivery_method)
-      redirect_to verify_pin_path(token: user.token, pin_delivery_method: pin_delivery_method, error_message: error_message) and return if from_magic_link
+      redirect_to verify_pin_path(token: user.token, pin_delivery_method: pin_delivery_method, keep_signed_in: keep_signed_in, error_message: error_message) and return if from_magic_link
       render turbo_stream: turbo_stream.update('verify_pin_failed_turbo_frame', partial: '/hawthorne_core/partials/user/verify_pin_failed') and return
     end
 
@@ -248,7 +237,7 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
         @pin_not_match = true
         error_message = 'PIN_NOT_MATCH'
       end
-      redirect_to verify_pin_path(token: user.token, pin_delivery_method: pin_delivery_method, error_message: error_message) and return if from_magic_link
+      redirect_to verify_pin_path(token: user.token, pin_delivery_method: pin_delivery_method, keep_signed_in: keep_signed_in, error_message: error_message) and return if from_magic_link
       render turbo_stream: turbo_stream.update('verify_pin_failed_turbo_frame', partial: '/hawthorne_core/partials/user/verify_pin_failed') and return
     end
 

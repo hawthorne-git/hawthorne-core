@@ -44,7 +44,7 @@ class HawthorneCore::UserSite < HawthorneCore::ActiveRecordBaseApp
   end
 
   # log the user site sign-out,
-  # update keep signed in to FALSE
+  # update keep signed in flag to FALSE - forcing the user to sign-in at next visit
   def self.log_site_sign_out(user_id)
     find_by(site_id: HawthorneCore::Site.this_site_id, user_id: user_id)&.update_columns(keep_signed_in: false)
   end

@@ -7,8 +7,7 @@ module HawthorneCore::HasSiteId
 
     # ---------------------------------------------------------------------------------
 
-    # before creating a record,
-    # set the records site id attribute
+    # before creating a record, set the records site id attribute
     before_validation :set_site_id, on: :create
 
     # ---------------------------------------------------------------------------------

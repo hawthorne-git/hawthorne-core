@@ -29,7 +29,7 @@ module HawthorneCore
 
     def self.site_name
       site_name = fetch_env_attr('SITE_NAME')
-      raise "Invalid SITE_NAME: " + site_name unless VALID_ENV_SITE_NAMES.include?(site_name)
+      raise "Invalid SITE_NAME: #{site_name}" unless VALID_ENV_SITE_NAMES.include?(site_name)
       site_name
     end
 
@@ -39,7 +39,7 @@ module HawthorneCore
 
     # fetch an ENV attribute ... if not found, or blank, raise an exception
     def self.fetch_env_attr(key)
-      raise('Missing ENV variable: ' + key) if ENV[key].blank?
+      raise("Missing ENV variable: #{key}") if ENV[key].blank?
       ENV[key]
     end
 

@@ -7,9 +7,7 @@ class HawthorneCore::Email::SendWelcomeEmailJob < HawthorneCore::ApplicationJob
 
   # ----------------------------------------------------------------
 
-  def perform(user_id, email_address)
-    HawthorneCore::Services::MailerSendSvc.send_welcome_email(user_id, email_address)
-  end
+  def perform(user_id, email_address) = HawthorneCore::Services::MailerSendSvc.send_welcome_email(user_id, email_address)
 
   # ----------------------------------------------------------------
 

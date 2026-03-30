@@ -29,7 +29,7 @@ module HawthorneCore::UserSessionIssuer
       session[:user_session_verified] = true
 
       # kick off a job to capture the users session location
-      HawthorneCore::User::CaptureUserSessionLocationJob.perform_later(user_session.id)
+      HawthorneCore::User::CaptureSessionLocationJob.perform_later(user_session.id)
 
     end
 

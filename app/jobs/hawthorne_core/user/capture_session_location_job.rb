@@ -1,7 +1,7 @@
 # v3.0
 
 # job to capture the user session location
-class HawthorneCore::User::CaptureUserSessionLocationJob < HawthorneCore::ApplicationJob
+class HawthorneCore::User::CaptureSessionLocationJob < HawthorneCore::ApplicationJob
 
   queue_as :low
 
