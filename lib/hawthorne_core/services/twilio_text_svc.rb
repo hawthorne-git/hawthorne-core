@@ -12,10 +12,10 @@ class HawthorneCore::Services::TwilioTextSvc
   # ----------------------------------------------------------------
 
   # send update phone number verification pin
-  def self.send_phone_number_update_verification_pin(user_id, phone_number, pin) = send_text_message(PHONE_NUMBER_UPDATE_VERIFICATION_PIN, user_id, phone_number, verification_pin_message(pin))
+  def self.send_phone_number_update_verification_pin(user_id, phone_number, pin_formatted) = send_text_message(PHONE_NUMBER_UPDATE_VERIFICATION_PIN, user_id, phone_number, verification_pin_message(pin_formatted))
 
   # send sign-in verification pin
-  def self.send_sign_in_verification_pin(user_id, phone_number, pin) = send_text_message(SIGN_IN_VERIFICATION_PIN, user_id, phone_number, verification_pin_message(pin))
+  def self.send_sign_in_verification_pin(user_id, phone_number, pin_formatted) = send_text_message(SIGN_IN_VERIFICATION_PIN, user_id, phone_number, verification_pin_message(pin_formatted))
 
   # ----------------------------------------------------------------
 
@@ -37,7 +37,7 @@ class HawthorneCore::Services::TwilioTextSvc
   # ----------------------------------------------------------------
 
   # define the verification pin text message - given a pin
-  def self.verification_pin_message(pin) = HawthorneCore::Site.this_site_name + ': Your verification pin is ' + pin.to_s + '.'
+  def self.verification_pin_message(pin_formatted) = "#{HawthorneCore::Site.this_site_name}: Your verification PIN is #{pin_formatted}."
 
   # ----------------------------------------------------------------
 

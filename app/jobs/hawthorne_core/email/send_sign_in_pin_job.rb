@@ -33,7 +33,7 @@ class HawthorneCore::Email::SendSignInPinJob < HawthorneCore::ApplicationJob
     end
 
     # the pin was not recently sent, send the email
-    HawthorneCore::Services::MailerSendSvc.send_sign_in_verification_pin(user.id, user.token, user.email_address, user.pin, keep_signed_in)
+    HawthorneCore::Services::MailerSendSvc.send_sign_in_verification_pin(user.id, user.token, user.email_address, user.sign_in_pin, user.sign_in_pin_formatted, keep_signed_in)
 
   end
 

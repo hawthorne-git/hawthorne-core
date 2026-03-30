@@ -15,17 +15,17 @@ class HawthorneCore::Services::MailerSendSvc
   # ----------------------------------------------------------------
 
   # send update email address verification pin
-  def self.send_email_address_update_verification_pin(user_id, new_email_address, new_email_address_pin)
-    personalization = email_address_update_verification_pin_personalization(new_email_address, new_email_address_pin)
+  def self.send_email_address_update_verification_pin(user_id, new_email_address, new_email_address_pin_formatted)
+    personalization = email_address_update_verification_pin_personalization(new_email_address, new_email_address_pin_formatted)
     send_email(EMAIL_ADDRESS_UPDATE_VERIFICATION_PIN, user_id, new_email_address, email_address_update_verification_pin_subject, email_address_update_verification_pin_template, personalization)
   end
 
   # ----------------------------------------------------------------
 
   # send verification pin (sign-in)
-  def self.send_sign_in_verification_pin(user_id, user_token, email_address, pin, keep_signed_in)
-    magic_link_url = HawthorneCore::AppConfig.site_base_url + '/verify-pin-via-magic-link?token=' + user_token + '&pin=' + pin.to_s + '&keep_signed_in=' + keep_signed_in.to_s
-    personalization = sign_in_verification_pin_personalization(email_address, magic_link_url, pin)
+  def self.send_sign_in_verification_pin(user_id, user_token, email_address, sign_in_pin, sign_in_pin_formatted, keep_signed_in)
+    magic_link_url = HawthorneCore::AppConfig.site_base_url + '/verify-pin-via-magic-link?token=' + user_token + '&pin=' + sign_in_pin.to_s + '&keep_signed_in=' + keep_signed_in.to_s
+    personalization = sign_in_verification_pin_personalization(email_address, magic_link_url, sign_in_pin_formatted)
     send_email(SIGN_IN_VERIFICATION_PIN, user_id, email_address, sign_in_verification_pin_subject, sign_in_verification_pin_template, personalization)
   end
 
@@ -63,7 +63,7 @@ class HawthorneCore::Services::MailerSendSvc
 
   def self.email_address_update_verification_pin_template = '3z0vklooo7xl7qrx'
 
-  def self.email_address_update_verification_pin_personalization(new_email_address, new_email_address_pin) = mailer_send_personalization(new_email_address, { pin: new_email_address_pin })
+  def self.email_address_update_verification_pin_personalization(new_email_address, new_email_address_pin_formatted) = mailer_send_personalization(new_email_address, { pin: new_email_address_pin_formatted })
 
   # ----------------------
 
@@ -71,7 +71,7 @@ class HawthorneCore::Services::MailerSendSvc
 
   def self.sign_in_verification_pin_template = '0r83ql3vnkmgzw1j'
 
-  def self.sign_in_verification_pin_personalization(email_address, magic_link_url, pin) = mailer_send_personalization(email_address, { magic_link_url: magic_link_url, pin: pin })
+  def self.sign_in_verification_pin_personalization(email_address, magic_link_url, sign_in_pin_formatted) = mailer_send_personalization(email_address, { magic_link_url: magic_link_url, pin: sign_in_pin_formatted })
 
   # ----------------------
 

@@ -31,6 +31,10 @@ module HawthorneCore::User::PinVerification
 
     # ----------------------------------------------------------------------------- SIGN IN
 
+    def sign_in_pin = pin
+
+    def sign_in_pin_formatted = "#{sign_in_pin[0,3]}-#{sign_in_pin[3,3]}"
+
     def sign_in_pin_active? = sign_in_pin_set? && !sign_in_pin_expired? && !sign_in_pin_max_failed_attempts_reached?
 
     def sign_in_pin_set? = pin.present? && pin_created_at.present?
@@ -105,6 +109,8 @@ module HawthorneCore::User::PinVerification
 
     # ----------------------------------------------------------------------------- EMAIL ADDRESS: UPDATE
 
+    def new_email_address_pin_formatted = "#{new_email_address_pin[0,3]}-#{new_email_address_pin[3,3]}"
+
     def email_address_update_pin_active? = email_address_update_pin_set? && !email_address_update_pin_expired? && !email_address_update_pin_max_failed_attempts_reached?
 
     def email_address_update_pin_set? = new_email_address_pin.present? && new_email_address_pin_created_at.present?
@@ -173,6 +179,8 @@ module HawthorneCore::User::PinVerification
 
     # ----------------------------------------------------------------------------- UPDATE: PHONE NUMBER
 
+    def new_phone_number_pin_formatted = "#{new_phone_number_pin[0,3]}-#{new_phone_number_pin[3,3]}"
+
     def phone_number_update_pin_active? = phone_number_update_pin_set? && !phone_number_update_pin_expired? && !phone_number_update_pin_max_failed_attempts_reached?
 
     def phone_number_update_pin_set? = new_phone_number_pin.present? && new_phone_number_pin_created_at.present?
@@ -234,7 +242,7 @@ module HawthorneCore::User::PinVerification
           success: true
         ).
         where("note->>'text_message_type' = ?", HawthorneCore::Services::TwilioTextSvc::PHONE_NUMBER_UPDATE_VERIFICATION_PIN).
-        where("note->>'message' LIKE ?", "%#{new_phone_number_pin}%").
+        where("note->>'message' LIKE ?", "%#{new_phone_number_pin_formatted}%").
         where('created_at >= ?', PIN_RECENTLY_SENT_IN_SECONDS.seconds.ago).
         exists?
     end

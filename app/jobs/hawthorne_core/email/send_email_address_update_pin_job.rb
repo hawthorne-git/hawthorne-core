@@ -33,7 +33,7 @@ class HawthorneCore::Email::SendEmailAddressUpdatePinJob < HawthorneCore::Applic
     end
 
     # the pin was not recently sent, send the email
-    HawthorneCore::Services::MailerSendSvc.send_email_address_update_verification_pin(user.id, user.new_email_address, user.new_email_address_pin)
+    HawthorneCore::Services::MailerSendSvc.send_email_address_update_verification_pin(user.id, user.new_email_address, user.new_email_address_pin_formatted)
 
   end
 

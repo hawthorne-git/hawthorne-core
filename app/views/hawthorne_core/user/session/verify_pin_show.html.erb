@@ -21,7 +21,7 @@ Enter the PIN we <%= delivery_label %> to: <%= destination %>
     <%= hidden_field_tag :keep_signed_in, @keep_signed_in %>
 
     <div class='form_input'>
-      <label class='form_input'>verification pin</label>
+      <label class='form_input'>verification pin - numbers only</label>
       <%= f.text_field :pin, class: 'form_input', required: true, maxlength: 100, autofocus: true, autocomplete: :off %>
     </div>
 

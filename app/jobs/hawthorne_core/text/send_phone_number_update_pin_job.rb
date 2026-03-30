@@ -33,7 +33,7 @@ class HawthorneCore::Text::SendPhoneNumberUpdatePinJob < HawthorneCore::Applicat
     end
 
     # the pin was not recently sent, send the text message
-    HawthorneCore::Services::TwilioTextSvc.send_phone_number_update_verification_pin(user.id, user.new_phone_number, user.new_phone_number_pin)
+    HawthorneCore::Services::TwilioTextSvc.send_phone_number_update_verification_pin(user.id, user.new_phone_number, user.new_phone_number_pin_formatted)
 
   end
 

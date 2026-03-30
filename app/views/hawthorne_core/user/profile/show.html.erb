@@ -18,7 +18,7 @@
 
     <div class='form_input'>
       <label class='form_input'>
-        phone number - <%= link_to @user.phone_number.blank? ? 'add' : 'clear', profile_phone_number_update_path, data: { turbo: :false } %>
+        phone number - <%= link_to @user.phone_number.blank? ? 'add' : 'update', profile_phone_number_update_path, data: { turbo: :false } %>
         <% if @user.phone_number.present? %>
         (<%= link_to 'clear', profile_phone_number_clear_path, data: { turbo_method: :delete, turbo_confirm: 'Are you sure you want to remove your phone number from your account?' } %>)
         <% end %>

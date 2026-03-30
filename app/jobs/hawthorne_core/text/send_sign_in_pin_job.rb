@@ -33,7 +33,7 @@ class HawthorneCore::Text::SendSignInPinJob < HawthorneCore::ApplicationJob
     end
 
     # the pin was not recently sent, send the text message
-    HawthorneCore::Services::TwilioTextSvc.send_sign_in_verification_pin(user.id, user.phone_number, user.pin)
+    HawthorneCore::Services::TwilioTextSvc.send_sign_in_verification_pin(user.id, user.phone_number, user.sign_in_pin_formatted)
 
   end
 
