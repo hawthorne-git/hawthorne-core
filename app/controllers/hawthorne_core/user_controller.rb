@@ -14,7 +14,7 @@ class HawthorneCore::UserController < HawthorneCore::ApplicationController
 
     # find the user
     @user = HawthorneCore::User.
-      select(:user_id, :email_address, :phone_number, :full_name).
+      select(:user_id, :full_name, :email_address, :phone_number, :pin_default_delivery).
       find_by(user_id: session[:user_id])
 
     # ----------------------

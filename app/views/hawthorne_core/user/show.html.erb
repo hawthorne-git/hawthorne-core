@@ -18,10 +18,14 @@
     <div style='display: table-cell; padding-top: 0.75rem;'>Email:</div>
     <div style='display: table-cell; padding-left: 0.5rem;'><%= @user.email_address %></div>
   </div>
-    <div style='display: table-row;'>
-      <div style='display: table-cell; padding-top: 0.75rem;'>Phone:</div>
-      <div style='display: table-cell; padding-left: 0.5rem; padding-top: 0.75rem;'><%= HawthorneCore::Helpers::PhoneNumber.us_format(@user.phone_number) %></div>
-    </div>
+  <div style='display: table-row;'>
+    <div style='display: table-cell; padding-top: 0.75rem;'>Phone:</div>
+    <div style='display: table-cell; padding-left: 0.5rem; padding-top: 0.75rem;'><%= HawthorneCore::Helpers::PhoneNumber.us_format(@user.phone_number) %></div>
+  </div>
+  <div style='display: table-row;'>
+    <div style='display: table-cell; padding-top: 0.75rem;'>PIN Delivery:</div>
+    <div style='display: table-cell; padding-left: 0.5rem; padding-top: 0.75rem;'><%= @user.pin_default_delivery.capitalize %></div>
+  </div>
 </div>
 
 <div class='vertical_space'></div>
