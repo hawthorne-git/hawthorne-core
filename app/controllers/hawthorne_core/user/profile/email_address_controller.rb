@@ -1,6 +1,6 @@
 # v3.0
 
-class HawthorneCore::User::ProfileEmailAddressUpdateController < HawthorneCore::ApplicationController
+class HawthorneCore::User::Profile::EmailAddressController < HawthorneCore::ApplicationController
 
   # -----------------------------------------------------------------------------
 
@@ -85,7 +85,7 @@ class HawthorneCore::User::ProfileEmailAddressUpdateController < HawthorneCore::
 
     # ----------------------
 
-    redirect_to profile_email_address_update_verify_pin_path
+    redirect_to profile_email_address_verify_pin_path
 
   end
 
@@ -115,7 +115,7 @@ class HawthorneCore::User::ProfileEmailAddressUpdateController < HawthorneCore::
   # resend the user their pin, to update their email address
   def resend_pin
     HawthorneCore::Email::SendEmailAddressUpdatePinJob.perform_later(session[:user_id])
-    redirect_to profile_email_address_update_verify_pin_path
+    redirect_to profile_email_address_verify_pin_path
   end
 
   # -----------------------------------------------------------------------------

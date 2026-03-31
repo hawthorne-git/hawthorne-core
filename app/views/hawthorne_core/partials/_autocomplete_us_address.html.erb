@@ -1,0 +1,154 @@
+<%# v3.0 %>
+
+<script>
+
+    (() => {
+
+        // -----------------------------------------------------------------------------
+
+        // public key to use smarty address autocomplete API - note that this key limits access by host
+        const SMARTY_EMBEDDED_KEY = '<%= HawthorneCore::AppConfig.smarty_embedded_key %>';
+
+        // smarty attributes
+        // suggested max results: the maximum number of suggested addresses to display
+        // delay in ms: the delay in milliseconds as the user types required to search for suggested addresses (to limit API usage)
+        // min nbr chars: the minimum number of characters entered required to search for suggested addresses (to limit API usage)
+        const SMARTY_SUGGESTED_MAX_RESULTS = 10
+        const SMARTY_DELAY_IN_MS = 50
+        const SMARTY_MIN_NBR_CHARS = 3
+
+        // autocomplete address fields
+        const autocompleteAddressInput = document.getElementById('<%= element_id_prefix %>_autocomplete_address');
+        const addressSuggestionsBox = document.getElementById('<%= element_id_prefix %>_autocomplete_address_suggestions');
+
+        // address fields
+        const streetField = document.getElementById('<%= element_id_prefix %>_street_address');
+        const cityField = document.getElementById('<%= element_id_prefix %>_city');
+        const stateField = document.getElementById('<%= element_id_prefix %>_state_province');
+        const zipField = document.getElementById('<%= element_id_prefix %>_postal_code');
+
+        // a timer - to wait for the user to stop typing prior to calling smarty api
+        let debounceTimer = null;
+
+        // -----------------------------------------------------------------------------
+
+        // clear the address suggestion box
+        function clearAddressSuggestions() {
+            addressSuggestionsBox.innerHTML = '';
+            addressSuggestionsBox.style.display = 'none';
+        }
+
+        // -----------------------------------------------------------------------------
+
+        // render address suggestions
+        function renderAddressSuggestions(addresses) {
+
+            // if there are no suggested addresses, clear the address suggestion box
+            if (!addresses || !addresses.length) return clearAddressSuggestions();
+
+            // suggested addresses exist!
+
+            // reset address suggestions - set as an empty list
+            addressSuggestionsBox.innerHTML = '';
+
+            // for each suggested address ...
+            addresses.forEach((address) => {
+
+                // create an element (div)
+                const addressElement = document.createElement('div');
+                addressElement.style.padding = '8px';
+                addressElement.style.cursor = 'pointer';
+                addressElement.style.borderBottom = '1px solid #eee';
+
+                // format the address
+                // ex: 54 Elizabeth St, Red Hook, NY, 12571
+                const addressFormatted = [
+                    address.street_line,
+                    address.city,
+                    address.state,
+                    address.zipcode
+                ].filter(Boolean).join(', ');
+
+                // set the formatted address text, into the element
+                addressElement.textContent = addressFormatted;
+
+                // add a listener to the element - when a suggested address is clicked ...
+                // set the address fields and clear the suggested addresses
+                addressElement.addEventListener('click', () => {
+                    streetField.value = address.street_line || '';
+                    cityField.value = address.city || '';
+                    stateField.value = address.state || '';
+                    zipField.value = address.zipcode || '';
+                    autocompleteAddressInput.value = addressFormatted;
+                    clearAddressSuggestions();
+                });
+
+                // add the element to the list of address suggestions
+                addressSuggestionsBox.appendChild(addressElement);
+
+            });
+
+            // set the address suggestions HTML element as visible
+            addressSuggestionsBox.style.display = 'block';
+        }
+
+        // -----------------------------------------------------------------------------
+
+        // lookup suggested addresses - with an autocomplete address, in smarty
+        // ex autocomplete address: '54 Elizabeth'
+        async function lookupSuggestedAddress(autocompleteAddress) {
+
+            // if the autocomplete address length is fewer than the required number of characters, clear the address suggestion box
+            if (!autocompleteAddress || autocompleteAddress.trim().length < SMARTY_MIN_NBR_CHARS) return clearAddressSuggestions();
+
+            // build the url to call the smarty API
+            const lookupParams = new URLSearchParams({
+                key: SMARTY_EMBEDDED_KEY,
+                search: autocompleteAddress,
+                max_results: SMARTY_SUGGESTED_MAX_RESULTS
+            });
+            const url = `https://us-autocomplete-pro.api.smarty.com/lookup?${lookupParams.toString()}`;
+
+            // call the smarty api
+            // render address suggestions
+            try {
+                const response = await fetch(url, {method: 'GET'});
+                if (!response.ok) {
+                    clearAddressSuggestions();
+                    console.error('Smarty error', response.status);
+                    return;
+                }
+                const data = await response.json();
+                renderAddressSuggestions(data.suggestions || []);
+            } catch (error) {
+                clearAddressSuggestions();
+                console.error('Network or parsing error', error);
+            }
+        }
+
+        // -----------------------------------------------------------------------------
+
+        // add a listener on the autocomplete address element
+        // the timer is reset on each keystroke as the user enters in an address to autocomplete
+        // once the timer is hit (in SMARTY_DELAY_IN_MS), lookup suggested addresses via smarty API
+        autocompleteAddressInput.addEventListener('input', (event) => {
+            window.clearTimeout(debounceTimer);
+            debounceTimer = window.setTimeout(() => {
+                lookupSuggestedAddress(event.target.value);
+            }, SMARTY_DELAY_IN_MS);
+        });
+
+        // -----------------------------------------------------------------------------
+
+        // listens for a click anywhere on the page,
+        // if the click happened outside the address suggestions box and not on the autocomplete input itself
+        // clear the address suggestion box
+        document.addEventListener('click', (event) => {
+            if (!addressSuggestionsBox.contains(event.target) && event.target !== autocompleteAddressInput) clearAddressSuggestions();
+        });
+
+        // -----------------------------------------------------------------------------
+
+    })();
+
+</script>

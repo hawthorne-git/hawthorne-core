@@ -1,0 +1,67 @@
+<%# v3.0 %>
+
+<% add_action = (action == 'add') %>
+
+<div class='title'><%= action.capitalize %> Shipping Address</div>
+
+<div class='form'>
+
+  <%= form_with model: @shipping_address, url: (add_action ? add_shipping_address_path : update_shipping_address_path) do |f| %>
+
+    <% if add_action %>
+      <div class='form_input'>
+        <label class='form_input'>autocomplete address</label>
+        <%= f.text_field :autocomplete_address, placeholder: 'Start typing an address ...', required: false, maxlength: 200, autocomplete: false, autofocus: true %>
+      </div>
+      <div id="user_shipping_address_autocomplete_address_suggestions" style='border: 1px solid #ccc; margin-top: 4px; display: none; background: #fff;'></div>
+    <% end %>
+
+    <div class='form_input'>
+      <label class='form_input'>name</label>
+      <%= f.text_field :full_name, value: (add_action ? @user.full_name : @shipping_address.full_name), required: true, maxlength: 100 %>
+    </div>
+
+    <div class='form_input'>
+      <label class='form_input'>street address</label>
+      <%= f.text_field :street_address, required: true, maxlength: 100, value: @shipping_address&.street_address %>
+    </div>
+
+    <div class='form_input'>
+      <label class='form_input'>apartment, unit, suite, or floor #</label>
+      <%= f.text_field :street_address_extended, required: false, maxlength: 100, value: @shipping_address&.street_address_extended %>
+    </div>
+
+    <div class='form_input'>
+      <label class='form_input'>city</label>
+      <%= f.text_field :city, required: true, maxlength: 100, value: @shipping_address&.city %>
+    </div>
+
+    <div class='form_input'>
+      <label class='form_input'>state / province</label>
+      <%= f.text_field :state_province, required: true, maxlength: 100, value: @shipping_address&.state_province %>
+    </div>
+
+    <div class='form_input'>
+      <label class='form_input'>postal code</label>
+      <%= f.text_field :postal_code, required: true, maxlength: 100, value: @shipping_address&.postal_code %>
+    </div>
+
+    <div class='form_input'>
+      <label class='form_input'>country</label>
+      <%= f.text_field :country, required: true, maxlength: 100, value: @shipping_address&.country %>
+    </div>
+
+    <div class='form_input'>
+      <label class='form_input'>phone number - required by select couriers</label>
+      <%= f.text_field :phone_number, value: HawthorneCore::Helpers::PhoneNumber.us_format(add_action ? @user.phone_number : @shipping_address.phone_number), required: true, maxlength: 100 %>
+    </div>
+
+    <div class='form_submit'>
+      <%= f.submit "#{action.capitalize} Shipping Address" %>
+    </div>
+
+  <% end %>
+
+</div>
+
+<%= render partial: '/hawthorne_core/partials/autocomplete_us_address', locals: { element_id_prefix: 'user_shipping_address' }  %>

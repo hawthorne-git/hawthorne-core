@@ -12,47 +12,63 @@ class HawthorneCore::Site < HawthorneCore::ActiveRecordBaseApp
 
   # -----------------------------------------------------------------------------
 
-  # define the list of site contact emails
-  SITE_CONTACT_EMAILS =
+  # define the list of contact emails, by site
+  CONTACT_EMAILS =
     {
       riley_blake_env_name => riley_blake_contact_email
     }
 
-  # define the list of site email from taglines
-  SITE_EMAIL_FROM_TAGLINES =
+  # define the list of email from taglines, by site
+  EMAIL_FROM_TAGLINES =
     {
       riley_blake_env_name => riley_blake_email_from_tagline
     }
 
+  # define the list of has checkouts, by site
+  # as ex: hawthorne-supply-co has a checkout, while hawthorne-admin does not
+  HAS_CHECKOUTS =
+    {
+      riley_blake_env_name => riley_blake_has_checkout
+    }
+
   # define the list of site ids
-  SITE_IDS =
+  IDS =
     {
       riley_blake_env_name => riley_blake_id
     }
 
   # define the list of mailer send welcome template ids
-  SITE_MAILER_SEND_WELCOME_EMAIL_TEMPLATE_IDS =
+  MAILER_SEND_WELCOME_EMAIL_TEMPLATE_IDS =
     {
       riley_blake_env_name => riley_blake_mailer_send_welcome_template_id
     }
 
   # define the list of site names
-  SITE_NAMES =
+  NAMES =
     {
       riley_blake_env_name => riley_blake_name
     }
 
+  SITE_SHARING_SCOPES =
+    {
+      riley_blake_env_name => riley_blake_site_sharing_scope
+    }
+
   # -----------------------------------------------------------------------------
 
-  def self.this_site_contact_email = SITE_CONTACT_EMAILS.fetch(HawthorneCore::AppConfig.site_name) { raise env_site_name_exception('this_site_contact_email') }
+  def self.this_site_contact_email = CONTACT_EMAILS.fetch(HawthorneCore::AppConfig.site_name) { raise env_site_name_exception('this_site_contact_email') }
 
-  def self.this_site_email_from_tagline = SITE_EMAIL_FROM_TAGLINES.fetch(HawthorneCore::AppConfig.site_name) { raise env_site_name_exception('this_site_email_from_tagline') }
+  def self.this_site_email_from_tagline = EMAIL_FROM_TAGLINES.fetch(HawthorneCore::AppConfig.site_name) { raise env_site_name_exception('this_site_email_from_tagline') }
 
-  def self.this_site_id = SITE_IDS.fetch(HawthorneCore::AppConfig.site_name) { raise env_site_name_exception('this_site_id') }
+  def self.this_site_has_checkout? = HAS_CHECKOUTS.fetch(HawthorneCore::AppConfig.site_name) { raise env_site_name_exception('this_site_has_checkout?') }
 
-  def self.this_site_mailer_send_welcome_email_template_id = SITE_MAILER_SEND_WELCOME_EMAIL_TEMPLATE_IDS.fetch(HawthorneCore::AppConfig.site_name) { raise env_site_name_exception('this_site_mailer_send_welcome_email_template_id') }
+  def self.this_site_id = IDS.fetch(HawthorneCore::AppConfig.site_name) { raise env_site_name_exception('this_site_id') }
 
-  def self.this_site_name = SITE_NAMES.fetch(HawthorneCore::AppConfig.site_name) { raise env_site_name_exception('this_site_name') }
+  def self.this_site_mailer_send_welcome_email_template_id = MAILER_SEND_WELCOME_EMAIL_TEMPLATE_IDS.fetch(HawthorneCore::AppConfig.site_name) { raise env_site_name_exception('this_site_mailer_send_welcome_email_template_id') }
+
+  def self.this_site_name = NAMES.fetch(HawthorneCore::AppConfig.site_name) { raise env_site_name_exception('this_site_name') }
+
+  def self.this_site_sharing_scope = SITE_SHARING_SCOPES.fetch(HawthorneCore::AppConfig.site_name) { raise env_site_name_exception('this_site_sharing_scope') }
 
   # -----------------------------------------------------------------------------
 

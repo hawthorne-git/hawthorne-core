@@ -12,6 +12,8 @@ module HawthorneCore::Site::RileyBlake
         env_name: HawthorneCore::AppConfig::RILEY_BLAKE_ENV_SITE_NAME,
         id: 1,
         name: 'Hawthorne at Riley Blake',
+        site_sharing_scope: 'HAWTHORNE',
+        has_checkout: true,
         contact_email: 'hello@rileyblakeathawthorne.com',
         email_from_tagline: 'Lindsay, Charlie, and your friends at Hawthorne',
         mailer_send_welcome_template_id: 'neqvygmmvz5g0p7w'

@@ -7,10 +7,10 @@ HawthorneCore::Engine.routes.draw do
 
   get 'verify-pin', to: 'user/session#verify_pin_show'
   get 'verify-pin-via-magic-link', to: 'user/session#verify_pin',  defaults: { pin_delivery_method: HawthorneCore::User::PIN_VIA_EMAIL, from_magic_link: true }
+  post 'verify-pin', to: 'user/session#verify_pin'
   get 'resend-pin', to: 'user/session#resend_pin'
   get 'resend-pin-via-email', to: 'user/session#resend_pin_via_email'
   get 'resend-pin-via-text', to: 'user/session#resend_pin_via_phone'
-  post 'verify-pin', to: 'user/session#verify_pin'
 
   # ----------------------
 
@@ -21,18 +21,23 @@ HawthorneCore::Engine.routes.draw do
   get 'profile', to: 'user/profile#show'
   post 'profile', to: 'user/profile#update'
 
-  get 'profile-email-address-update', to: 'user/profile_email_address_update#show'
-  post 'profile-email-address-update-verify', to: 'user/profile_email_address_update#verify'
-  get 'profile-email-address-update-verify-pin', to: 'user/profile_email_address_update#verify_pin_show'
-  get 'profile-email-address-update-resend-pin', to: 'user/profile_email_address_update#resend_pin'
-  post 'profile-email-address-update-verify-pin', to: 'user/profile_email_address_update#verify_pin'
+  get 'profile-email-address', to: 'user/profile/email_address#show'
+  post 'profile-email-address-verify', to: 'user/profile/email_address#verify'
+  get 'profile-email-address-verify-pin', to: 'user/profile/email_address#verify_pin_show'
+  post 'profile-email-address-verify-pin', to: 'user/profile/email_address#verify_pin'
+  get 'profile-email-address-resend-pin', to: 'user/profile/email_address#resend_pin'
 
-  get 'profile-phone-number-update', to: 'user/profile_phone_number_update#show'
-  post 'profile-phone-number-update-verify', to: 'user/profile_phone_number_update#verify'
-  get 'profile-phone-number-update-verify-pin', to: 'user/profile_phone_number_update#verify_pin_show'
-  get 'profile-phone-number-update-resend-pin', to: 'user/profile_phone_number_update#resend_pin'
-  post 'profile-phone-number-update-verify-pin', to: 'user/profile_phone_number_update#verify_pin'
-  delete 'profile-phone-number-clear', to: 'user/profile_phone_number_update#clear'
+  get 'profile-phone-number', to: 'user/profile/phone_number#show'
+  post 'profile-phone-number-verify', to: 'user/profile/phone_number#verify'
+  get 'profile-phone-number-verify-pin', to: 'user/profile/phone_number#verify_pin_show'
+  post 'profile-phone-number-verify-pin', to: 'user/profile/phone_number#verify_pin'
+  get 'profile-phone-number-resend-pin', to: 'user/profile/phone_number#resend_pin'
+  delete 'profile-phone-number-clear', to: 'user/profile/phone_number#clear'
+
+  # ----------------------
+
+  get 'add-shipping-address', to: 'user/shipping_address#new'
+  post 'add-shipping-address', to: 'user/shipping_address#create'
 
   # ----------------------
 

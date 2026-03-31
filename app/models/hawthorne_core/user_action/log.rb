@@ -122,6 +122,12 @@ module HawthorneCore::UserAction::Log
     success(user_id, action(:sign_out), nil, ip_address, user_session_token)
   end
 
+  # ----------------------------------------------------------------------------- Shipping Address
+
+  def self.add_shipping_address(user_id, note, ip_address, user_session_token)
+    success(user_id, action(:shipping_address_added), note, ip_address, user_session_token)
+  end
+
   # ----------------------------------------------------------------------------- Text Message
 
   def self.text_message_sent(user_id, note)

@@ -12,7 +12,7 @@ Enter the PIN we texted to: <%= HawthorneCore::Helpers::PhoneNumber.us_format(@u
 
 <div class='form'>
 
-  <%= form_with url: profile_phone_number_update_verify_pin_path do |f| %>
+  <%= form_with url: profile_phone_number_verify_pin_path do |f| %>
 
     <% if @user.phone_number.present? %>
       <div class='form_input'>
@@ -41,5 +41,5 @@ Enter the PIN we texted to: <%= HawthorneCore::Helpers::PhoneNumber.us_format(@u
 </div>
 
 <div class='vertical_space'></div>
-Didn’t get the PIN?  <%= link_to 'Resend it', profile_phone_number_update_resend_pin_path, data: { turbo: :false } %>
+Didn’t get the PIN?  <%= link_to 'Resend it', profile_phone_number_resend_pin_path, data: { turbo: :false } %>
 <div class='vertical_space'></div>

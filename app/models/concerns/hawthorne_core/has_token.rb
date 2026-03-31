@@ -23,6 +23,8 @@ module HawthorneCore::HasToken
     # length of 8: 500,246,412,961 (500 billion)
     # length of 9: 14,507,145,975,869 (14 trillion)
     # length of 10: 420,707,233,300,201 (420 trillion)
+    # length of 11: 12,200,509,765,705,800 (12 quadrillion)
+    # length of 12: 353,814,783,205,469,000 (353 quadrillion)
 
     # ---------------------------------------------------------------------------------
 
@@ -33,7 +35,8 @@ module HawthorneCore::HasToken
     # define the list of token lengths ... by the objects table name
     TOKEN_LENGTHS =
       {
-        'users' => 8
+        'users' => 12,
+        'user_shipping_addresses' => 12
       }.freeze
 
     # ---------------------------------------------------------------------------------

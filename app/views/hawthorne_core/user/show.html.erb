@@ -37,3 +37,22 @@
 <div class='vertical_space'></div>
 <hr class='section'>
 <div class='vertical_space'></div>
+
+<%# ------------------------------------------- Shipping Addresses %>
+
+<% if HawthorneCore::Site.this_site_has_checkout? %>
+
+  <% @shipping_addresses&.each do |shipping_address| %>
+    <%= raw(shipping_address.to_s) %> (<%= link_to 'X', '/delete-shipping-address?id=' + shipping_address.token, :title => 'Delete Shipping Address', data: { turbo: 'false' } %>)
+    <div class='vertical_space'></div>
+  <% end %>
+
+  <%= link_to 'Add Shipping Address', add_shipping_address_path %>
+
+  <div class='vertical_space'></div>
+  <hr class='section'>
+  <div class='vertical_space'></div>
+
+<% end %>
+
+<%# ------------------------------------------- %>

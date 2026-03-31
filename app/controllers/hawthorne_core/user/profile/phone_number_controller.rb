@@ -1,6 +1,6 @@
 # v3.0
 
-class HawthorneCore::User::ProfilePhoneNumberUpdateController < HawthorneCore::ApplicationController
+class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::ApplicationController
 
   # -----------------------------------------------------------------------------
 
@@ -77,7 +77,7 @@ class HawthorneCore::User::ProfilePhoneNumberUpdateController < HawthorneCore::A
 
     # ----------------------
 
-    redirect_to profile_phone_number_update_verify_pin_path
+    redirect_to profile_phone_number_verify_pin_path
 
   end
 
@@ -107,7 +107,7 @@ class HawthorneCore::User::ProfilePhoneNumberUpdateController < HawthorneCore::A
   # resend the user their pin, to update their phone number
   def resend_pin
     HawthorneCore::Text::SendPhoneNumberUpdatePinJob.perform_later(session[:user_id])
-    redirect_to profile_phone_number_update_verify_pin_path
+    redirect_to profile_phone_number_verify_pin_path
   end
 
   # -----------------------------------------------------------------------------
