@@ -128,6 +128,10 @@ module HawthorneCore::UserAction::Log
     success(user_id, action(:shipping_address_added), note, ip_address, user_session_token)
   end
 
+  def self.shipping_address_failure(user_id, failure_reason, note, ip_address, user_session_token)
+    failure(user_id, action(:shipping_address), failure_reason, note, ip_address, user_session_token)
+  end
+
   # ----------------------------------------------------------------------------- Text Message
 
   def self.text_message_sent(user_id, note)

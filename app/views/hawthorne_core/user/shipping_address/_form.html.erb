@@ -1,67 +1,57 @@
 <%# v3.0 %>
 
 <% add_action = (action == 'add') %>
+<% domestic_address = (@selected_country&.code_alpha2 == 'US') %>
 
-<div class='title'><%= action.capitalize %> Shipping Address</div>
+<% title_text = "#{action.capitalize} Shipping Address" %>
+<%= render(HawthorneCore::UI::TitleComponent.new(text: title_text)) %>
 
-<div class='form'>
+<%= render HawthorneCore::UI::Form::FormWrapperComponent.new do %>
 
-  <%= form_with model: @shipping_address, url: (add_action ? add_shipping_address_path : update_shipping_address_path) do |f| %>
+  <% if @select_country %>
 
-    <% if add_action %>
-      <div class='form_input'>
-        <label class='form_input'>autocomplete address</label>
-        <%= f.text_field :autocomplete_address, placeholder: 'Start typing an address ...', required: false, maxlength: 200, autocomplete: false, autofocus: true %>
-      </div>
-      <div id="user_shipping_address_autocomplete_address_suggestions" style='border: 1px solid #ccc; margin-top: 4px; display: none; background: #fff;'></div>
+    <%= form_with url: add_shipping_address_with_selected_country_path do |f| %>
+      <%= render HawthorneCore::UI::Form::Attr::CountrySelectComponent.new(form: f, countries: @ship_to_countries) %>
     <% end %>
 
-    <div class='form_input'>
-      <label class='form_input'>name</label>
-      <%= f.text_field :full_name, value: (add_action ? @user.full_name : @shipping_address.full_name), required: true, maxlength: 100 %>
-    </div>
+  <% else %>
 
-    <div class='form_input'>
-      <label class='form_input'>street address</label>
-      <%= f.text_field :street_address, required: true, maxlength: 100, value: @shipping_address&.street_address %>
-    </div>
+    <% form_url = add_action ? add_shipping_address_path : update_shipping_address_path %>
+    <%= form_with model: @shipping_address, url: form_url do |f| %>
 
-    <div class='form_input'>
-      <label class='form_input'>apartment, unit, suite, or floor #</label>
-      <%= f.text_field :street_address_extended, required: false, maxlength: 100, value: @shipping_address&.street_address_extended %>
-    </div>
+      <% clear_country_link = link_to 'clear', add_shipping_address_select_country_path, data: { turbo: :false } %>
+      <% country_handle_label = "country (#{clear_country_link})" %>
+      <%= render(HawthorneCore::UI::Form::HiddenFieldComponent.new(form: f, attribute: :country_code_alpha2, value: @selected_country.code_alpha2, required: true)) %>
+      <%= render(HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :country_handle, label: country_handle_label, value: @selected_country.handle, required: true)) %>
 
-    <div class='form_input'>
-      <label class='form_input'>city</label>
-      <%= f.text_field :city, required: true, maxlength: 100, value: @shipping_address&.city %>
-    </div>
+      <%= render(HawthorneCore::UI::Form::Attr::AutocompleteAddressComponent.new(form: f, model: @shipping_address, selected_country: @selected_country)) if add_action %>
 
-    <div class='form_input'>
-      <label class='form_input'>state / province</label>
-      <%= f.text_field :state_province, required: true, maxlength: 100, value: @shipping_address&.state_province %>
-    </div>
+      <%= render(HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :full_name, label: 'name', value: @shipping_address&.full_name, required: true)) %>
 
-    <div class='form_input'>
-      <label class='form_input'>postal code</label>
-      <%= f.text_field :postal_code, required: true, maxlength: 100, value: @shipping_address&.postal_code %>
-    </div>
+      <%= render(HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :street_address, label: 'street address', value: @shipping_address&.street_address, required: true)) %>
 
-    <div class='form_input'>
-      <label class='form_input'>country</label>
-      <%= f.text_field :country, required: true, maxlength: 100, value: @shipping_address&.country %>
-    </div>
+      <%= render(HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :street_address_extended, label: 'apartment, unit, suite, or floor #', value: @shipping_address&.street_address_extended)) %>
 
-    <div class='form_input'>
-      <label class='form_input'>phone number - required by select couriers</label>
-      <%= f.text_field :phone_number, value: HawthorneCore::Helpers::PhoneNumber.us_format(add_action ? @user.phone_number : @shipping_address.phone_number), required: true, maxlength: 100 %>
-    </div>
+      <%= render(HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :city, label: 'city', value: @shipping_address&.city, required: true)) %>
 
-    <div class='form_submit'>
-      <%= f.submit "#{action.capitalize} Shipping Address" %>
-    </div>
+      <% state_province_label = domestic_address ? 'state' : 'state / province / region' %>
+      <%= render(HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :state_province, label: state_province_label, value: @shipping_address&.state_province, required: true)) %>
+
+      <% postal_code_label = domestic_address ? 'zip code' : 'postal code' %>
+      <%= render(HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :postal_code, label: postal_code_label, value: @shipping_address&.postal_code, required: true)) %>
+
+      <%= render(HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :phone_number, label: 'phone number - required by select couriers', value: @shipping_address&.phone_number, required: true)) %>
+
+      <% submit_button_text = "#{action.capitalize} Shipping Address" %>
+      <%= render(HawthorneCore::UI::Form::SubmitButtonComponent.new(form: f, text: submit_button_text)) %>
+
+    <% end %>
 
   <% end %>
 
-</div>
+<% end %>
 
-<%= render partial: '/hawthorne_core/partials/autocomplete_us_address', locals: { element_id_prefix: 'user_shipping_address' }  %>
+<% unless @select_country %>
+  <%= render partial: '/hawthorne_core/partials/autocomplete_us_address', locals: { element_id_prefix: @shipping_address.model_name.param_key } if domestic_address %>
+  <%= render partial: '/hawthorne_core/partials/autocomplete_intl_address', locals: { country_code_alpha3: @selected_country.code_alpha3, element_id_prefix: @shipping_address.model_name.param_key } unless domestic_address %>
+<% end %>

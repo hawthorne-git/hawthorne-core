@@ -14,7 +14,7 @@
         // delay in ms: the delay in milliseconds as the user types required to search for suggested addresses (to limit API usage)
         // min nbr chars: the minimum number of characters entered required to search for suggested addresses (to limit API usage)
         const SMARTY_SUGGESTED_MAX_RESULTS = 10
-        const SMARTY_DELAY_IN_MS = 50
+        const SMARTY_DELAY_IN_MS = 200
         const SMARTY_MIN_NBR_CHARS = 3
 
         // autocomplete address fields
@@ -29,6 +29,9 @@
 
         // a timer - to wait for the user to stop typing prior to calling smarty api
         let debounceTimer = null;
+
+        // to handle stale / slow responses ... keep track of what # lookup is executed
+        let latestLookupId = 0;
 
         // -----------------------------------------------------------------------------
 
@@ -101,16 +104,20 @@
             // if the autocomplete address length is fewer than the required number of characters, clear the address suggestion box
             if (!autocompleteAddress || autocompleteAddress.trim().length < SMARTY_MIN_NBR_CHARS) return clearAddressSuggestions();
 
+            // increment what # lookup is to be executed
+            const lookupId = ++latestLookupId;
+
             // build the url to call the smarty API
             const lookupParams = new URLSearchParams({
                 key: SMARTY_EMBEDDED_KEY,
-                search: autocompleteAddress,
+                search: autocompleteAddress.trim(),
                 max_results: SMARTY_SUGGESTED_MAX_RESULTS
             });
             const url = `https://us-autocomplete-pro.api.smarty.com/lookup?${lookupParams.toString()}`;
 
             // call the smarty api
             // render address suggestions
+            // to handle stale / slow responses ... make sure the lookup being executed matches the latest lookup
             try {
                 const response = await fetch(url, {method: 'GET'});
                 if (!response.ok) {
@@ -119,6 +126,7 @@
                     return;
                 }
                 const data = await response.json();
+                if (lookupId !== latestLookupId) return;
                 renderAddressSuggestions(data.suggestions || []);
             } catch (error) {
                 clearAddressSuggestions();

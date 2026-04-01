@@ -37,6 +37,8 @@ HawthorneCore::Engine.routes.draw do
   # ----------------------
 
   get 'add-shipping-address', to: 'user/shipping_address#new'
+  get 'add-shipping-address-select-country', to: 'user/shipping_address#new_select_country'
+  post 'add-shipping-address-with-selected-country', to: 'user/shipping_address#new_selected_country'
   post 'add-shipping-address', to: 'user/shipping_address#create'
 
   # ----------------------

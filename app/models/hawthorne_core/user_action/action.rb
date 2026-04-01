@@ -18,6 +18,7 @@ module HawthorneCore::UserAction::Action
       profile_updated: 'PROFILE UPDATED',
       profile_email_address_updated: 'PROFILE EMAIL ADDRESS UPDATED',
       profile_phone_number_updated: 'PROFILE PHONE NUMBER UPDATED',
+      shipping_address: 'SHIPPING ADDRESS',
       shipping_address_added: 'SHIPPING ADDRESS ADDED',
       sign_in: 'SIGN-IN',
       sign_in_pin_cleared: 'SIGN-IN PIN CLEARED',

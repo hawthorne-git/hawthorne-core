@@ -1,0 +1,197 @@
+<%# v3.0 %>
+<%# AI generated based on US address autocomplete %>
+
+<script>
+
+    (() => {
+
+        // -----------------------------------------------------------------------------
+
+        // public key to use smarty international autocomplete API - note that this key limits access by host
+        const SMARTY_EMBEDDED_KEY = '<%= HawthorneCore::AppConfig.smarty_embedded_key %>';
+
+        // smarty attributes
+        // suggested max results: the maximum number of suggested addresses to display
+        // delay in ms: the delay in milliseconds as the user types required to search for suggested addresses
+        // min nbr chars: the minimum number of characters entered required to search for suggested addresses
+        const SMARTY_SUGGESTED_MAX_RESULTS = 10;
+        const SMARTY_EXPANDED_MAX_RESULTS = 100;
+        const SMARTY_DELAY_IN_MS = 200;
+        const SMARTY_MIN_NBR_CHARS = 3;
+
+        // autocomplete address fields
+        const autocompleteAddressInput = document.getElementById('<%= element_id_prefix %>_autocomplete_address');
+        const addressSuggestionsBox = document.getElementById('<%= element_id_prefix %>_autocomplete_address_suggestions');
+
+        // address fields
+        const streetField = document.getElementById('<%= element_id_prefix %>_street_address');
+        const cityField = document.getElementById('<%= element_id_prefix %>_city');
+        const stateField = document.getElementById('<%= element_id_prefix %>_state_province');
+        const zipField = document.getElementById('<%= element_id_prefix %>_postal_code');
+
+        // required by Smarty international autocomplete: ISO3 Alpha-3 country code, ex: CAN, GBR, AUS
+        const countryIso3 = String('<%= country_code_alpha3 %>').trim().toUpperCase();
+
+        // a timer - to wait for the user to stop typing prior to calling smarty api
+        let debounceTimer = null;
+
+        // to handle stale / slow responses ... keep track of what # lookup is executed
+        let latestLookupId = 0;
+
+        // -----------------------------------------------------------------------------
+
+        function clearAddressSuggestions() {
+            addressSuggestionsBox.innerHTML = '';
+            addressSuggestionsBox.style.display = 'none';
+        }
+
+        // -----------------------------------------------------------------------------
+
+        function formatSuggestionText(candidate) {
+            return candidate.address_text || [
+                candidate.street,
+                candidate.locality,
+                candidate.administrative_area || candidate.administrative_area_short || candidate.administrative_area_long,
+                candidate.postal_code
+            ].filter(Boolean).join(', ');
+        }
+
+        // -----------------------------------------------------------------------------
+
+        function populateAddressFields(candidate) {
+            streetField.value = candidate.street || '';
+            cityField.value = candidate.locality || '';
+            stateField.value = candidate.administrative_area || candidate.administrative_area_short || candidate.administrative_area_long || '';
+            zipField.value = candidate.postal_code || '';
+            autocompleteAddressInput.value = formatSuggestionText(candidate);
+            clearAddressSuggestions();
+        }
+
+        // -----------------------------------------------------------------------------
+
+        async function fetchLookup({search = null, addressId = null, maxResults = SMARTY_SUGGESTED_MAX_RESULTS}) {
+
+            const lookupParams = new URLSearchParams({
+                key: SMARTY_EMBEDDED_KEY,
+                country: countryIso3
+            });
+
+            if (search) {
+                lookupParams.set('search', search.trim());
+                lookupParams.set('max_results', String(maxResults));
+            }
+
+            if (addressId) {
+                lookupParams.set('max_group_results', String(SMARTY_EXPANDED_MAX_RESULTS));
+            }
+
+            const path = addressId ? `/v2/lookup/${encodeURIComponent(addressId)}` : '/v2/lookup';
+            const url = `https://international-autocomplete.api.smarty.com${path}?${lookupParams.toString()}`;
+
+            const response = await fetch(url, {method: 'GET'});
+            if (!response.ok) throw new Error(`Smarty error ${response.status}`);
+            return await response.json();
+        }
+
+        // -----------------------------------------------------------------------------
+
+        async function fetchDetailedAddress(addressId) {
+            const data = await fetchLookup({addressId: addressId});
+            return (data.candidates || [])[0] || null;
+        }
+
+        // -----------------------------------------------------------------------------
+
+        async function expandOrSelectCandidate(candidate) {
+
+            // entries > 1 means ask Smarty for the next level of results using address_id
+            if (Number(candidate.entries) > 1 && candidate.address_id) {
+                const data = await fetchLookup({addressId: candidate.address_id});
+                renderAddressSuggestions(data.candidates || []);
+                return;
+            }
+
+            // entries == 1 means request the detailed result, which contains the individual address fields
+            if (candidate.address_id) {
+                const detailedCandidate = await fetchDetailedAddress(candidate.address_id);
+                if (detailedCandidate) {
+                    populateAddressFields(detailedCandidate);
+                    return;
+                }
+            }
+
+            // fallback in case Smarty already returned detailed fields
+            populateAddressFields(candidate);
+        }
+
+        // -----------------------------------------------------------------------------
+
+        function renderAddressSuggestions(addresses) {
+
+            if (!addresses || !addresses.length) return clearAddressSuggestions();
+
+            addressSuggestionsBox.innerHTML = '';
+
+            addresses.forEach((address) => {
+
+                const addressElement = document.createElement('div');
+                addressElement.style.padding = '8px';
+                addressElement.style.cursor = 'pointer';
+                addressElement.style.borderBottom = '1px solid #eee';
+
+                addressElement.textContent = formatSuggestionText(address);
+
+                addressElement.addEventListener('click', async () => {
+                    try {
+                        await expandOrSelectCandidate(address);
+                    } catch (error) {
+                        clearAddressSuggestions();
+                        console.error('Smarty international lookup error', error);
+                    }
+                });
+
+                addressSuggestionsBox.appendChild(addressElement);
+            });
+
+            addressSuggestionsBox.style.display = 'block';
+        }
+
+        // -----------------------------------------------------------------------------
+
+        async function lookupSuggestedAddress(autocompleteAddress) {
+
+            if (!countryIso3 || countryIso3.length !== 3) return clearAddressSuggestions();
+            if (!autocompleteAddress || autocompleteAddress.trim().length < SMARTY_MIN_NBR_CHARS) return clearAddressSuggestions();
+
+            const lookupId = ++latestLookupId;
+
+            try {
+                const data = await fetchLookup({search: autocompleteAddress});
+                if (lookupId !== latestLookupId) return;
+                renderAddressSuggestions(data.candidates || []);
+            } catch (error) {
+                clearAddressSuggestions();
+                console.error('Network or parsing error', error);
+            }
+        }
+
+        // -----------------------------------------------------------------------------
+
+        autocompleteAddressInput.addEventListener('input', (event) => {
+            window.clearTimeout(debounceTimer);
+            debounceTimer = window.setTimeout(() => {
+                lookupSuggestedAddress(event.target.value);
+            }, SMARTY_DELAY_IN_MS);
+        });
+
+        // -----------------------------------------------------------------------------
+
+        document.addEventListener('click', (event) => {
+            if (!addressSuggestionsBox.contains(event.target) && event.target !== autocompleteAddressInput) clearAddressSuggestions();
+        });
+
+        // -----------------------------------------------------------------------------
+
+    })();
+
+</script>

@@ -8,6 +8,12 @@ module HawthorneCore
 
     isolate_namespace HawthorneCore
 
+    initializer "hawthorne_core.inflections" do
+      ActiveSupport::Inflector.inflections(:en) do |inflect|
+        inflect.acronym "UI"
+      end
+    end
+
     # verify that required hawthorne core env variables exist
     initializer 'hawthorne_core.validate_env' do
       HawthorneCore::AppConfig.mailer_send_api_token
