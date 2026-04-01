@@ -59,17 +59,17 @@ class HawthorneCore::Services::MailerSendSvc
 
   # ----------------------
 
-  def self.email_address_update_verification_pin_subject = 'Verify your new email address'
+  def self.email_address_update_verification_pin_subject = 'Verify your new email address'.freeze
 
-  def self.email_address_update_verification_pin_template = '3z0vklooo7xl7qrx'
+  def self.email_address_update_verification_pin_template = '3z0vklooo7xl7qrx'.freeze
 
   def self.email_address_update_verification_pin_personalization(new_email_address, new_email_address_pin_formatted) = mailer_send_personalization(new_email_address, { pin: new_email_address_pin_formatted })
 
   # ----------------------
 
-  def self.sign_in_verification_pin_subject = 'Verify your email address'
+  def self.sign_in_verification_pin_subject = 'Verify your email address'.freeze
 
-  def self.sign_in_verification_pin_template = '0r83ql3vnkmgzw1j'
+  def self.sign_in_verification_pin_template = '0r83ql3vnkmgzw1j'.freeze
 
   def self.sign_in_verification_pin_personalization(email_address, magic_link_url, sign_in_pin_formatted) = mailer_send_personalization(email_address, { magic_link_url: magic_link_url, pin: sign_in_pin_formatted })
 

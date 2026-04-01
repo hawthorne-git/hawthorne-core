@@ -19,6 +19,8 @@ module HawthorneCore
       HawthorneCore::AppConfig.mailer_send_api_token
       HawthorneCore::AppConfig.site_base_url
       HawthorneCore::AppConfig.site_name
+      HawthorneCore::AppConfig.smarty_auth_id
+      HawthorneCore::AppConfig.smarty_auth_token
       HawthorneCore::AppConfig.smarty_embedded_key
       HawthorneCore::AppConfig.twilio_password
       HawthorneCore::AppConfig.twilio_us_phone_number

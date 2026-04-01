@@ -2,6 +2,6 @@
 
 <% autocomplete_address_label = "autocomplete - #{@selected_country.handle.gsub('United States', 'US')} addresses only" %>
 <% placeholder = 'Start typing an address ...' %>
-<%= render(HawthorneCore::UI::Form::TextFieldComponent.new(form: @form, attribute: :autocomplete_address, label: autocomplete_address_label, placeholder: placeholder, maxlength: 200)) %>
+<%= render(HawthorneCore::UI::Form::TextFieldComponent.new(form: @form, attribute: :autocomplete_address, label: autocomplete_address_label, placeholder: placeholder, maxlength: 200, autofocus: true)) %>
 
 <div id='<%= @model.model_name.param_key %>_autocomplete_address_suggestions' style='border: 1px solid #ccc; margin-top: 4px; display: none; background: #fff;'></div>

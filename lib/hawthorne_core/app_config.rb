@@ -12,6 +12,10 @@ module HawthorneCore
 
     def self.site_base_url = fetch_env_attr('SITE_BASE_URL')
 
+    def self.smarty_auth_id = fetch_env_attr('SMARTY_AUTH_ID')
+
+    def self.smarty_auth_token = fetch_env_attr('SMARTY_AUTH_TOKEN')
+
     def self.smarty_embedded_key = fetch_env_attr('SMARTY_EMBEDDED_KEY')
 
     def self.twilio_password = fetch_env_attr('TWILIO_PASSWORD')
