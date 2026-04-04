@@ -8,6 +8,11 @@ class HawthorneCore::ApplicationController < ::ApplicationController
 
   # ---------------------------------------------------------------------------
 
+  # only support 'modern' browsers
+  allow_browser versions: :modern
+
+  # ---------------------------------------------------------------------------
+
   # set an attribute, noting if the page is to be re-cached
   before_action :set_clear_cache_attr
 
@@ -22,6 +27,11 @@ class HawthorneCore::ApplicationController < ::ApplicationController
 
   # determine if the user is signed in
   before_action :signed_in?
+
+  # ---------------------------------------------------------------------------
+
+  # changes to the importmap will invalidate the etag for HTML responses - rails v8 default
+  stale_when_importmap_changes
 
   # ---------------------------------------------------------------------------
 
