@@ -7,11 +7,11 @@ module HawthorneCore::Site::HawthorneSupplyCo
 
     # -----------------------------------------------------------------------------
 
-    #TODO: change id, contact_email, and mailer_send_welcome_template_id
+    #TODO: change contact_email, and mailer_send_welcome_template_id
     CONFIG =
       {
         env_name: HawthorneCore::AppConfig::HAWTHORNE_SUPPLY_CO_ENV_SITE_NAME,
-        id: 1,
+        id: 3,
         name: 'Hawthorne Supply Co',
         site_sharing_scope: 'HAWTHORNE',
         has_checkout: true,
