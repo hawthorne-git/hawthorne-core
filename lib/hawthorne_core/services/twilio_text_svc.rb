@@ -32,7 +32,7 @@ class HawthorneCore::Services::TwilioTextSvc
   end
 
   # define the phone number to use when sending the text message
-  def self.twilio_phone_number = HawthorneCore::AppConfig.twilio_us_phone_number
+  def self.twilio_phone_number = '18452534739'.freeze
 
   # ----------------------------------------------------------------
 

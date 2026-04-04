@@ -8,7 +8,17 @@ module HawthorneCore
 
     # -----------------------------------------------------------------------------
 
+    def self.aws_access_key = fetch_env_attr('AWS_ACCESS_KEY')
+
+    def self.aws_secret_access_key = fetch_env_attr('AWS_SECRET_ACCESS_KEY')
+
     def self.mailer_send_api_token = fetch_env_attr('MAILER_SEND_API_TOKEN')
+
+    def self.redis_cache_url = fetch_env_attr('REDIS_CACHE_URL')
+
+    def self.redis_sidekiq_url = fetch_env_attr('REDIS_SIDEKIQ_URL')
+
+    def self.rails_env = fetch_env_attr('RAILS_ENV')
 
     def self.site_base_url = fetch_env_attr('SITE_BASE_URL')
 
@@ -20,16 +30,22 @@ module HawthorneCore
 
     def self.twilio_password = fetch_env_attr('TWILIO_PASSWORD')
 
-    def self.twilio_us_phone_number = fetch_env_attr('TWILIO_US_PHONE_NUMBER')
-
     def self.twilio_username = fetch_env_attr('TWILIO_USERNAME')
 
     # ----------------------------------------------------------------------------- Site Names
 
+    HAWTHORNE_ADMIN_ENV_SITE_NAME = 'HAWTHORNE_ADMIN'
+    HAWTHORNE_ARTISTS_ENV_SITE_NAME = 'HAWTHORNE_ARTISTS'
+    HAWTHORNE_PRINT_CO_ENV_SITE_NAME = 'HAWTHORNE_PRINT_CO'
+    HAWTHORNE_SUPPLY_CO_ENV_SITE_NAME = 'HAWTHORNE_SUPPLY_CO'
     RILEY_BLAKE_ENV_SITE_NAME = 'RILEY_BLAKE'
 
     VALID_ENV_SITE_NAMES =
       [
+        HAWTHORNE_ADMIN_ENV_SITE_NAME,
+        HAWTHORNE_ARTISTS_ENV_SITE_NAME,
+        HAWTHORNE_PRINT_CO_ENV_SITE_NAME,
+        HAWTHORNE_SUPPLY_CO_ENV_SITE_NAME,
         RILEY_BLAKE_ENV_SITE_NAME
       ].freeze
 

@@ -2,7 +2,11 @@
 
 class HawthorneCore::Site < HawthorneCore::ActiveRecordBaseApp
 
-  include HawthorneCore::Site::RileyBlake
+  include HawthorneCore::Site::HawthorneAdmin,
+          HawthorneCore::Site::HawthorneArtists,
+          HawthorneCore::Site::HawthornePrintCo,
+          HawthorneCore::Site::HawthorneSupplyCo,
+          HawthorneCore::Site::RileyBlake
 
   # -----------------------------------------------------------------------------
 
@@ -13,14 +17,22 @@ class HawthorneCore::Site < HawthorneCore::ActiveRecordBaseApp
   # -----------------------------------------------------------------------------
 
   # define the list of contact emails, by site
+  # note that not all sites have a contact email; ex hawthorne-admin
   CONTACT_EMAILS =
     {
+      hawthorne_artists_env_name => hawthorne_artists_contact_email,
+      hawthorne_print_co_env_name => hawthorne_print_co_contact_email,
+      hawthorne_supply_co_env_name => hawthorne_supply_co_contact_email,
       riley_blake_env_name => riley_blake_contact_email
     }
 
   # define the list of email from taglines, by site
+  # note that not all sites have an email from tagline; ex hawthorne-admin
   EMAIL_FROM_TAGLINES =
     {
+      hawthorne_artists_env_name => hawthorne_artists_email_from_tagline,
+      hawthorne_print_co_env_name => hawthorne_print_co_email_from_tagline,
+      hawthorne_supply_co_env_name => hawthorne_supply_co_email_from_tagline,
       riley_blake_env_name => riley_blake_email_from_tagline
     }
 
@@ -28,29 +40,50 @@ class HawthorneCore::Site < HawthorneCore::ActiveRecordBaseApp
   # as ex: hawthorne-supply-co has a checkout, while hawthorne-admin does not
   HAS_CHECKOUTS =
     {
+      hawthorne_admin_env_name => hawthorne_admin_has_checkout,
+      hawthorne_artists_env_name => hawthorne_artists_has_checkout,
+      hawthorne_print_co_env_name => hawthorne_print_co_has_checkout,
+      hawthorne_supply_co_env_name => hawthorne_supply_co_has_checkout,
       riley_blake_env_name => riley_blake_has_checkout
     }
 
-  # define the list of site ids
+  # define the list of site ids, by site
   IDS =
     {
+      hawthorne_admin_env_name => hawthorne_admin_id,
+      hawthorne_artists_env_name => hawthorne_artists_id,
+      hawthorne_print_co_env_name => hawthorne_print_co_id,
+      hawthorne_supply_co_env_name => hawthorne_supply_co_id,
       riley_blake_env_name => riley_blake_id
     }
 
-  # define the list of mailer send welcome template ids
+  # define the list of mailer send welcome template ids, by site
+  # note that not all sites send welcome emails; ex hawthorne-admin
   MAILER_SEND_WELCOME_EMAIL_TEMPLATE_IDS =
     {
+      hawthorne_artists_env_name => hawthorne_artists_mailer_send_welcome_template_id,
+      hawthorne_print_co_env_name => hawthorne_print_co_mailer_send_welcome_template_id,
+      hawthorne_supply_co_env_name => hawthorne_supply_co_mailer_send_welcome_template_id,
       riley_blake_env_name => riley_blake_mailer_send_welcome_template_id
     }
 
-  # define the list of site names
+  # define the list of site names, by site
   NAMES =
     {
+      hawthorne_admin_env_name => hawthorne_admin_name,
+      hawthorne_artists_env_name => hawthorne_artists_name,
+      hawthorne_print_co_env_name => hawthorne_print_co_name,
+      hawthorne_supply_co_env_name => hawthorne_supply_co_name,
       riley_blake_env_name => riley_blake_name
     }
 
+  # define the list of site sharing scopes, by site
   SITE_SHARING_SCOPES =
     {
+      hawthorne_admin_env_name => hawthorne_admin_site_sharing_scope,
+      hawthorne_artists_env_name => hawthorne_artists_site_sharing_scope,
+      hawthorne_print_co_env_name => hawthorne_print_co_site_sharing_scope,
+      hawthorne_supply_co_env_name => hawthorne_supply_co_site_sharing_scope,
       riley_blake_env_name => riley_blake_site_sharing_scope
     }
 
