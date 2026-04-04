@@ -77,6 +77,16 @@ class HawthorneCore::Site < HawthorneCore::ActiveRecordBaseApp
       riley_blake_env_name => riley_blake_name
     }
 
+  # define the list of site name abbreviations, by site
+  NAME_ABBREVIATIONS =
+    {
+      hawthorne_admin_env_name => hawthorne_admin_name_abbreviation,
+      hawthorne_artists_env_name => hawthorne_artists_name_abbreviation,
+      hawthorne_print_co_env_name => hawthorne_print_co_name_abbreviation,
+      hawthorne_supply_co_env_name => hawthorne_supply_co_name_abbreviation,
+      riley_blake_env_name => riley_blake_name_abbreviation
+    }
+
   # define the list of site sharing scopes, by site
   SITE_SHARING_SCOPES =
     {
@@ -100,6 +110,8 @@ class HawthorneCore::Site < HawthorneCore::ActiveRecordBaseApp
   def self.this_site_mailer_send_welcome_email_template_id = MAILER_SEND_WELCOME_EMAIL_TEMPLATE_IDS.fetch(HawthorneCore::AppConfig.site_name) { raise env_site_name_exception('this_site_mailer_send_welcome_email_template_id') }
 
   def self.this_site_name = NAMES.fetch(HawthorneCore::AppConfig.site_name) { raise env_site_name_exception('this_site_name') }
+
+  def self.this_site_name_abbreviation = NAME_ABBREVIATIONS.fetch(HawthorneCore::AppConfig.site_name) { raise env_site_name_exception('this_site_name_abbreviation') }
 
   def self.this_site_sharing_scope = SITE_SHARING_SCOPES.fetch(HawthorneCore::AppConfig.site_name) { raise env_site_name_exception('this_site_sharing_scope') }
 

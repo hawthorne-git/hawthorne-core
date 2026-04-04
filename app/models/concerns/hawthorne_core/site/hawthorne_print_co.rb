@@ -13,6 +13,7 @@ module HawthorneCore::Site::HawthornePrintCo
         env_name: HawthorneCore::AppConfig::HAWTHORNE_PRINT_CO_ENV_SITE_NAME,
         id: 2,
         name: 'Hawthorne Print Co',
+        name_abbreviation: 'HPCO',
         site_sharing_scope: 'HAWTHORNE',
         has_checkout: true,
         contact_email: 'contact@hawthornesupplyco.com',

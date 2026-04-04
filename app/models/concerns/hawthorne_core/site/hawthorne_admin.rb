@@ -12,6 +12,7 @@ module HawthorneCore::Site::HawthorneAdmin
         env_name: HawthorneCore::AppConfig::HAWTHORNE_ADMIN_ENV_SITE_NAME,
         id: 4,
         name: 'Hawthorne Admin',
+        name_abbreviation: 'HADMIN',
         site_sharing_scope: 'HAWTHORNE',
         has_checkout: false
       }.freeze

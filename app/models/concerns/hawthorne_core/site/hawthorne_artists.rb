@@ -13,6 +13,7 @@ module HawthorneCore::Site::HawthorneArtists
         env_name: HawthorneCore::AppConfig::HAWTHORNE_ARTISTS_ENV_SITE_NAME,
         id: 5,
         name: 'Hawthorne Artists',
+        name_abbreviation: 'HARTISTS',
         site_sharing_scope: 'HAWTHORNE',
         has_checkout: false,
         contact_email: 'contact@hawthornesupplyco.com',

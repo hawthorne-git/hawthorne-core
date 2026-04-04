@@ -12,6 +12,7 @@ module HawthorneCore::Site::RileyBlake
         env_name: HawthorneCore::AppConfig::RILEY_BLAKE_ENV_SITE_NAME,
         id: 1,
         name: 'Hawthorne at Riley Blake',
+        name_abbreviation: 'HRB',
         site_sharing_scope: 'HAWTHORNE',
         has_checkout: true,
         contact_email: 'hello@rileyblakeathawthorne.com',
