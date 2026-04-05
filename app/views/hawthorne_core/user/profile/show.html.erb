@@ -1,44 +1,34 @@
 <%# v3.0 %>
 
-<div class='title'>Profile</div>
+<%
+  title = 'Profile'
 
-<div class='form'>
+  full_name_label = 'name'
+  full_name_value = @user.full_name
 
+  email_address_label = "email address - #{link_to 'update', profile_email_address_path, data: { turbo: :false }}"
+  email_address_value = @user.email_address
+
+  phone_number_label = "phone number - #{link_to @user.phone_number.blank? ? 'add' : 'update', profile_phone_number_path, data: { turbo: :false }}"
+  phone_number_label = "#{phone_number_label} (#{link_to 'clear', profile_phone_number_clear_path, :title => 'Remove Phone Number', data: { turbo_method: :delete, turbo_confirm: 'Are you sure you want to remove your phone number from your account?' }})" if @user.phone_number.present?
+  phone_number_value = HawthorneCore::Helpers::PhoneNumber.us_format(@user.phone_number)
+
+  sign_in_pin_default_delivery_label = 'preferred PIN delivery method at sign-in'
+  sign_in_pin_default_delivery_options = [[HawthorneCore::User::PIN_VIA_EMAIL.capitalize]]
+  sign_in_pin_default_delivery_options.push([HawthorneCore::User::PIN_VIA_PHONE.capitalize]) if @user.phone_number.present?
+  sign_in_pin_default_delivery_selected = @user.sign_in_pin_default_delivery.capitalize
+
+  submit_button_text = 'Update Profile'
+%>
+
+<%= render HawthorneCore::UI::TitleComponent.new(text: title) %>
+
+<%= render HawthorneCore::UI::Form::FormWrapperComponent.new do |f| %>
   <%= form_with url: profile_path do |f| %>
-
-    <div class='form_input'>
-      <label class='form_input'>name</label>
-      <%= f.text_field :full_name, value: @user.full_name, required: false, maxlength: 100 %>
-    </div>
-
-    <div class='form_input'>
-      <label class='form_input'>email address - <%= link_to 'update', profile_email_address_path, data: { turbo: :false } %></label>
-      <%= f.text_field :email_address, value: @user.email_address, disabled: true, required: false, maxlength: 320 %>
-    </div>
-
-    <div class='form_input'>
-      <label class='form_input'>
-        phone number - <%= link_to @user.phone_number.blank? ? 'add' : 'update', profile_phone_number_path, data: { turbo: :false } %>
-        <% if @user.phone_number.present? %>
-        (<%= link_to 'clear', profile_phone_number_clear_path, :title => 'Remove Phone Number', data: { turbo_method: :delete, turbo_confirm: 'Are you sure you want to remove your phone number from your account?' } %>)
-        <% end %>
-      </label>
-      <%= f.text_field :phone_number, value: HawthorneCore::Helpers::PhoneNumber.us_format(@user.phone_number), disabled: true, required: false, maxlength: 100 %>
-    </div>
-
-    <% if @user.phone_number.present? %>
-      <div class='form_input'>
-        <label class='form_input'>preferred PIN delivery method at sign-in</label>
-        <%= f.select :sign_in_pin_default_delivery, [[HawthorneCore::User::PIN_VIA_EMAIL.capitalize], [HawthorneCore::User::PIN_VIA_PHONE.capitalize]], { selected: @user.sign_in_pin_default_delivery.capitalize } %>
-      </div>
-    <% else %>
-      <%= hidden_field_tag :sign_in_pin_default_delivery, HawthorneCore::User::PIN_VIA_EMAIL %>
-    <% end %>
-
-    <div class='form_submit'>
-      <%= f.submit 'Update Profile' %>
-    </div>
-
+    <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :full_name, label: full_name_label, value: full_name_value, required: true) %>
+    <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :email_address, label: email_address_label, value: email_address_value, disabled: true, required: true, maxlength: 320) %>
+    <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :phone_number, label: phone_number_label, value: phone_number_value, disabled: true) %>
+    <%= render HawthorneCore::UI::Form::SelectFieldComponent.new(form: f, attribute: :sign_in_pin_default_delivery, label: sign_in_pin_default_delivery_label, options: sign_in_pin_default_delivery_options, selected: sign_in_pin_default_delivery_selected) %>
+    <%= render HawthorneCore::UI::Form::SubmitButtonComponent.new(form: f, text: submit_button_text) %>
   <% end %>
-
-</div>
+<% end %>
