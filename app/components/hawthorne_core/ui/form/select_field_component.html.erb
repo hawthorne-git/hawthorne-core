@@ -1,6 +1,6 @@
 <%# v3.0 %>
 
-<div class='form_input'>
+<div>
   <%= render(HawthorneCore::UI::Form::LabelComponent.new(text: @label)) %>
   <%= @form.select @attribute, @options, { prompt: @prompt }, @html_options %>
 </div>

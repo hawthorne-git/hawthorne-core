@@ -29,10 +29,10 @@
     <% if @user.phone_number.present? %>
       <div class='form_input'>
         <label class='form_input'>preferred PIN delivery method at sign-in</label>
-        <%= f.select :pin_default_delivery, [[HawthorneCore::User::PIN_VIA_EMAIL.capitalize], [HawthorneCore::User::PIN_VIA_PHONE.capitalize]], { selected: @user.pin_default_delivery.capitalize } %>
+        <%= f.select :sign_in_pin_default_delivery, [[HawthorneCore::User::PIN_VIA_EMAIL.capitalize], [HawthorneCore::User::PIN_VIA_PHONE.capitalize]], { selected: @user.sign_in_pin_default_delivery.capitalize } %>
       </div>
     <% else %>
-      <%= hidden_field_tag :pin_default_delivery, HawthorneCore::User::PIN_VIA_EMAIL %>
+      <%= hidden_field_tag :sign_in_pin_default_delivery, HawthorneCore::User::PIN_VIA_EMAIL %>
     <% end %>
 
     <div class='form_submit'>

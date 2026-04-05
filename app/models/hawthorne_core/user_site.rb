@@ -2,7 +2,8 @@
 
 class HawthorneCore::UserSite < HawthorneCore::ActiveRecordBaseApp
 
-  include HawthorneCore::HasSiteId
+  include HawthorneCore::HasSiteId,
+          HawthorneCore::UserSite::SignInPinVerification
 
   # -----------------------------------------------------------------------------
 
@@ -13,8 +14,6 @@ class HawthorneCore::UserSite < HawthorneCore::ActiveRecordBaseApp
   # -----------------------------------------------------------------------------
 
   def self.user_access_exist?(user_id) = exists?(site_id: HawthorneCore::Site.this_site_id, user_id: user_id)
-
-  def self.first_sign_in?(user_id) = exists?(site_id: HawthorneCore::Site.this_site_id, user_id: user_id, sign_in_count: 0)
 
   def first_sign_in? = sign_in_count.zero?
 

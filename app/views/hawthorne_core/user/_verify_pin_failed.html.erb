@@ -1,0 +1,10 @@
+<%# v3.0 %>
+
+<%
+  message = 'Your PIN has expired, so we’ve sent you a new one' if @pin_expired
+  message = 'There have been too many unsuccessful attempts, so we’ve sent you a new PIN' if @pin_max_failed_attempts_reached
+  message = 'That PIN doesn’t match, please check for a typo and try again' if @pin_not_match
+  message = 'We couldn’t verify that PIN, so we sent you a new one' if @pin_not_set
+%>
+
+<%= render HawthorneCore::UI::Form::ErrorMessageComponent.new(message: message) %>

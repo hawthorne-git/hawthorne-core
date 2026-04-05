@@ -14,7 +14,7 @@ class HawthorneCore::User::ProfileController < HawthorneCore::ApplicationControl
 
     # find the user
     @user = HawthorneCore::User.
-      select(:user_id, :full_name, :email_address, :phone_number, :pin_default_delivery).
+      select(:user_id, :full_name, :email_address, :phone_number, :sign_in_pin_default_delivery).
       find_by(user_id: session[:user_id])
 
     # ----------------------
@@ -35,7 +35,7 @@ class HawthorneCore::User::ProfileController < HawthorneCore::ApplicationControl
 
     # get the form attributes
     full_name = params[:full_name]
-    pin_default_delivery = params[:pin_default_delivery].upcase
+    sign_in_pin_default_delivery = params[:sign_in_pin_default_delivery].upcase
 
     # find the user
     user = HawthorneCore::User.
@@ -43,8 +43,8 @@ class HawthorneCore::User::ProfileController < HawthorneCore::ApplicationControl
       find_by(user_id: session[:user_id])
 
     # update the users profile attributes - log it
-    user.update_columns(full_name: full_name, pin_default_delivery: pin_default_delivery)
-    HawthorneCore::UserAction::Log.update_profile(user.id, { full_name: full_name, pin_default_delivery: pin_default_delivery }, request.remote_ip, cookies[:user_session_token])
+    user.update_columns(full_name: full_name, sign_in_pin_default_delivery: sign_in_pin_default_delivery)
+    HawthorneCore::UserAction::Log.update_profile(user.id, { full_name: full_name, sign_in_pin_default_delivery: sign_in_pin_default_delivery }, request.remote_ip, cookies[:user_session_token])
 
     # redirect the user to view their account
     redirect_to account_path

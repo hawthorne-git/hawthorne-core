@@ -166,7 +166,7 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Appli
 
     # update the users phone number and set this as default delivery
     # then clear the users update phone number attributes
-    user.update_columns(phone_number: new_phone_number, pin_default_delivery: HawthorneCore::User::PIN_VIA_PHONE)
+    user.update_columns(phone_number: new_phone_number, sign_in_pin_default_delivery: HawthorneCore::User::PIN_VIA_PHONE)
     user.clear_phone_number_update_attrs
 
     # log it
@@ -199,7 +199,7 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Appli
 
     # remove the users phone number,
     # and set the pin default delivery to EMAIL as they no longer have a phone number
-    user.update_columns(phone_number: new_phone_number, pin_default_delivery: HawthorneCore::User::PIN_VIA_EMAIL)
+    user.update_columns(phone_number: new_phone_number, sign_in_pin_default_delivery: HawthorneCore::User::PIN_VIA_EMAIL)
 
     # log it
     HawthorneCore::UserAction::Log.update_profile_phone_number(user.id, { old_phone_number: old_phone_number, new_phone_number: new_phone_number }, request.remote_ip, cookies[:user_session_token])
