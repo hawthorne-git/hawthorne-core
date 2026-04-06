@@ -1,45 +1,37 @@
 <%# v3.0 %>
 
-<div class='title'>Verify your PIN</div>
+<%
+  form_url = account_profile_phone_number_verify_pin_path
 
-<div class='vertical_space'></div>
-Enter the PIN we texted to: <%= HawthorneCore::Helpers::PhoneNumber.us_format(@user.new_phone_number) %>
-<div class='vertical_space'></div>
+  title = 'Verify your PIN'
 
-<%= turbo_frame_tag 'verify_pin_failed_turbo_frame' do %>
-  <%= render partial: '/hawthorne_core/partials/user/verify_pin_failed' if @verify_pin_failed %>
+  instruction_message = "Enter the PIN we texted to: #{HawthorneCore::Helpers::PhoneNumber.us_format(@new_phone_number)}"
+
+  current_phone_number_label = 'Current phone number'
+  current_phone_number_value = HawthorneCore::Helpers::PhoneNumber.us_format(@current_phone_number)
+
+  new_phone_number_label = 'New phone number'
+  new_phone_number_value = HawthorneCore::Helpers::PhoneNumber.us_format(@new_phone_number)
+
+  pin_label = 'Verification PIN - Numbers only'
+
+  submit_button_text = @current_phone_number.blank? ? 'Add Phone Number' : 'Update Phone Number'
+%>
+
+<%= render HawthorneCore::UI::TitleComponent.new(text: title) %>
+
+<%= turbo_frame_tag 'errors' %>
+
+<%= render HawthorneCore::UI::Form::FormWrapperComponent.new do %>
+  <%= render HawthorneCore::UI::Form::InstructionMessageComponent.new(message: instruction_message) %>
+  <%= form_with url: form_url do |f| %>
+    <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :current_phone_number, label: current_phone_number_label, value: current_phone_number_value, disabled: true) if @current_phone_number %>
+    <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :new_phone_number, label: new_phone_number_label, value: new_phone_number_value, disabled: true) %>
+    <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :pin, label: pin_label, required: true, autofocus: true) %>
+    <%= render HawthorneCore::UI::Form::SubmitButtonComponent.new(form: f, text: submit_button_text) %>
+  <% end %>
 <% end %>
 
-<div class='form'>
-
-  <%= form_with url: profile_phone_number_verify_pin_path do |f| %>
-
-    <% if @user.phone_number.present? %>
-      <div class='form_input'>
-        <label class='form_input'>current phone number</label>
-        <%= f.text_field :current_phone_number, value: HawthorneCore::Helpers::PhoneNumber.us_format(@user.phone_number), disabled: true, required: false, maxlength: 320 %>
-      </div>
-    <% end %>
-
-    <div class='form_input'>
-      <label class='form_input'>new phone number</label>
-      <%= f.text_field :new_phone_number, value: HawthorneCore::Helpers::PhoneNumber.us_format(@user.new_phone_number), disabled: true, required: false, maxlength: 320 %>
-    </div>
-
-    <div class='form_input'>
-      <label class='form_input'>verification pin - numbers only</label>
-      <%= f.text_field :pin, class: 'form_input', required: true, maxlength: 100, autofocus: true, autocomplete: :off %>
-    </div>
-
-    <div class='form_submit'>
-      <% button_label = (@user.phone_number.blank? ? 'Add' : 'Update') + ' Phone Number' %>
-      <%= f.submit button_label %>
-    </div>
-
-  <% end %>
-
+<div>
+  Didn’t get the PIN?  <%= link_to 'Resend it', account_profile_phone_number_resend_pin_path, data: { turbo: :false } %>
 </div>
-
-<div class='vertical_space'></div>
-Didn’t get the PIN?  <%= link_to 'Resend it', profile_phone_number_resend_pin_path, data: { turbo: :false } %>
-<div class='vertical_space'></div>

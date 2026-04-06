@@ -40,15 +40,15 @@ module HawthorneCore::UserAction::Log
 
   # ----------------------------------------------------------------------------- Phone (Update)
 
-  def self.phone_number_update_attrs_cleared(user_id)
+  def self.new_phone_number_attrs_cleared(user_id)
     success_admin(user_id, action(:phone_number_update_attrs_cleared), nil)
   end
 
-  def self.phone_number_update_attrs_refreshed(user_id, note)
+  def self.new_phone_number_attrs_refreshed(user_id, note)
     success_admin(user_id, action(:phone_number_update_attrs_refreshed), note)
   end
 
-  def self.phone_number_update_attrs_set(user_id, note)
+  def self.new_phone_number_attrs_set(user_id, note)
     success_admin(user_id, action(:phone_number_update_attrs_set), note)
   end
 

@@ -1,31 +1,26 @@
 <%# v3.0 %>
 
-<div class='title'><%= @user.phone_number.blank? ? 'Add' : 'Update' %> Phone Number</div>
+<%
+  form_url = account_profile_phone_number_verify_path
 
-<%= turbo_frame_tag 'update_phone_number_failed_turbo_frame' do %>
-  <%= render partial: '/hawthorne_core/partials/user/update_phone_number_failed' if @update_phone_number_failed %>
-<% end %>
+  title = @phone_number.blank? ? 'Add Phone Number' : 'Update Phone Number'
 
-<div class='form'>
+  current_phone_number_label = 'Current phone number'
+  current_phone_number_value = HawthorneCore::Helpers::PhoneNumber.us_format(@phone_number)
 
-  <%= form_with url: profile_phone_number_verify_path do |f| %>
+  new_phone_number_label = 'New phone number (US / Canada only)'
 
-    <% if @user.phone_number.present? %>
-      <div class='form_input'>
-        <label class='form_input'>current phone number</label>
-        <%= f.text_field :current_phone_number, value: HawthorneCore::Helpers::PhoneNumber.us_format(@user.phone_number), disabled: true, required: false, maxlength: 320 %>
-      </div>
-    <% end %>
+  submit_button_text = 'Continue'
+%>
 
-    <div class='form_input'>
-      <label class='form_input'>new phone number (us / canada only)</label>
-      <%= f.text_field :new_phone_number, required: true, maxlength: 320, autofocus: true %>
-    </div>
+<%= render HawthorneCore::UI::TitleComponent.new(text: title) %>
 
-    <div class='form_submit'>
-      <%= f.submit 'Continue' %>
-    </div>
+<%= turbo_frame_tag('errors') %>
 
+<%= render HawthorneCore::UI::Form::FormWrapperComponent.new do %>
+  <%= form_with url: form_url do |f| %>
+    <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :current_phone_number, label: current_phone_number_label, value: current_phone_number_value, disabled: true, required: true) if @phone_number.present? %>
+    <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :new_phone_number, label: new_phone_number_label, required: true, autofocus: true) %>
+    <%= render HawthorneCore::UI::Form::SubmitButtonComponent.new(form: f, text: submit_button_text) %>
   <% end %>
-
-</div>
+<% end %>

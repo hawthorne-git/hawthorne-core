@@ -25,7 +25,7 @@ class HawthorneCore::User::Profile::EmailAddressController < HawthorneCore::Appl
     @html_title = 'Update Email Address | My Account'
     @breadcrumbs = [
       { title: 'My Account', link: account_path },
-      { title: 'Profile', link: profile_path },
+      { title: 'Profile', link: account_profile_path },
       { title: 'Update Email Address', link: nil }
     ]
 
@@ -51,7 +51,7 @@ class HawthorneCore::User::Profile::EmailAddressController < HawthorneCore::Appl
     # verify that the new email address does not have a syntax error
     # if invalid - log it, return back and display an error message
     unless HawthorneCore::Helpers::EmailAddress.syntax_valid?(new_email_address)
-      @update_email_address_failed = @new_email_address_syntax_error = true
+      @new_email_address_syntax_error = true
       HawthorneCore::UserAction::Log.update_profile_email_address_failure(user.id, HawthorneCore::UserAction::FailureReason.email_address_syntax_error, { new_email_address: new_email_address }, request.remote_ip, cookies[:user_session_token])
       render turbo_stream: turbo_stream.update('update_email_address_failed_turbo_frame', partial: '/hawthorne_core/partials/user/update_email_address_failed') and return
     end
@@ -59,7 +59,7 @@ class HawthorneCore::User::Profile::EmailAddressController < HawthorneCore::Appl
     # verify that the new email address does not match the current email address
     # if identical - log it, return back and display an error message
     if user.email_address == new_email_address
-      @update_email_address_failed = @new_email_address_identical = true
+      @new_email_address_identical = true
       HawthorneCore::UserAction::Log.update_profile_email_address_failure(session[:user_id], HawthorneCore::UserAction::FailureReason.email_address_identical, { current_email_address: user.email_address, new_email_address: new_email_address }, request.remote_ip, cookies[:user_session_token])
       render turbo_stream: turbo_stream.update('update_email_address_failed_turbo_frame', partial: '/hawthorne_core/partials/user/update_email_address_failed') and return
     end
@@ -67,7 +67,7 @@ class HawthorneCore::User::Profile::EmailAddressController < HawthorneCore::Appl
     # verify that the new email address is not taken
     # if taken - log it, return back and display an error message
     if HawthorneCore::Helpers::EmailAddress.taken?(new_email_address)
-      @update_email_address_failed = @new_email_address_taken = true
+      @new_email_address_taken = true
       HawthorneCore::UserAction::Log.update_profile_email_address_failure(session[:user_id], HawthorneCore::UserAction::FailureReason.email_address_taken, { new_email_address: new_email_address }, request.remote_ip, cookies[:user_session_token])
       render turbo_stream: turbo_stream.update('update_email_address_failed_turbo_frame', partial: '/hawthorne_core/partials/user/update_email_address_failed') and return
     end
@@ -104,7 +104,7 @@ class HawthorneCore::User::Profile::EmailAddressController < HawthorneCore::Appl
     @html_title = 'Update Email Address | My Account'
     @breadcrumbs = [
       { title: 'My Account', link: account_path },
-      { title: 'Profile', link: profile_path },
+      { title: 'Profile', link: account_profile_path },
       { title: 'Update Email Address', link: nil }
     ]
 

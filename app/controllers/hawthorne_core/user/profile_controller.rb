@@ -43,8 +43,9 @@ class HawthorneCore::User::ProfileController < HawthorneCore::ApplicationControl
       find_by(user_id: session[:user_id])
 
     # update the users profile attributes - log it
-    user.update_columns(full_name: full_name, sign_in_pin_default_delivery: sign_in_pin_default_delivery)
-    HawthorneCore::UserAction::Log.update_profile(user.id, { full_name: full_name, sign_in_pin_default_delivery: sign_in_pin_default_delivery }, request.remote_ip, cookies[:user_session_token])
+    user_update_attrs = { full_name: full_name, sign_in_pin_default_delivery: sign_in_pin_default_delivery }
+    user.update_columns(user_update_attrs)
+    HawthorneCore::UserAction::Log.update_profile(user.id, user_update_attrs, request.remote_ip, cookies[:user_session_token])
 
     # redirect the user to view their account
     redirect_to account_path

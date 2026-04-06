@@ -34,7 +34,7 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
     # verify that the email address does not have a syntax error
     # if invalid - log it, return back and display an error message
     unless HawthorneCore::Helpers::EmailAddress.syntax_valid?(email_address)
-      @sign_in_failed = @email_address_syntax_error = true
+      @email_address_syntax_error = true
       HawthorneCore::UserAction::Log.sign_in_failure(HawthorneCore::UserAction::FailureReason.email_address_syntax_error, { email_address: email_address }, request.remote_ip, cookies[:user_session_token])
       render turbo_stream: turbo_stream.update('sign_in_failed_turbo_frame', partial: 'sign_in_failed') and return
     end

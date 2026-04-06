@@ -18,8 +18,8 @@ HawthorneCore::Engine.routes.draw do
 
   # ----------------------
 
-  get 'profile', to: 'user/profile#show'
-  post 'profile', to: 'user/profile#update'
+  get 'account/profile', to: 'user/profile#show'
+  post 'account/profile', to: 'user/profile#update'
 
   get 'profile-email-address', to: 'user/profile/email_address#show'
   post 'profile-email-address-verify', to: 'user/profile/email_address#verify'
@@ -27,12 +27,12 @@ HawthorneCore::Engine.routes.draw do
   post 'profile-email-address-verify-pin', to: 'user/profile/email_address#verify_pin'
   get 'profile-email-address-resend-pin', to: 'user/profile/email_address#resend_pin'
 
-  get 'profile-phone-number', to: 'user/profile/phone_number#show'
-  post 'profile-phone-number-verify', to: 'user/profile/phone_number#verify'
-  get 'profile-phone-number-verify-pin', to: 'user/profile/phone_number#verify_pin_show'
-  post 'profile-phone-number-verify-pin', to: 'user/profile/phone_number#verify_pin'
-  get 'profile-phone-number-resend-pin', to: 'user/profile/phone_number#resend_pin'
-  delete 'profile-phone-number-clear', to: 'user/profile/phone_number#clear'
+  get 'account/profile/phone-number', to: 'user/profile/phone_number#show'
+  post 'account/profile/phone-number-verify', to: 'user/profile/phone_number#verify'
+  get 'account/profile/phone-number-verify-pin', to: 'user/profile/phone_number#verify_pin_show'
+  post 'account/profile/phone-number-verify-pin', to: 'user/profile/phone_number#verify_pin'
+  get 'account/profile/phone-number-resend-pin', to: 'user/profile/phone_number#resend_pin'
+  delete 'account/profile/phone-number-clear', to: 'user/profile/phone_number#clear'
 
   # ----------------------
 

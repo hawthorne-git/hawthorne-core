@@ -2,5 +2,5 @@
 
 <div>
   <%= render HawthorneCore::UI::Form::LabelComponent.new(text: @label) %>
-  <%= @form.text_field @attribute, placeholder: @placeholder, required: @required, value: @value, autocomplete: @autocomplete, maxlength: @maxlength, autofocus: @autofocus %>
+  <%= @form.text_field @attribute, placeholder: @placeholder, required: @required, value: @value, disabled: @disabled, autocomplete: @autocomplete, maxlength: @maxlength, autofocus: @autofocus %>
 </div>

@@ -3,7 +3,9 @@
 class HawthorneCore::UserSite < HawthorneCore::ActiveRecordBaseApp
 
   include HawthorneCore::HasSiteId,
+          HawthorneCore::UserSite::PhoneNumberPinVerification,
           HawthorneCore::UserSite::SignInPinVerification
+
 
   # -----------------------------------------------------------------------------
 

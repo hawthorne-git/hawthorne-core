@@ -1,8 +1,0 @@
-<%# v3.0 %>
-
-<div class='error'>
-  <div class='vertical_space_small'></div>
-  <%= raw('Your new phone number doesn’t look valid<br>Please check for a typo and try again') if @new_phone_number_syntax_error %>
-  <%= 'Your new phone number is the same as your current one' if @new_phone_number_identical %>
-  <div class='vertical_space_small'></div>
-</div>

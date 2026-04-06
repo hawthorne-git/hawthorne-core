@@ -1,6 +1,8 @@
 <%# v3.0 %>
 
 <%
+  form_url = verify_sign_in_pin_path
+
   title = 'Verify your PIN'
 
   instruction_message = "Enter the PIN we emailed to: #{@user.email_address}" if @pin_delivery_method == HawthorneCore::User::PIN_VIA_EMAIL
@@ -12,20 +14,18 @@
 
   keep_signed_in_value = @keep_signed_in
 
-  pin_label = 'verification pin - numbers only'
+  pin_label = 'Verification PIN - Numbers only'
 
   submit_button_text = 'Continue'
 %>
 
 <%= render HawthorneCore::UI::TitleComponent.new(text: title) %>
 
-<%= turbo_frame_tag 'verify_pin_failed_turbo_frame' do %>
-  <%= render partial: '/hawthorne_core/user/verify_pin_failed' if @verify_pin_failed %>
-<% end %>
+<%= turbo_frame_tag('errors') %>
 
 <%= render HawthorneCore::UI::Form::FormWrapperComponent.new do %>
   <%= render HawthorneCore::UI::Form::InstructionMessageComponent.new(message: instruction_message) %>
-  <%= form_with url: verify_sign_in_pin_path do |f| %>
+  <%= form_with url: form_url do |f| %>
     <%= render HawthorneCore::UI::Form::HiddenFieldComponent.new(form: f, attribute: :token, value: token_value, required: true) %>
     <%= render HawthorneCore::UI::Form::HiddenFieldComponent.new(form: f, attribute: :pin_delivery_method, value: pin_delivery_method_value, required: true) %>
     <%= render HawthorneCore::UI::Form::HiddenFieldComponent.new(form: f, attribute: :keep_signed_in, value: keep_signed_in_value) %>
