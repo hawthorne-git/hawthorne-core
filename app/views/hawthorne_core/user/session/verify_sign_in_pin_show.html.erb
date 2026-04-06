@@ -20,11 +20,7 @@
 %>
 
 <%= render HawthorneCore::UI::TitleComponent.new(text: title) %>
-
-<%= turbo_frame_tag('errors') %>
-
-<%= render HawthorneCore::UI::Form::FormWrapperComponent.new do %>
-  <%= render HawthorneCore::UI::Form::InstructionMessageComponent.new(message: instruction_message) %>
+<%= render HawthorneCore::UI::Form::FormWrapperComponent.new(instruction_message: instruction_message) do %>
   <%= form_with url: form_url do |f| %>
     <%= render HawthorneCore::UI::Form::HiddenFieldComponent.new(form: f, attribute: :token, value: token_value, required: true) %>
     <%= render HawthorneCore::UI::Form::HiddenFieldComponent.new(form: f, attribute: :pin_delivery_method, value: pin_delivery_method_value, required: true) %>

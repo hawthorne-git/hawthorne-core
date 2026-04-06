@@ -16,7 +16,7 @@
 
   <% else %>
 
-    <% form_url = add_action ? add_shipping_address_path : update_shipping_address_path %>
+    <% form_url = add_action ? account_add_shipping_address_path : update_shipping_address_path %>
     <%= form_with model: @shipping_address, url: form_url do |f| %>
 
       <% clear_country_link = link_to 'clear', add_shipping_address_select_country_path, data: { turbo: :false } %>

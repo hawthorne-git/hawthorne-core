@@ -1,42 +1,33 @@
 <%# v3.0 %>
 
-<div class='title'>Verify your PIN</div>
+<%
+  form_url = account_profile_email_address_verify_pin_path
 
-<div class='vertical_space'></div>
-Enter the PIN we emailed to: <%= @user.new_email_address %>
-<div class='vertical_space'></div>
+  title = 'Verify your PIN'
 
-<%= turbo_frame_tag 'verify_pin_failed_turbo_frame' do %>
-  <%= render partial: '/hawthorne_core/partials/user/verify_pin_failed' if @verify_pin_failed %>
+  instruction_message = "Enter the PIN we emailed to: #{@new_email_address}"
+
+  current_email_address_label = 'Current email address'
+  current_email_address_value = @current_email_address
+
+  new_email_address_label = 'New email_address'
+  new_email_address_value = @new_email_address
+
+  pin_label = 'Verification PIN - Numbers only'
+
+  submit_button_text = 'Update Email Address'
+%>
+
+<%= render HawthorneCore::UI::TitleComponent.new(text: title) %>
+<%= render HawthorneCore::UI::Form::FormWrapperComponent.new(instruction_message: instruction_message) do %>
+  <%= form_with url: form_url do |f| %>
+    <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :current_email_address, label: current_email_address_label, value: current_email_address_value, disabled: true) %>
+    <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :new_email_address, label: new_email_address_label, value: new_email_address_value, disabled: true) %>
+    <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :pin, label: pin_label, required: true, autofocus: true) %>
+    <%= render HawthorneCore::UI::Form::SubmitButtonComponent.new(form: f, text: submit_button_text) %>
+  <% end %>
 <% end %>
 
-<div class='form'>
-
-  <%= form_with url: profile_email_address_verify_pin_path do |f| %>
-
-    <div class='form_input'>
-      <label class='form_input'>current email address</label>
-      <%= f.text_field :current_email_address, value: @user.email_address, disabled: true, required: false, maxlength: 320 %>
-    </div>
-
-    <div class='form_input'>
-      <label class='form_input'>new email address</label>
-      <%= f.text_field :new_email_address, value: @user.new_email_address, disabled: true, required: false, maxlength: 320 %>
-    </div>
-
-    <div class='form_input'>
-      <label class='form_input'>verification pin - numbers only</label>
-      <%= f.text_field :pin, class: 'form_input', required: true, maxlength: 100, autofocus: true, autocomplete: :off %>
-    </div>
-
-    <div class='form_submit'>
-      <%= f.submit 'Update Email' %>
-    </div>
-
-  <% end %>
-
+<div>
+  Didn’t get the PIN?  <%= link_to 'Resend it', account_profile_email_address_resend_pin_path, data: { turbo: :false } %>
 </div>
-
-<div class='vertical_space'></div>
-Didn’t get the PIN?  <%= link_to 'Resend it', profile_email_address_resend_pin_path, data: { turbo: :false } %>
-<div class='vertical_space'></div>

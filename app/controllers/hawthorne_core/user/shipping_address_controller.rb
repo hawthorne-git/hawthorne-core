@@ -91,9 +91,9 @@ class HawthorneCore::User::ShippingAddressController < HawthorneCore::Applicatio
 
   # -----------------------------------------------------------------------------
 
-  def new_select_country = redirect_to add_shipping_address_path(select_country: true)
+  def new_select_country = redirect_to account_add_shipping_address_path(select_country: true)
 
-  def new_selected_country = redirect_to add_shipping_address_path(selected_country: params[:country_code_alpha2])
+  def new_selected_country = redirect_to account_add_shipping_address_path(selected_country: params[:country_code_alpha2])
 
   # -----------------------------------------------------------------------------
 

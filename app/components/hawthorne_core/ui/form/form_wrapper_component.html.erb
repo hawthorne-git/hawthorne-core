@@ -1,5 +1,9 @@
 <%# v3.0 %>
 
+<%= turbo_frame_tag('form_errors') %>
+
+<%= render HawthorneCore::UI::Form::InstructionMessageComponent.new(message: @instruction_message) if @instruction_message.present? %>
+
 <div>
   <%= content %>
 </div>

@@ -3,10 +3,10 @@
 <%
   form_url = account_profile_phone_number_verify_path
 
-  title = @phone_number.blank? ? 'Add Phone Number' : 'Update Phone Number'
+  title = @current_phone_number.blank? ? 'Add Phone Number' : 'Update Phone Number'
 
   current_phone_number_label = 'Current phone number'
-  current_phone_number_value = HawthorneCore::Helpers::PhoneNumber.us_format(@phone_number)
+  current_phone_number_value = HawthorneCore::Helpers::PhoneNumber.us_format(@current_phone_number)
 
   new_phone_number_label = 'New phone number (US / Canada only)'
 
@@ -14,12 +14,9 @@
 %>
 
 <%= render HawthorneCore::UI::TitleComponent.new(text: title) %>
-
-<%= turbo_frame_tag('errors') %>
-
 <%= render HawthorneCore::UI::Form::FormWrapperComponent.new do %>
   <%= form_with url: form_url do |f| %>
-    <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :current_phone_number, label: current_phone_number_label, value: current_phone_number_value, disabled: true, required: true) if @phone_number.present? %>
+    <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :current_phone_number, label: current_phone_number_label, value: current_phone_number_value, disabled: true, required: true) if @current_phone_number.present? %>
     <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :new_phone_number, label: new_phone_number_label, required: true, autofocus: true) %>
     <%= render HawthorneCore::UI::Form::SubmitButtonComponent.new(form: f, text: submit_button_text) %>
   <% end %>

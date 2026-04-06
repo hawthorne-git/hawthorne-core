@@ -60,7 +60,7 @@ module HawthorneCore::UserSite::PhoneNumberPinVerification
 
     # ------------------------
 
-    # determine if a text message, with this phone number update pin, was recently sent
+    # determine if a text message, with this new phone number pin, was recently sent
     def new_phone_number_pin_recently_sent?
       HawthorneCore::UserAction.
         where(

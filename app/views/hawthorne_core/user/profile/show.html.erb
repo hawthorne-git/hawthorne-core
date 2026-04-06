@@ -8,7 +8,7 @@
   full_name_label = 'Name'
   full_name_value = @user.full_name
 
-  email_address_label = "Email address - #{link_to 'Update', profile_email_address_path, data: { turbo: :false }}"
+  email_address_label = "Email address - #{link_to 'Update', account_profile_email_address_path, data: { turbo: :false }}"
   email_address_value = @user.email_address
 
   phone_number_label = "Phone number - #{link_to @user.phone_number.blank? ? 'Add' : 'Update', account_profile_phone_number_path, data: { turbo: :false }}"

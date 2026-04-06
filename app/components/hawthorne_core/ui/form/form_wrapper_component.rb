@@ -1,6 +1,8 @@
 # v3.0
 
 class HawthorneCore::UI::Form::FormWrapperComponent < ViewComponent::Base
-  def initialize
+  include Turbo::FramesHelper
+  def initialize(instruction_message: nil)
+    @instruction_message = instruction_message
   end
 end

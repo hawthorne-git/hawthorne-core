@@ -26,15 +26,15 @@ module HawthorneCore::UserAction::Log
 
   # ----------------------------------------------------------------------------- Email (Update)
 
-  def self.email_address_update_attrs_cleared(user_id)
+  def self.new_email_address_attrs_cleared(user_id)
     success_admin(user_id, action(:email_address_update_attrs_cleared), nil)
   end
 
-  def self.email_address_update_attrs_refreshed(user_id, note)
+  def self.new_email_address_attrs_refreshed(user_id, note)
     success_admin(user_id, action(:email_address_update_attrs_refreshed), note)
   end
 
-  def self.email_address_update_attrs_set(user_id, note)
+  def self.new_email_address_attrs_set(user_id, note)
     success_admin(user_id, action(:email_address_update_attrs_set), note)
   end
 

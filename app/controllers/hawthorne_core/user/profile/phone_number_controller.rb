@@ -13,15 +13,14 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Appli
   def show
 
     # find the users phone number
-    @phone_number = HawthorneCore::User.where(user_id: session[:user_id]).pick(:phone_number)
+    @current_phone_number = HawthorneCore::User.where(user_id: session[:user_id]).pick(:phone_number)
 
     # find the users site record ... the new phone number attributes are specific to each site
-    user_site = HawthorneCore::UserSite.
+    # then clear the users new phone number attributes
+    HawthorneCore::UserSite.
       select(:user_site_id, :user_id).
-      find_by(user_id: session[:user_id], site_id: HawthorneCore::Site.this_site_id)
-
-    # clear the users new phone number attributes, for site
-    user_site.clear_new_phone_number_attrs
+      find_by(user_id: session[:user_id], site_id: HawthorneCore::Site.this_site_id).
+      clear_new_phone_number_attrs
 
     # ----------------------
 
@@ -51,7 +50,7 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Appli
 
     # find the users site record ... the new phone number attributes are specific to each site
     user_site = HawthorneCore::UserSite.
-      select(:user_site_id, :user_id, :new_phone_number, :new_phone_number_pin, :new_phone_number_pin_created_at, :new_phone_number_pin_failed_attempts_count).
+      select(:user_site_id, :user_id, :new_phone_number).
       find_by(user_id: user.id, site_id: HawthorneCore::Site.this_site_id)
 
     # ----------------------
@@ -60,14 +59,14 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Appli
     # if invalid - log it, return back and display an error message
     unless HawthorneCore::Helpers::PhoneNumber.us_syntax_valid?(new_phone_number)
       HawthorneCore::UserAction::Log.update_profile_phone_number_failure(user.id, HawthorneCore::UserAction::FailureReason.phone_number_syntax_error, { new_phone_number: new_phone_number }, request.remote_ip, cookies[:user_session_token])
-      render turbo_stream: turbo_stream.update('errors', partial: '/hawthorne_core/user/profile/phone_number/new_phone_number_failed', locals: { syntax_error: true }) and return
+      render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/profile/phone_number/new_phone_number_failed', locals: { syntax_error: true }) and return
     end
 
     # verify that the new phone number does not match the current phone number
     # if identical - log it, return back and display an error message
     if HawthorneCore::Helpers::PhoneNumber.match?(user.phone_number, new_phone_number)
       HawthorneCore::UserAction::Log.update_profile_phone_number_failure(session[:user_id], HawthorneCore::UserAction::FailureReason.phone_number_identical, { current_phone_number: user.phone_number, new_phone_number: new_phone_number }, request.remote_ip, cookies[:user_session_token])
-      render turbo_stream: turbo_stream.update('errors', partial: '/hawthorne_core/user/profile/phone_number/new_phone_number_failed', locals: { identical: true }) and return
+      render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/profile/phone_number/new_phone_number_failed', locals: { identical: true }) and return
     end
 
     # ----------------------
@@ -145,7 +144,7 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Appli
       (pin_max_failed_attempts_reached = true; failure_reason = HawthorneCore::UserAction::FailureReason.pin_max_failed_attempts_reached) if user_site.new_phone_number_pin_max_failed_attempts_reached?
       HawthorneCore::UserAction::Log.update_profile_phone_number_failure(user.id, failure_reason, { new_phone_number_pin: user_site.new_phone_number_pin, new_phone_number_pin_created_at: user_site.new_phone_number_pin_created_at, new_phone_number_pin_failed_attempts_count: user_site.new_phone_number_pin_failed_attempts_count }, request.remote_ip, cookies[:user_session_token])
       user_site.refresh_new_phone_number_pin_attrs_then_send_it
-      render turbo_stream: turbo_stream.update('errors', partial: '/hawthorne_core/user/verify_pin_failed', locals: { not_set: pin_not_set, expired: pin_expired, max_failed_attempts_reached: pin_max_failed_attempts_reached }) and return
+      render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/verify_pin_failed', locals: { not_set: pin_not_set, expired: pin_expired, max_failed_attempts_reached: pin_max_failed_attempts_reached }) and return
     end
 
     # verify the pin - it is set, not expired, and has not reached the max number of failed attempts
@@ -161,7 +160,7 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Appli
       else
         pin_not_match = true
       end
-      render turbo_stream: turbo_stream.update('errors', partial: '/hawthorne_core/user/verify_pin_failed', locals: { not_match: pin_not_match,max_failed_attempts_reached: pin_max_failed_attempts_reached }) and return
+      render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/verify_pin_failed', locals: { not_match: pin_not_match, max_failed_attempts_reached: pin_max_failed_attempts_reached }) and return
     end
 
     # ----------------------
