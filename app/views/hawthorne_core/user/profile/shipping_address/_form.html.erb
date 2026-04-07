@@ -1,0 +1,61 @@
+<%# v3.0 %>
+
+<%
+  add_action = (action == 'add')
+
+  select_country_form_url = account_profile_add_shipping_address_with_selected_country_path
+  selected_country_form_url = add_action ? account_profile_add_shipping_address_path : account_profile_update_shipping_address_path
+
+  title = "#{action.capitalize} Shipping Address"
+
+  country_handle_label = "Country (#{link_to 'clear', account_profile_add_shipping_address_select_country_path, data: { turbo: :false }})"
+  country_handle_value = @selected_country&.handle
+  country_code_alpha2_value = @selected_country&.code_alpha2
+
+  full_name_label = 'Name'
+  full_name_value = @shipping_address&.full_name
+
+  street_address_label = 'Street Address'
+  street_address_value = @shipping_address&.street_address
+
+  street_address_extended_label = 'Apartment, Unit, Suite, or Floor #'
+  street_address_extended_value = @shipping_address&.street_address_extended
+
+  city_label = 'City'
+  city_value = @shipping_address&.city
+
+  state_province_label = @selected_country&.us? ? 'State' : 'State / Province / Region'
+  state_province_value = @shipping_address&.state_province
+
+  postal_code_label = @selected_country&.us? ? 'Zip Code' : 'Postal Code'
+  postal_code_value = @shipping_address&.postal_code
+
+  phone_number_label = 'Phone Number - Required by select couriers'
+  phone_number_value = @shipping_address&.phone_number
+
+  submit_button_text = "#{action.capitalize} Shipping Address"
+%>
+
+<%= render HawthorneCore::UI::TitleComponent.new(text: title) %>
+<%= render HawthorneCore::UI::Form::FormWrapperComponent.new do %>
+  <% if @select_country %>
+    <%= form_with url: select_country_form_url do |f| %>
+      <%= render HawthorneCore::UI::Form::Attr::CountrySelectComponent.new(form: f, countries: @ship_to_countries) %>
+    <% end %>
+  <% else %>
+    <%= form_with model: @shipping_address, url: selected_country_form_url do |f| %>
+      <%= render HawthorneCore::UI::Form::HiddenFieldComponent.new(form: f, attribute: :country_code_alpha2, value: country_code_alpha2_value, required: true) %>
+      <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :country_handle, label: country_handle_label, value: country_handle_value, required: true) %>
+      <%= render HawthorneCore::UI::Form::Attr::Address::AutocompleteAddressComponent.new(form: f, model: @shipping_address, selected_country: @selected_country) if add_action %>
+      <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :full_name, label: full_name_label, value: full_name_value, required: true) %>
+      <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :street_address, label: street_address_label, value: street_address_value, required: true) %>
+      <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :street_address_extended, label: street_address_extended_label, value: street_address_extended_value) %>
+      <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :city, label: city_label, value: city_value, required: true) %>
+      <%= render HawthorneCore::UI::Form::Attr::Address::StateComponent.new(form: f, attribute: :state_province, label: state_province_label, value: state_province_value, selected_country: @selected_country, us_states: @us_states ) %>
+      <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :postal_code, label: postal_code_label, value: postal_code_value, required: true) %>
+      <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :phone_number, label: phone_number_label, value: phone_number_value, required: true) %>
+      <%= render HawthorneCore::UI::Form::SubmitButtonComponent.new(form: f, text: submit_button_text) %>
+    <% end %>
+  <% end %>
+<% end %>
+<%= render partial: '/hawthorne_core/partials/autocomplete_address', locals: { model: @shipping_address, selected_country: @selected_country } unless @select_country %>

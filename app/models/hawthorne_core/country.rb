@@ -12,6 +12,8 @@ class HawthorneCore::Country < HawthorneCore::ActiveRecordBaseAdmin
 
   def ship_to? = ship_to
 
+  def us? = (id == 235) || (handle == 'United States') || (code_alpha2 == 'US') || (code_alpha3 == 'USA')
+
   # -----------------------------------------------------------------------------
 
   # determine if a country exists with code alpha 2

@@ -1,0 +1,7 @@
+<%# v3.0 %>
+
+<% if @selected_country&.us? %>
+  <%= render(HawthorneCore::UI::Form::SelectFieldComponent.new(form: @form, attribute: @attribute, label: @label, options: options_from_collection_for_select(@us_states, :code_alpha2, :handle), prompt: 'Select State', required: true)) %>
+<% else %>
+  <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form: @form, attribute: @attribute, label: @label, value: @value, required: true) %>
+<% end %>

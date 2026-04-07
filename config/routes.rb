@@ -21,11 +21,15 @@ HawthorneCore::Engine.routes.draw do
   get 'account/profile', to: 'user/profile#show'
   post 'account/profile', to: 'user/profile#update'
 
+  # ----------------------
+
   get 'account/profile/email-address', to: 'user/profile/email_address#show'
   post 'account/profile/email-address-verify', to: 'user/profile/email_address#verify'
   get 'account/profile/email-address-verify-pin', to: 'user/profile/email_address#verify_pin_show'
   post 'account/profile/email-address-verify-pin', to: 'user/profile/email_address#verify_pin'
   get 'account/profile/email-address-resend-pin', to: 'user/profile/email_address#resend_pin'
+
+  # ----------------------
 
   get 'account/profile/phone-number', to: 'user/profile/phone_number#show'
   post 'account/profile/phone-number-verify', to: 'user/profile/phone_number#verify'
@@ -36,10 +40,10 @@ HawthorneCore::Engine.routes.draw do
 
   # ----------------------
 
-  get 'account/add-shipping-address', to: 'user/shipping_address#new'
-  get 'account/add-shipping-address-select-country', to: 'user/shipping_address#new_select_country'
-  post 'account/add-shipping-address-with-selected-country', to: 'user/shipping_address#new_selected_country'
-  post 'account/add-shipping-address', to: 'user/shipping_address#create'
+  get 'account/profile/add-shipping-address', to: 'user/profile/shipping_address#new'
+  get 'account/profile/add-shipping-address-select-country', to: 'user/profile/shipping_address#new_select_country'
+  post 'account/profile/add-shipping-address-with-selected-country', to: 'user/profile/shipping_address#new_selected_country'
+  post 'account/profile/add-shipping-address', to: 'user/profile/shipping_address#create'
 
   # ----------------------
 

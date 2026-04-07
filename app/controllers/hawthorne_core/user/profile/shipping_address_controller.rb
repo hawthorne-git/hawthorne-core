@@ -1,10 +1,10 @@
 # v3.0
 
-class HawthorneCore::User::ShippingAddressController < HawthorneCore::ApplicationController
+class HawthorneCore::User::Profile::ShippingAddressController < HawthorneCore::ApplicationController
 
   # -----------------------------------------------------------------------------
 
-  # verify that the user is signed in prior to all actions
+  # verify that the user is signed-in prior to all actions
   before_action :verify_signed_in?
 
   # -----------------------------------------------------------------------------
@@ -12,7 +12,7 @@ class HawthorneCore::User::ShippingAddressController < HawthorneCore::Applicatio
   # show the page to add a shipping address
   # by default the page is loaded with the Cloudflare country selected
   # if the Cloudflare country is NOT a country that we ship to - force the user to select a country
-  # the user can also choose to select a country - if selected, use this country
+  # the user can also choose to select an alternate country - if selected, use this country
   def new
 
     # get the page attributes
@@ -29,7 +29,7 @@ class HawthorneCore::User::ShippingAddressController < HawthorneCore::Applicatio
     # set the users shipping address defaults ... add in their name / phone number
     @shipping_address = HawthorneCore::UserShippingAddress.new
     @shipping_address.full_name = user.full_name
-    @shipping_address.phone_number = user.phone_number
+    @shipping_address.phone_number = HawthorneCore::Helpers::PhoneNumber.us_format(user.phone_number)
 
     # find the selected country ... if present
     if selected_country_code_alpha2.present?
@@ -44,13 +44,13 @@ class HawthorneCore::User::ShippingAddressController < HawthorneCore::Applicatio
     # get the selected country via Cloudflare
     if !@select_country && !@selected_country
 
-      # get the users country code (alpha 2) via Cloudflare
-      cloudflare_country_code_alpha2 = 'US'
+      # get the users country (code alpha 2) via Cloudflare
+      cloudflare_country_code_alpha2 = request.headers['CF-IPCountry']
 
       # in the unexpected case where the Cloudflare country code is not found within our list, set to US
       unless HawthorneCore::Country.code_alpha2_exists?(cloudflare_country_code_alpha2)
         cloudflare_country_code_alpha2 = 'US'
-        HawthorneCore::UserAction::Log.shipping_address_failure(user.id, HawthorneCore::UserAction::FailureReason.unexpected_state, { message: 'Country not found with Cloudflare country code', cloudflare_country_code: cloudflare_country_code }, request.remote_ip, cookies[:user_session_token])
+        HawthorneCore::UserAction::Log.shipping_address_failure(user.id, HawthorneCore::UserAction::FailureReason.unexpected_state, { message: 'Country not found with Cloudflare country code', cloudflare_country_code: cloudflare_country_code_alpha2 }, request.remote_ip, cookies[:user_session_token])
       end
 
       # if the Cloudflare country is in our list of countries to ship to, set this as the selected country
@@ -79,21 +79,32 @@ class HawthorneCore::User::ShippingAddressController < HawthorneCore::Applicatio
 
     # ----------------------
 
+    # if the selected country is US ...
+    # find all us states that we ship to
+    if @selected_country&.us?
+        @us_states = HawthorneCore::UsState.
+          select(:handle, :code_alpha2).
+          where(ship_to: true, deleted: false).
+          order(handle: :asc)
+    end
+
+    # ----------------------
+
     @html_title = 'Shipping Address | My Account'
     @breadcrumbs = [
       { title: 'My Account', link: account_path },
       { title: 'Shipping Address', link: nil }
     ]
 
-    # ----------------------
-
   end
 
   # -----------------------------------------------------------------------------
 
-  def new_select_country = redirect_to account_add_shipping_address_path(select_country: true)
+  # user action that they want to select a country to ship to
+  def new_select_country = redirect_to account_profile_add_shipping_address_path(select_country: true)
 
-  def new_selected_country = redirect_to account_add_shipping_address_path(selected_country: params[:country_code_alpha2])
+  # user action when a country is selected
+  def new_selected_country = redirect_to account_profile_add_shipping_address_path(selected_country: params[:country_code_alpha2])
 
   # -----------------------------------------------------------------------------
 
@@ -103,12 +114,12 @@ class HawthorneCore::User::ShippingAddressController < HawthorneCore::Applicatio
     # ----------------------
 
     # get the form attributes, and merge in the user id - needed to create the record
-    attrs = shipping_address_params
+    attrs = address_params
     attrs = attrs.merge(user_id: session[:user_id])
 
     # ----------------------
 
-    # TODO: is verified? ... different action?
+    # TODO: verify, and if not verified ... different action?
 
     # ----------------------
 
@@ -118,13 +129,16 @@ class HawthorneCore::User::ShippingAddressController < HawthorneCore::Applicatio
 
     # ----------------------
 
+    # redirect the user to view their account
+    redirect_to account_path
+
   end
 
   # -----------------------------------------------------------------------------
 
   private
 
-  def shipping_address_params
+  def address_params
     params.require(:user_shipping_address).
         permit(
         :full_name,

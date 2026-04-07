@@ -1,0 +1,4 @@
+<%# v3.0 %>
+
+<%= render partial: '/hawthorne_core/partials/autocomplete_us_address', locals: { element_id_prefix: model.model_name.param_key } if selected_country.us? %>
+<%= render partial: '/hawthorne_core/partials/autocomplete_intl_address', locals: { country_code_alpha3: selected_country.code_alpha3, element_id_prefix: model.model_name.param_key } unless selected_country.us? %>

@@ -1,9 +1,0 @@
-<%# v3.0 %>
-
-<div class='error'>
-  <div class='vertical_space_small'></div>
-  <%= raw('Your new email address doesn’t look valid<br>Please check for a typo and try again') if @new_email_address_syntax_error %>
-  <%= 'Your new email address is the same as your current one' if @new_email_address_identical %>
-  <%= 'Your new email address is already in use' if @new_email_address_taken %>
-  <div class='vertical_space_small'></div>
-</div>

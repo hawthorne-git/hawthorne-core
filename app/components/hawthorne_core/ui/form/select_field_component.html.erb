@@ -2,5 +2,5 @@
 
 <div>
   <%= render(HawthorneCore::UI::Form::LabelComponent.new(text: @label)) %>
-  <%= @form.select @attribute, @options, { prompt: @prompt, selected: @selected }, @html_options %>
+  <%= @form.select @attribute, @options, { prompt: @prompt, selected: @selected }, @html_options.merge(required: @required) %>
 </div>

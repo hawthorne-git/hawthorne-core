@@ -2,8 +2,7 @@
 
 class HawthorneCore::UserShippingAddress < HawthorneCore::ActiveRecordBaseApp
 
-  include HawthorneCore::HasSiteSharingScope,
-          HawthorneCore::HasToken
+  include HawthorneCore::HasToken
 
   # -----------------------------------------------------------------------------
 
