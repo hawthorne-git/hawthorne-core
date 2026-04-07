@@ -24,7 +24,6 @@
 %>
 
 <%= render HawthorneCore::UI::TitleComponent.new(text: title) %>
-
 <%= render HawthorneCore::UI::Form::FormWrapperComponent.new do %>
   <%= form_with url: form_url do |f| %>
     <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :full_name, label: full_name_label, value: full_name_value, required: true) %>

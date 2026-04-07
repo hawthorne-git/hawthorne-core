@@ -59,14 +59,14 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Appli
     # if invalid - log it, return back and display an error message
     unless HawthorneCore::Helpers::PhoneNumber.us_syntax_valid?(new_phone_number)
       HawthorneCore::UserAction::Log.update_profile_phone_number_failure(user.id, HawthorneCore::UserAction::FailureReason.phone_number_syntax_error, { new_phone_number: new_phone_number }, request.remote_ip, cookies[:user_session_token])
-      render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/profile/phone_number/new_phone_number_failed', locals: { syntax_error: true }) and return
+      render turbo_stream: turbo_stream.update('form_errors', partial: 'new_phone_number_failed', locals: { syntax_error: true }) and return
     end
 
     # verify that the new phone number does not match the current phone number
     # if identical - log it, return back and display an error message
     if HawthorneCore::Helpers::PhoneNumber.match?(user.phone_number, new_phone_number)
       HawthorneCore::UserAction::Log.update_profile_phone_number_failure(session[:user_id], HawthorneCore::UserAction::FailureReason.phone_number_identical, { current_phone_number: user.phone_number, new_phone_number: new_phone_number }, request.remote_ip, cookies[:user_session_token])
-      render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/profile/phone_number/new_phone_number_failed', locals: { identical: true }) and return
+      render turbo_stream: turbo_stream.update('form_errors', partial: 'new_phone_number_failed', locals: { identical: true }) and return
     end
 
     # ----------------------

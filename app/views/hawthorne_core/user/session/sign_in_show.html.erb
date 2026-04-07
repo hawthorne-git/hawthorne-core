@@ -13,11 +13,6 @@
 %>
 
 <%= render HawthorneCore::UI::TitleComponent.new(text: title)  %>
-
-<%= turbo_frame_tag 'sign_in_failed_turbo_frame' do %>
-  <%= render partial: 'sign_in_failed' if @sign_in_failed %>
-<% end %>
-
 <%= render HawthorneCore::UI::Form::FormWrapperComponent.new do %>
   <%= form_with url: form_url do |f| %>
     <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :email_address, label: email_address_label, value: 'charlieprezzano@gmail.com', required: true, maxlength: 320) %>

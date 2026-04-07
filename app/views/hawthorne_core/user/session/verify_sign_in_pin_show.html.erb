@@ -19,8 +19,11 @@
   submit_button_text = 'Continue'
 %>
 
+<%= render partial: '/hawthorne_core/user/verify_pin_failed', locals: { expired: @pin_expired, max_failed_attempts_reached: @pin_max_failed_attempts_reached, not_match: @pin_not_match, not_set: @pin_not_set } if @verify_pin_failed %>
+
 <%= render HawthorneCore::UI::TitleComponent.new(text: title) %>
 <%= render HawthorneCore::UI::Form::FormWrapperComponent.new(instruction_message: instruction_message) do %>
+  <%= render partial: '/hawthorne_core/user/verify_pin_failed' if @verify_pin_failed %>
   <%= form_with url: form_url do |f| %>
     <%= render HawthorneCore::UI::Form::HiddenFieldComponent.new(form: f, attribute: :token, value: token_value, required: true) %>
     <%= render HawthorneCore::UI::Form::HiddenFieldComponent.new(form: f, attribute: :pin_delivery_method, value: pin_delivery_method_value, required: true) %>

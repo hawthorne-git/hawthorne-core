@@ -34,9 +34,8 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
     # verify that the email address does not have a syntax error
     # if invalid - log it, return back and display an error message
     unless HawthorneCore::Helpers::EmailAddress.syntax_valid?(email_address)
-      @email_address_syntax_error = true
       HawthorneCore::UserAction::Log.sign_in_failure(HawthorneCore::UserAction::FailureReason.email_address_syntax_error, { email_address: email_address }, request.remote_ip, cookies[:user_session_token])
-      render turbo_stream: turbo_stream.update('sign_in_failed_turbo_frame', partial: 'sign_in_failed') and return
+      render turbo_stream: turbo_stream.update('form_errors', partial: 'sign_in_failed') and return
     end
 
     # ----------------------
@@ -45,7 +44,7 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
     # find the user by their email address with the site sharing scope
     # note that a user will have a single (and shared) Hawthorne account ... but alt sites (ex: William Morris) may be stand-alone
     user = HawthorneCore::User.
-      select(:user_id, :token, :email_address, :email_address_verified, :phone_number, :sign_in_pin_default_delivery).
+      select(:user_id, :token, :email_address, :phone_number, :sign_in_pin_default_delivery).
       find_by(email_address: email_address, site_sharing_scope: HawthorneCore::Site.this_site_sharing_scope)
 
     # if the user exists, log that the user has accessed the site
@@ -227,13 +226,15 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
     # if the pin is inactive ...
     # refresh the pin, resend, then return back and display an error message
     unless user_site.sign_in_pin_active?
-      (@pin_not_set = true; error_message = 'PIN_NOT_SET'; failure_reason = HawthorneCore::UserAction::FailureReason.pin_not_set) unless user_site.sign_in_pin_set?
-      (@pin_expired = true; error_message = 'PIN_EXPIRED'; failure_reason = HawthorneCore::UserAction::FailureReason.pin_expired) if user_site.sign_in_pin_expired?
-      (@pin_max_failed_attempts_reached = true; error_message = 'PIN_MAX_FAILED_ATTEMPTS_REACHED'; failure_reason = HawthorneCore::UserAction::FailureReason.pin_max_failed_attempts_reached) if user_site.sign_in_pin_max_failed_attempts_reached?
+      (pin_not_set = true; error_message = 'PIN_NOT_SET'; failure_reason = HawthorneCore::UserAction::FailureReason.pin_not_set) unless user_site.sign_in_pin_set?
+      (pin_expired = true; error_message = 'PIN_EXPIRED'; failure_reason = HawthorneCore::UserAction::FailureReason.pin_expired) if user_site.sign_in_pin_expired?
+      (pin_max_failed_attempts_reached = true; error_message = 'PIN_MAX_FAILED_ATTEMPTS_REACHED'; failure_reason = HawthorneCore::UserAction::FailureReason.pin_max_failed_attempts_reached) if user_site.sign_in_pin_max_failed_attempts_reached?
       HawthorneCore::UserAction::Log.sign_in_pin_verified_failure(user.id, failure_reason, { sign_in_pin: user_site.sign_in_pin, sign_in_pin_created_at: user_site.sign_in_pin_created_at, sign_in_pin_failed_attempts_count: user_site.sign_in_pin_failed_attempts_count }, request.remote_ip, cookies[:user_session_token])
       user_site.refresh_sign_in_pin_then_send_it(pin_delivery_method)
       redirect_to verify_sign_in_pin_path(token: user.token, pin_delivery_method: pin_delivery_method, keep_signed_in: keep_signed_in, error_message: error_message) and return if from_magic_link
       render turbo_stream: turbo_stream.update('verify_pin_failed_turbo_frame', partial: '/hawthorne_core/user/verify_pin_failed') and return
+      render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/verify_pin_failed', locals: { not_set: pin_not_set, expired: pin_expired, max_failed_attempts_reached: pin_max_failed_attempts_reached }) and return
+
     end
 
     # verify the pin - it is set, not expired, and has not reached the max number of failed attempts
@@ -244,13 +245,14 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
       HawthorneCore::UserAction::Log.sign_in_pin_verified_failure(user.id, HawthorneCore::UserAction::FailureReason.pin_not_match, { entered_pin: pin, pin_to_match: user_site.sign_in_pin }, request.remote_ip, cookies[:user_session_token])
       user_site.add_sign_in_pin_failed_attempt
       if user_site.sign_in_pin_max_failed_attempts_reached?
-        @pin_max_failed_attempts_reached = true; error_message = 'PIN_MAX_FAILED_ATTEMPTS_REACHED'
+        pin_max_failed_attempts_reached = true; error_message = 'PIN_MAX_FAILED_ATTEMPTS_REACHED'
         user_site.refresh_sign_in_pin_then_send_it(pin_delivery_method)
       else
-        @pin_not_match = true; error_message = 'PIN_NOT_MATCH'
+        pin_not_match = true; error_message = 'PIN_NOT_MATCH'
       end
       redirect_to verify_sign_in_pin_path(token: user.token, pin_delivery_method: pin_delivery_method, keep_signed_in: keep_signed_in, error_message: error_message) and return if from_magic_link
-      render turbo_stream: turbo_stream.update('verify_pin_failed_turbo_frame', partial: '/hawthorne_core/partials/user/verify_pin_failed') and return
+      render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/verify_pin_failed', locals: { not_match: pin_not_match, max_failed_attempts_reached: pin_max_failed_attempts_reached }) and return
+
     end
 
     # ----------------------
@@ -284,7 +286,7 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
     # TODO: create the user a stripe account (if not done prior)
     # user.create_stripe_account
 
-    # TODO: if first sign-in EVER, redirect to enter phone number?
+    # TODO: if first sign-in EVER, redirect to enter phone number? or maybe on their third sign-in?
 
     # redirect the user to view their account
     redirect_to account_path

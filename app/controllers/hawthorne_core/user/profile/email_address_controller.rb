@@ -59,21 +59,21 @@ class HawthorneCore::User::Profile::EmailAddressController < HawthorneCore::Appl
     # if invalid - log it, return back and display an error message
     unless HawthorneCore::Helpers::EmailAddress.syntax_valid?(new_email_address)
       HawthorneCore::UserAction::Log.update_profile_email_address_failure(user.id, HawthorneCore::UserAction::FailureReason.email_address_syntax_error, { new_email_address: new_email_address }, request.remote_ip, cookies[:user_session_token])
-      render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/profile/email_address/new_email_address_failed', locals: { syntax_error: true }) and return
+      render turbo_stream: turbo_stream.update('form_errors', partial: 'new_email_address_failed', locals: { syntax_error: true }) and return
     end
 
     # verify that the new email address does not match the current email address
     # if identical - log it, return back and display an error message
     if user.email_address == new_email_address
       HawthorneCore::UserAction::Log.update_profile_email_address_failure(user.id, HawthorneCore::UserAction::FailureReason.email_address_identical, { current_email_address: user.email_address, new_email_address: new_email_address }, request.remote_ip, cookies[:user_session_token])
-      render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/profile/email_address/new_email_address_failed', locals: { identical: true }) and return
+      render turbo_stream: turbo_stream.update('form_errors', partial: 'new_email_address_failed', locals: { identical: true }) and return
     end
 
     # verify that the new email address is not taken
     # if taken - log it, return back and display an error message
     if HawthorneCore::Helpers::EmailAddress.taken?(new_email_address)
       HawthorneCore::UserAction::Log.update_profile_email_address_failure(user.id, HawthorneCore::UserAction::FailureReason.email_address_taken, { new_email_address: new_email_address }, request.remote_ip, cookies[:user_session_token])
-      render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/profile/email_address/new_email_address_failed', locals: { taken: true }) and return
+      render turbo_stream: turbo_stream.update('form_errors', partial: 'new_email_address_failed', locals: { taken: true }) and return
     end
 
     # ----------------------

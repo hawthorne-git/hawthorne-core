@@ -19,10 +19,6 @@ class HawthorneCore::UserController < HawthorneCore::ApplicationController
 
     # ----------------------
 
-    puts HawthorneCore::Services::SmartySvc.verify_us_address('72 hilltop rd', '', 'rhinebeck', 'ny', '12572').to_s
-
-    # ----------------------
-
     @html_title = 'My Account'
 
   end
