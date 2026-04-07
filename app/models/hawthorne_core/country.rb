@@ -2,6 +2,8 @@
 
 class HawthorneCore::Country < HawthorneCore::ActiveRecordBaseAdmin
 
+  include HawthorneCore::CanBeSoftDeleted
+
   # -----------------------------------------------------------------------------
 
   self.table_name = 'countries'
@@ -17,13 +19,13 @@ class HawthorneCore::Country < HawthorneCore::ActiveRecordBaseAdmin
   # -----------------------------------------------------------------------------
 
   # determine if a country exists with code alpha 2
-  def self.code_alpha2_exists?(code_alpha2) = exists?(code_alpha2: code_alpha2, deleted: false)
+  def self.code_alpha2_exists?(code_alpha2) = active.exists?(code_alpha2: code_alpha2)
 
   # determine if we ship to the country
-  def self.ship_to?(code_alpha2) = exists?(code_alpha2: code_alpha2.strip.upcase, ship_to: true, deleted: false)
+  def self.ship_to?(code_alpha2) = active.exists?(code_alpha2: code_alpha2.strip.upcase, ship_to: true)
 
   # return all countries that we ship to
-  def self.ship_to = select(:country_id, :handle, :code_alpha2).where(ship_to: true, deleted: false).order(handle: :asc)
+  def self.ship_to = select(:country_id, :handle, :code_alpha2).active.where(ship_to: true).order(handle: :asc)
 
   # -----------------------------------------------------------------------------
 

@@ -2,13 +2,16 @@
 
 class HawthorneCore::UserShippingAddress < HawthorneCore::ActiveRecordBaseApp
 
-  include HawthorneCore::HasToken
+  include HawthorneCore::CanBeSoftDeleted,
+          HawthorneCore::HasToken
 
   # -----------------------------------------------------------------------------
 
   self.table_name = 'user_shipping_addresses'
 
   def id = user_shipping_address_id
+
+  def to_s = [street_address, street_address_extended, city, state_province, postal_code, country_code_alpha2].reject(&:blank?).join(', ')
 
   # -----------------------------------------------------------------------------
 

@@ -2,7 +2,8 @@
 
 class HawthorneCore::User < HawthorneCore::ActiveRecordBaseApp
 
-  include HawthorneCore::HasToken,
+  include HawthorneCore::CanBeSoftDeleted,
+          HawthorneCore::HasToken,
           HawthorneCore::User::EmailVerification,
           HawthorneCore::User::PinVerification,
           HawthorneCore::User::SingleSignOn,

@@ -35,7 +35,8 @@ class HawthorneCore::User::Profile::ShippingAddressController < HawthorneCore::A
     if selected_country_code_alpha2.present?
       @selected_country = HawthorneCore::Country.
         select(:handle, :code_alpha2, :code_alpha3).
-        find_by(code_alpha2: selected_country_code_alpha2.strip.upcase, ship_to: true, deleted: false)
+        active.
+        find_by(code_alpha2: selected_country_code_alpha2.strip.upcase, ship_to: true)
     end
 
     # ----------------------
@@ -58,7 +59,8 @@ class HawthorneCore::User::Profile::ShippingAddressController < HawthorneCore::A
       if HawthorneCore::Country.ship_to?(cloudflare_country_code_alpha2)
         @selected_country = HawthorneCore::Country.
           select(:handle, :code_alpha2, :code_alpha3).
-          find_by(code_alpha2: cloudflare_country_code_alpha2.strip.upcase, ship_to: true, deleted: false)
+          active.
+          find_by(code_alpha2: cloudflare_country_code_alpha2.strip.upcase, ship_to: true)
       else
         @select_country = true
       end
@@ -73,7 +75,8 @@ class HawthorneCore::User::Profile::ShippingAddressController < HawthorneCore::A
     if @select_country
       @ship_to_countries = HawthorneCore::Country.
         select(:handle, :code_alpha2).
-        where(ship_to: true, deleted: false).
+        active.
+        where(ship_to: true).
         order(handle: :asc)
     end
 
@@ -82,10 +85,11 @@ class HawthorneCore::User::Profile::ShippingAddressController < HawthorneCore::A
     # if the selected country is US ...
     # find all us states that we ship to
     if @selected_country&.us?
-        @us_states = HawthorneCore::UsState.
-          select(:handle, :code_alpha2).
-          where(ship_to: true, deleted: false).
-          order(handle: :asc)
+      @us_states = HawthorneCore::UsState.
+        select(:handle, :code_alpha2).
+        active.
+        where(ship_to: true).
+        order(handle: :asc)
     end
 
     # ----------------------
@@ -136,11 +140,45 @@ class HawthorneCore::User::Profile::ShippingAddressController < HawthorneCore::A
 
   # -----------------------------------------------------------------------------
 
+  def delete
+
+    # get the page attributes
+    token = params[:token]
+
+    # ----------------------
+
+    # find the users shipping address to soft delete
+    shipping_address = HawthorneCore::UserShippingAddress.
+      select(:user_shipping_address_id, :user_id, :deleted).
+      find_by(user_id: session[:user_id], token: token)
+
+    # in the unexpected case where the users shipping address is not found
+    # log it, and redirect the user to view their account
+    unless shipping_address
+      HawthorneCore::UserAction::Log.remove_shipping_address_failure(session[:user_id], HawthorneCore::UserAction::FailureReason.unexpected_state, { message: 'Users shipping address not found', user_id: session[:user_id], token: token }, request.remote_ip, cookies[:user_session_token])
+      redirect_to account_path and return
+    end
+
+    # soft delete the record
+    shipping_address.soft_delete
+
+    # log it
+    HawthorneCore::UserAction::Log.remove_shipping_address(shipping_address.user_id, { user_shipping_address_id: shipping_address.id }, request.remote_ip, cookies[:user_session_token])
+
+    # ----------------------
+
+    # redirect the user to view their account
+    redirect_to account_path
+
+  end
+
+  # -----------------------------------------------------------------------------
+
   private
 
   def address_params
     params.require(:user_shipping_address).
-        permit(
+      permit(
         :full_name,
         :street_address,
         :street_address_extended,

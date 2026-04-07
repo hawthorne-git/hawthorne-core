@@ -132,6 +132,16 @@ module HawthorneCore::UserAction::Log
     failure(user_id, action(:shipping_address), failure_reason, note, ip_address, user_session_token)
   end
 
+  # ------------------------
+
+  def self.remove_shipping_address(user_id, note, ip_address, user_session_token)
+    success(user_id, action(:shipping_address_removed), note, ip_address, user_session_token)
+  end
+
+  def self.remove_shipping_address_failure(user_id, failure_reason, note, ip_address, user_session_token)
+    failure(user_id, action(:shipping_address_removed), failure_reason, note, ip_address, user_session_token)
+  end
+
   # ----------------------------------------------------------------------------- Text Message
 
   def self.text_message_sent(user_id, note)

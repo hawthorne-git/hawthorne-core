@@ -115,7 +115,8 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
     # find the user by their token
     @user = HawthorneCore::User.
       select(:user_id, :token, :email_address, :email_address_verified, :phone_number).
-      find_by(token: @user_token, deleted: false)
+      active.
+      find_by(token: @user_token)
 
     # in the unexpected case where the user is not found - log it, return back to the sign-in page
     unless @user
@@ -156,7 +157,8 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
     # find the user by their token
     user = HawthorneCore::User.
       select(:user_id).
-      find_by(token: user_token, deleted: false)
+      active.
+      find_by(token: user_token)
 
     # send the user their pin via prior delivery method, email or text
     HawthorneCore::Email::SendSignInPinJob.perform_later(user.id, keep_signed_in) if pin_delivery_method == HawthorneCore::User::PIN_VIA_EMAIL
@@ -200,7 +202,8 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
     # find the user by their token
     user = HawthorneCore::User.
       select(:user_id, :token, :email_address, :email_address_verified).
-      find_by(token: user_token, deleted: false)
+      active.
+      find_by(token: user_token)
 
     # in the unexpected case where the user is not found (by their token) - log it, return back to the sign-in page
     unless user

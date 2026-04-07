@@ -44,6 +44,7 @@ HawthorneCore::Engine.routes.draw do
   get 'account/profile/add-shipping-address-select-country', to: 'user/profile/shipping_address#new_select_country'
   post 'account/profile/add-shipping-address-with-selected-country', to: 'user/profile/shipping_address#new_selected_country'
   post 'account/profile/add-shipping-address', to: 'user/profile/shipping_address#create'
+  delete 'account/profile/remove-shipping-address', to: 'user/profile/shipping_address#delete'
 
   # ----------------------
 
