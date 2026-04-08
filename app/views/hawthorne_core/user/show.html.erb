@@ -45,9 +45,6 @@
   <% @shipping_addresses&.each do |shipping_address| %>
     <div>
       <%= shipping_address.to_s %> (<%= link_to 'X', account_profile_remove_shipping_address_path(token: shipping_address.token), :title => 'Remove Shipping Address', data: { turbo_method: :delete, turbo_confirm: 'Are you sure you want to remove this shipping address from your account?' } %>)
-
-
-
     </div>
   <% end %>
 
