@@ -1,0 +1,14 @@
+<%# v3.0 %>
+
+<script>
+    // get the html form attribute with an input action - that triggers this event
+    // exit if the attribute is not the PIN field
+    // remove all non-digit characters from the PIN field
+    // if the PIN field value has 6 digits, submit the form
+    document.addEventListener('input', function (event) {
+        const pinField = event.target
+        if (pinField.dataset.behavior !== 'auto-submit-6-digit') return
+        pinField.value = pinField.value.replace(/\D/g, '')
+        if (pinField.value.length === 6) pinField.form.requestSubmit()
+    })
+</script>

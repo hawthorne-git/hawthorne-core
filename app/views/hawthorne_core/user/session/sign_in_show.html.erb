@@ -3,20 +3,21 @@
 <%
   form_url = sign_in_path
 
-  title = 'Sign-In / Create Account'
+  title = 'Continue with Email'
 
-  email_address_label = 'Email address'
+  instruction_message = 'Enter your email address. If you already have an account, we’ll sign you in. If not, we’ll create one for you.'
 
-  keep_signed_in_text_after_checkbox = 'Keep me signed in'
+  email_address_label = 'Email'
+  email_address_value = 'charlieprezzano@gmail.com' if Rails.env.development?
 
-  submit_button_text = 'Continue'
+  submit_button_text = 'Send PIN'
 %>
 
 <%= render HawthorneCore::UI::TitleComponent.new(text: title)  %>
-<%= render HawthorneCore::UI::Form::FormWrapperComponent.new do %>
+<%= render HawthorneCore::UI::Form::FormWrapperComponent.new(instruction_message: instruction_message) do %>
   <%= form_with url: form_url do |f| %>
-    <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :email_address, label: email_address_label, value: 'charlieprezzano@gmail.com', required: true, maxlength: 320) %>
-    <%= render HawthorneCore::UI::Form::CheckBoxComponent.new(form: f, attribute: :keep_signed_in, text_after_checkbox: keep_signed_in_text_after_checkbox) %>
+    <%= render HawthorneCore::UI::Form::HiddenFieldComponent.new(form: f, attribute: :keep_signed_in, value: 1, required: true) %>
+    <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :email_address, label: email_address_label, value: email_address_value, required: true, maxlength: 320) %>
     <%= render HawthorneCore::UI::Form::SubmitButtonComponent.new(form: f, text: submit_button_text) %>
   <% end %>
 <% end %>

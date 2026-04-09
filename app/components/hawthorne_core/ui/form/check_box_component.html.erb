@@ -1,5 +1,6 @@
 <%# v3.0 %>
 
-<div>
-  <%= @form.check_box @attribute %> <%= @text_after_checkbox if @text_after_checkbox.present? %>
+<div class="flex items-center gap-2">
+  <%= @form.check_box @attribute, class: "h-4 w-4 rounded border-gray-300 cursor-pointer" %>
+  <span class="text-sm text-gray-600 select-none"><%= @text_after_checkbox if @text_after_checkbox.present? %></span>
 </div>

@@ -123,6 +123,10 @@ class HawthorneCore::Site < HawthorneCore::ActiveRecordBaseApp
 
   # -----------------------------------------------------------------------------
 
+  def self.header_announcement_attrs = with_reading { where(site_id: this_site_id).pick(:announcement_attrs) }
+
+  # -----------------------------------------------------------------------------
+
   private
 
   # in the case where site name is not expected,

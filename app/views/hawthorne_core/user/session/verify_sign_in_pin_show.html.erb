@@ -1,12 +1,15 @@
 <%# v3.0 %>
 
 <%
+  pin_delivery_method_via_email = (@pin_delivery_method == HawthorneCore::User::PIN_VIA_EMAIL)
+  pin_delivery_method_via_phone = (@pin_delivery_method == HawthorneCore::User::PIN_VIA_PHONE)
+
   form_url = verify_sign_in_pin_path
 
   title = 'Verify your PIN'
 
-  instruction_message = "Enter the PIN we emailed to: #{@user.email_address}" if @pin_delivery_method == HawthorneCore::User::PIN_VIA_EMAIL
-  instruction_message = "Enter the PIN we texted to: #{HawthorneCore::Helpers::PhoneNumber.masked(@user.phone_number)}" if @pin_delivery_method == HawthorneCore::User::PIN_VIA_PHONE
+  instruction_message = "We sent your PIN to: #{@user.email_address}" if pin_delivery_method_via_email
+  instruction_message = "We sent your PIN to: #{HawthorneCore::Helpers::PhoneNumber.masked(@user.phone_number)}" if pin_delivery_method_via_phone
 
   token_value = @user_token
 
@@ -14,43 +17,28 @@
 
   keep_signed_in_value = @keep_signed_in
 
-  pin_label = 'Verification PIN - Numbers only'
+  submit_button_text = 'Verify PIN'
 
-  submit_button_text = 'Continue'
+  resend_pin_message = "Didn't get the PIN? #{link_to 'Resend it', resend_sign_in_pin_path(token: @user_token, pin_delivery_method: @pin_delivery_method, keep_signed_in: @keep_signed_in), data: { turbo: :false }}"
+  send_pin_via_email_message = "Send PIN by email instead? #{link_to 'Send email', resend_sign_in_pin_via_email_path(token: @user_token, pin_delivery_method: @pin_delivery_method, keep_signed_in: @keep_signed_in), data: { turbo: :false }}"
+  send_pin_via_phone_message = "Send PIN by text message instead? #{link_to 'Send text', resend_sign_in_pin_via_text_path(token: @user_token, pin_delivery_method: @pin_delivery_method, keep_signed_in: @keep_signed_in), data: { turbo: :false }}"
+  start_over_message = "Need to change your email address? #{link_to 'Start over', sign_in_path, data: { turbo: :false }}"
 %>
-
-<%= render partial: '/hawthorne_core/user/verify_pin_failed', locals: { expired: @pin_expired, max_failed_attempts_reached: @pin_max_failed_attempts_reached, not_match: @pin_not_match, not_set: @pin_not_set } if @verify_pin_failed %>
 
 <%= render HawthorneCore::UI::TitleComponent.new(text: title) %>
 <%= render HawthorneCore::UI::Form::FormWrapperComponent.new(instruction_message: instruction_message) do %>
-  <%= render partial: '/hawthorne_core/user/verify_pin_failed' if @verify_pin_failed %>
+  <%= render partial: '/hawthorne_core/user/verify_pin_failed', locals: { expired: @pin_expired, max_failed_attempts_reached: @pin_max_failed_attempts_reached, not_match: @pin_not_match, not_set: @pin_not_set } if @verify_pin_failed %>
   <%= form_with url: form_url do |f| %>
     <%= render HawthorneCore::UI::Form::HiddenFieldComponent.new(form: f, attribute: :token, value: token_value, required: true) %>
     <%= render HawthorneCore::UI::Form::HiddenFieldComponent.new(form: f, attribute: :pin_delivery_method, value: pin_delivery_method_value, required: true) %>
     <%= render HawthorneCore::UI::Form::HiddenFieldComponent.new(form: f, attribute: :keep_signed_in, value: keep_signed_in_value) %>
-    <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :pin, label: pin_label, required: true, autofocus: true) %>
+    <%= render HawthorneCore::UI::Form::Attr::PinTextFieldComponent.new(form: f) %>
     <%= render HawthorneCore::UI::Form::SubmitButtonComponent.new(form: f, text: submit_button_text) %>
   <% end %>
+  <%= render HawthorneCore::UI::Form::SupportMessageComponent.new(message: resend_pin_message) %>
+  <%= render HawthorneCore::UI::Form::SupportMessageComponent.new(message: send_pin_via_email_message) if pin_delivery_method_via_phone %>
+  <%= render HawthorneCore::UI::Form::SupportMessageComponent.new(message: send_pin_via_phone_message) if pin_delivery_method_via_email && @user.phone_number.present? %>
+  <%= render HawthorneCore::UI::Form::SupportMessageComponent.new(message: start_over_message) if pin_delivery_method_via_email %>
 <% end %>
 
-<div>
-  Didn’t get the PIN?  <%= link_to 'Resend it', resend_sign_in_pin_path(token: @user_token, pin_delivery_method: @pin_delivery_method, keep_signed_in: @keep_signed_in), data: { turbo: :false } %>
-</div>
-
-<% if (@pin_delivery_method == HawthorneCore::User::PIN_VIA_EMAIL) && @user.phone_number.present? %>
-  <div>
-    Send PIN by text message instead? <%= link_to 'Send text', resend_sign_in_pin_via_text_path(token: @user_token, pin_delivery_method: @pin_delivery_method, keep_signed_in: @keep_signed_in), data: { turbo: :false } %>
-  </div>
-<% end %>
-
-<% if @pin_delivery_method == HawthorneCore::User::PIN_VIA_PHONE %>
-  <div>
-    Send PIN by email instead? <%= link_to 'Send email', resend_sign_in_pin_via_email_path(token: @user_token, pin_delivery_method: @pin_delivery_method, keep_signed_in: @keep_signed_in), data: { turbo: :false } %>
-  </div>
-<% end %>
-
-<% if (@pin_delivery_method == HawthorneCore::User::PIN_VIA_EMAIL) && !@user.email_address_verified? %>
-  <div>
-    Need to change your email address? <%= link_to 'Start over', sign_in_path, data: { turbo: :false } %>
-  </div>
-<% end %>
+<%= render '/hawthorne_core/user/verify_pin_auto_submit_js' %>

@@ -1,9 +1,11 @@
 <%# v3.0 %>
 
-<%= turbo_frame_tag('form_errors') %>
-
-<%= render HawthorneCore::UI::Form::InstructionMessageComponent.new(message: @instruction_message) if @instruction_message.present? %>
-
-<div>
-  <%= content %>
+<div class="max-w-md mx-auto px-4 pb-16">
+  <% if @instruction_message.present? %>
+    <div class="mb-6"><%= render HawthorneCore::UI::Form::InstructionMessageComponent.new(message: @instruction_message) %></div>
+  <% end %>
+  <%= turbo_frame_tag('form_errors') %>
+  <div class="flex flex-col gap-6">
+    <%= content %>
+  </div>
 </div>

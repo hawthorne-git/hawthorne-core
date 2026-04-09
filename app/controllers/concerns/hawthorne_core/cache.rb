@@ -20,17 +20,11 @@ module HawthorneCore::Cache
 
     # ---------------------------------------------------------------------------
 
-    # add the site name abbreviation to the cache key ... to avoid collisions on sites that share a redis instance
-    # ex: if the cache key is 'header_version', for Hawthorne Supply Co, the returned key is 'HSCO:header_version'
-    def cache_key_for_site(cache_key) = "#{HawthorneCore::Site.this_site_name_abbreviation}:#{cache_key}"
-
-    # ---------------------------------------------------------------------------
-
     # set the sites header / footer versions in the cache, if needed
     def set_site_header_footer_versions_in_cache
-      if @clear_cache || !Rails.cache.exist?(cache_key_for_site(:header_version)) || !Rails.cache.exist?(cache_key_for_site(:footer_version))
-        Rails.cache.write(cache_key_for_site(:header_version), HawthorneCore::Site.header_version, expires_in: 1.month)
-        Rails.cache.write(cache_key_for_site(:footer_version), HawthorneCore::Site.footer_version, expires_in: 1.month)
+      if @clear_cache || !Rails.cache.exist?(:header_version) || !Rails.cache.exist?(:footer_version)
+        Rails.cache.write(:header_version, HawthorneCore::Site.header_version, expires_in: 1.month)
+        Rails.cache.write(:footer_version, HawthorneCore::Site.footer_version, expires_in: 1.month)
       end
     end
 
@@ -40,8 +34,8 @@ module HawthorneCore::Cache
     # ex cache key: fabric-collection-controller-index-243
     # ex cache key with header and footer versions: fabric-collection-controller-index-243-h1-f1
     def cache_key_with_header_footer_versions(cache_key)
-      header_version = Rails.cache.read(cache_key_for_site(:header_version)) || 0
-      footer_version = Rails.cache.read(cache_key_for_site(:footer_version)) || 0
+      header_version = Rails.cache.read(:header_version) || 0
+      footer_version = Rails.cache.read(:footer_version) || 0
       "#{cache_key}-h#{header_version}-f#{footer_version}"
     end
 

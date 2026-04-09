@@ -1,7 +1,7 @@
 # v3.0
 
 class HawthorneCore::UI::Form::TextFieldComponent < ViewComponent::Base
-  def initialize(form:, attribute:, label:, placeholder: nil, value: nil, disabled: false, required: false, autocomplete: :off, maxlength: 100, autofocus: false)
+  def initialize(form:, attribute:, label:, placeholder: nil, value: nil, disabled: false, required: false, autocomplete: :off, maxlength: 100, autofocus: false, data: nil)
     @form = form
     @attribute = attribute
     @label = label
@@ -12,5 +12,6 @@ class HawthorneCore::UI::Form::TextFieldComponent < ViewComponent::Base
     @autocomplete = autocomplete
     @maxlength = maxlength
     @autofocus = autofocus
+    @data = data
   end
 end

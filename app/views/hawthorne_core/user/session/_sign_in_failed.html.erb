@@ -1,5 +1,5 @@
 <%# v3.0 %>
 
-<% message = 'Your email address doesn’t look valid<br>Please check for a typo and try again' if @email_address_syntax_error %>
+<% message = 'Your email address doesn’t look valid. Please check for a typo and try again.' if local_assigns[:syntax_error] %>
 
 <%= render HawthorneCore::UI::Form::ErrorMessageComponent.new(message: message) %>
