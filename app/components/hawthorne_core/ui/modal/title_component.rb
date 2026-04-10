@@ -1,3 +1,5 @@
+# v3.0
+
 class HawthorneCore::UI::Modal::TitleComponent < ViewComponent::Base
   def initialize(text:, modal_element_id:)
     @text = text

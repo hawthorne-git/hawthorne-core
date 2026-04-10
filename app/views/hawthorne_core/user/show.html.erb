@@ -1,76 +1,17 @@
 <%# v3.0 %>
 
 <%
+  title = 'My Profile'
 
-  full_name_value = @user.full_name.presence || '-----'
-
+  full_name_value = @user.full_name.presence
+  email_value = @user.email_address
+  phone_number_value = HawthorneCore::Helpers::PhoneNumber.us_format(@user.phone_number).presence
 %>
 
-<div class="flex min-h-screen">
+<%= render HawthorneCore::UI::User::LayoutComponent.new(user: @user, title: title) do %>
+  <%= render HawthorneCore::UI::User::ProfileAttrComponent.new(label: 'Full Name', value: full_name_value) %>
+  <%= render HawthorneCore::UI::User::ProfileAttrComponent.new(label: 'Email', value: email_value) %>
+  <%= render HawthorneCore::UI::User::ProfileAttrComponent.new(label: 'Phone Number', value: phone_number_value) %>
+<% end %>
 
-  <%# Sidebar %>
-  <aside class="w-64 shrink-0 border-r border-gray-200 px-6 py-10">
-
-    <%# User greeting %>
-    <div class="mb-8">
-      <p class="text-lg font-semibold text-brand-heading">Hi, <%= @user.first_name.capitalize if @user.first_name? %></p>
-      <p class="text-sm text-gray-500"><%= @user.email_address %></p>
-    </div>
-
-    <%# Navigation %>
-    <nav class="flex flex-col gap-1 text-sm">
-      <a href="/account/profile" class="px-3 py-2 font-semibold text-brand-heading rounded hover:bg-gray-100 no-underline hover:no-underline">My Profile</a>
-      <a href="#" class="px-3 py-2 text-gray-700 rounded hover:bg-gray-100 no-underline hover:no-underline">Order History</a>
-      <a href="#" class="px-3 py-2 text-gray-700 rounded hover:bg-gray-100 no-underline hover:no-underline">Shipping Addresses</a>
-      <a href="#" class="px-3 py-2 text-gray-700 rounded hover:bg-gray-100 no-underline hover:no-underline">Payment Methods</a>
-    </nav>
-
-    <%# Sign out %>
-    <div class="mt-10 pt-6 border-t border-gray-200">
-      <a href="/sign-out" data-turbo="false" class="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 no-underline hover:no-underline block">Sign Out</a>
-    </div>
-
-  </aside>
-
-  <%# Main content %>
-  <main class="flex-1 px-12 py-10 max-w-2xl">
-
-    <h1 class="text-2xl font-bold text-brand-heading mb-8">My Profile</h1>
-
-    <%# Full name %>
-    <div class="py-5 border-b border-gray-200 flex items-center justify-between">
-      <div>
-        <p class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Full Name</p>
-        <p class="text-gray-900"><%= full_name_value %></p>
-      </div>
-      <button type="button" onclick="document.getElementById('edit_full_name_modal').showModal()" class="text-sm text-brand-dark no-underline hover:underline shrink-0 bg-transparent border-none cursor-pointer p-0">Edit</button>
-    </div>
-
-    <%# Email %>
-    <div class="py-5 border-b border-gray-200">
-      <p class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Email</p>
-      <p class="text-gray-900"><%= @user.email_address %></p>
-    </div>
-
-    <%# Phone number %>
-    <div class="py-5 border-b border-gray-200 flex items-center justify-between">
-      <div>
-        <p class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Phone Number</p>
-        <p class="text-gray-900"><%= HawthorneCore::Helpers::PhoneNumber.us_format(@user.phone_number).presence || '-----' %></p>
-      </div>
-      <div class="flex items-center gap-2 text-sm shrink-0">
-        <% if @user.phone_number.present? %>
-          <%= link_to 'Edit', account_profile_phone_number_path, class: "text-brand-dark no-underline hover:underline" %>
-          <span class="text-gray-300">/</span>
-          <%= link_to 'Remove', account_profile_phone_number_clear_path, data: { turbo_method: :delete, turbo_confirm: 'Are you sure you want to remove your phone number?' }, class: "text-brand-dark no-underline hover:underline" %>
-        <% else %>
-          <%= link_to 'Add', account_profile_phone_number_path, class: "text-brand-dark no-underline hover:underline" %>
-        <% end %>
-      </div>
-    </div>
-
-  </main>
-
-</div>
-
-<%= render partial: 'hawthorne_core/user/profile/full_name_modal', locals: { modal_element_id: 'edit_full_name_modal' } %>
+<%= render partial: 'hawthorne_core/user/profile/full_name_modal', locals: { modal_element_id: 'profile_full_name_modal' } %>

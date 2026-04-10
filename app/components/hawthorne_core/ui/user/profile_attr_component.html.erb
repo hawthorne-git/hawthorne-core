@@ -1,0 +1,17 @@
+<%# v3.0 %>
+
+<%
+  blank_value = '-----'
+  @value = @value.presence || blank_value
+  @action = (@value == blank_value ? 'Add' : 'Edit')
+%>
+
+<div class="py-5 border-b border-gray-200 flex items-center justify-between">
+  <div>
+    <p class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1"><%= @label %></p>
+    <p class="text-gray-900"><%= @value %></p>
+  </div>
+  <div class="flex items-center gap-2 text-sm shrink-0">
+    <button type="button" onclick="document.getElementById('profile_full_name_modal').showModal()" class="text-sm text-brand-dark no-underline hover:underline shrink-0 bg-transparent border-none cursor-pointer p-0"><%= @action %></button>
+  </div>
+</div>

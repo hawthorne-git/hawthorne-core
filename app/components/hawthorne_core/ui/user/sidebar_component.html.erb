@@ -1,0 +1,46 @@
+<%# v3.0 %>
+
+<%
+
+  # find the user, if not present
+  @user = @user.presence || HawthorneCore::User.select(:email_address, :full_name).find_by(user_id: session[:user_id])
+
+  # create each navigation component
+  my_profile_navigation_component = { handle: 'My Profile', url: helpers.account_profile_phone_number_path, selected: (@selected_sidebar_navigation == 'My Profile') }
+  order_history_navigation_component = { handle: 'Order History', url: helpers.account_profile_phone_number_path, selected: (@selected_sidebar_navigation == 'Order History') }
+  shipping_addresses_navigation_component = { handle: 'Shipping Addresses', url: helpers.account_profile_phone_number_path, selected: (@selected_sidebar_navigation == 'Shipping Addresses') }
+  payment_methods_navigation_component = { handle: 'Payment Methods', url: helpers.account_profile_phone_number_path, selected: (@selected_sidebar_navigation == 'Payment Methods') }
+
+  # set these navigation components into a list
+  navigation_components =
+    [
+      my_profile_navigation_component,
+      order_history_navigation_component,
+      shipping_addresses_navigation_component,
+      payment_methods_navigation_component
+    ]
+
+%>
+
+<%# Sidebar %>
+<aside class="w-64 shrink-0 border-r border-gray-200 px-6 py-10">
+
+  <%# User greeting %>
+  <div class="mb-8">
+    <p class="text-lg font-semibold text-brand-heading">Hi, <%= @user.first_name.capitalize if @user.first_name? %></p>
+    <p class="text-sm text-gray-500"><%= @user.email_address %></p>
+  </div>
+
+  <%# Navigation %>
+  <nav class="flex flex-col gap-1 text-sm">
+    <% navigation_components.each do |navigation_component| %>
+      <%= render HawthorneCore::UI::User::SidebarNavigationComponent.new(navigation_component: navigation_component) %>
+    <% end %>
+  </nav>
+
+  <%# Sign out %>
+  <div class="mt-10 pt-6 border-t border-gray-200">
+    <%= link_to 'Sign Out', helpers.sign_out_path, data: { turbo: :false }, class: "px-3 py-2 text-sm text-gray-500 hover:text-gray-700 no-underline hover:no-underline block" %>
+  </div>
+
+</aside>

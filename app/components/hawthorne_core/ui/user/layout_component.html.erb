@@ -1,0 +1,9 @@
+<%# v3.0 %>
+
+<div class="flex min-h-screen">
+  <%= render HawthorneCore::UI::User::SidebarComponent.new(user: @user, selected_sidebar_navigation: @title) %>
+  <main class="flex-1 px-12 py-10 max-w-2xl">
+    <%= render HawthorneCore::UI::User::TitleComponent.new(text: @title) %>
+    <%= content %>
+  </main>
+</div>

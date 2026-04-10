@@ -17,9 +17,9 @@ class HawthorneCore::User < HawthorneCore::ActiveRecordBaseApp
 
   # -----------------------------------------------------------------------------
 
-  def first_name = full_name.split(' ').first
+  def first_name = full_name.present? ? full_name.split(' ').first : ''
 
-  def first_name? = first_name.present?
+  def first_name? = full_name.present?
 
   # -----------------------------------------------------------------------------
 
