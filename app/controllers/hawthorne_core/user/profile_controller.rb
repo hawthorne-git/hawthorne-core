@@ -33,7 +33,7 @@ class HawthorneCore::User::ProfileController < HawthorneCore::ApplicationControl
   # just their full name and pin default delivery - email address / phone number are done solo
   def update
 
-    # get the form attributes
+    # get the request attributes
     full_name = params[:full_name]
     sign_in_pin_default_delivery = params[:sign_in_pin_default_delivery].upcase
 

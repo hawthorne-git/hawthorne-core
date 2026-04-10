@@ -6,7 +6,7 @@
     let submitting = false
 
     document.addEventListener('input', function (event) {
-         q
+
         // exit if the form is being submitted
         if (submitting) return
 
@@ -19,7 +19,7 @@
         pinField.value = pinField.value.replace(/\D/g, '')
 
         // exit if the PIN field does not equal 6 digits
-        if (pinField.value.length !==6) return
+        if (pinField.value.length !== 6) return
 
         // set that we are submitting
         submitting = true

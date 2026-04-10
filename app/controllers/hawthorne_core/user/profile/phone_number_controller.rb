@@ -38,7 +38,7 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Appli
   # verify the users new phone number
   def verify
 
-    # get the page attributes
+    # get the request attributes
     new_phone_number = params[:new_phone_number].to_s.strip
 
     # ----------------------
@@ -119,7 +119,7 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Appli
   # verify the users pin, to update their phone number
   def verify_pin
 
-    # get the page attributes
+    # get the request attributes
     pin = params[:pin]
 
     # ----------------------

@@ -25,7 +25,7 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
   # sign-in the user
   def sign_in
 
-    # get the page attributes
+    # get the request attributes
     email_address = params[:email_address].to_s.downcase.strip
     keep_signed_in = params[:keep_signed_in]
 
@@ -98,7 +98,7 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
   # show the page for the user to verify their sign-in pin
   def verify_sign_in_pin_show
 
-    # get the page attributes
+    # get the request attributes
     @user_token = params[:token]
     @pin_delivery_method = params[:pin_delivery_method]
     @keep_signed_in = params[:keep_signed_in].to_i
@@ -147,7 +147,7 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
   # resend the user their sign-in pin via delivery method
   def resend_sign_in_pin
 
-    # get the page attributes
+    # get the request attributes
     user_token = params[:token]
     pin_delivery_method = params[:pin_delivery_method]
     keep_signed_in = params[:keep_signed_in]
@@ -186,7 +186,7 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
 
     # ----------------------
 
-    # get the page attributes
+    # get the request attributes
     user_token = params[:token]
     pin = params[:pin]
     pin_delivery_method = params[:pin_delivery_method]

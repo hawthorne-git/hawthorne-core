@@ -23,6 +23,10 @@ HawthorneCore::Engine.routes.draw do
 
   # ----------------------
 
+  post 'account/profile/full_name', to: 'user/profile/full_name#edit'
+
+  # ----------------------
+
   get 'account/profile/email-address', to: 'user/profile/email_address#show'
   post 'account/profile/email-address-verify', to: 'user/profile/email_address#verify'
   get 'account/profile/email-address-verify-pin', to: 'user/profile/email_address#verify_pin_show'

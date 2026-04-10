@@ -1,5 +1,11 @@
 <%# v3.0 %>
 
+<%
+
+  full_name_value = @user.full_name.presence || '-----'
+
+%>
+
 <div class="flex min-h-screen">
 
   <%# Sidebar %>
@@ -35,9 +41,9 @@
     <div class="py-5 border-b border-gray-200 flex items-center justify-between">
       <div>
         <p class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Full Name</p>
-        <p class="text-gray-900"><%= @user.full_name.presence || '—' %></p>
+        <p class="text-gray-900"><%= full_name_value %></p>
       </div>
-      <%= link_to 'Edit', account_profile_path, class: "text-sm text-brand-dark no-underline hover:underline shrink-0" %>
+      <button type="button" onclick="document.getElementById('edit_full_name_modal').showModal()" class="text-sm text-brand-dark no-underline hover:underline shrink-0 bg-transparent border-none cursor-pointer p-0">Edit</button>
     </div>
 
     <%# Email %>
@@ -66,3 +72,5 @@
   </main>
 
 </div>
+
+<%= render partial: 'hawthorne_core/user/profile/full_name_modal', locals: { modal_element_id: 'edit_full_name_modal' } %>

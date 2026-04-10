@@ -15,7 +15,7 @@ class HawthorneCore::User::Profile::ShippingAddressController < HawthorneCore::A
   # the user can also choose to select an alternate country - if selected, use this country
   def new
 
-    # get the page attributes
+    # get the request attributes
     @select_country = (params[:select_country] == 'true')
     selected_country_code_alpha2 = params[:selected_country]
 
@@ -117,7 +117,7 @@ class HawthorneCore::User::Profile::ShippingAddressController < HawthorneCore::A
 
     # ----------------------
 
-    # get the form attributes, and merge in the user id - needed to create the record
+    # get the request attributes, and merge in the user id - needed to create the record
     attrs = address_params
     attrs = attrs.merge(user_id: session[:user_id])
 
@@ -142,7 +142,7 @@ class HawthorneCore::User::Profile::ShippingAddressController < HawthorneCore::A
 
   def delete
 
-    # get the page attributes
+    # get the request attributes
     token = params[:token]
 
     # ----------------------

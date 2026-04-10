@@ -38,7 +38,7 @@ class HawthorneCore::User::Profile::EmailAddressController < HawthorneCore::Appl
   # verify the users email address, to update
   def verify
 
-    # get the page attributes
+    # get the request attributes
     new_email_address = params[:new_email_address].to_s.downcase.strip
 
     # ----------------------
@@ -126,7 +126,7 @@ class HawthorneCore::User::Profile::EmailAddressController < HawthorneCore::Appl
   # verify the users pin, to update their email address
   def verify_pin
 
-    # get the page attributes
+    # get the request attributes
     pin = params[:pin]
 
     # ----------------------
