@@ -184,6 +184,8 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
   # verify the users sign-in pin
   def verify_sign_in_pin
 
+    # ----------------------
+
     # get the page attributes
     user_token = params[:token]
     pin = params[:pin]

@@ -5,19 +5,24 @@
 
   title = @current_phone_number.blank? ? 'Add Phone Number' : 'Update Phone Number'
 
+  instruction_message = "Use your phone number to receive a sign-in PIN."
+
   current_phone_number_label = 'Current phone number'
   current_phone_number_value = HawthorneCore::Helpers::PhoneNumber.us_format(@current_phone_number)
 
-  new_phone_number_label = 'New phone number (US / Canada only)'
+  new_phone_number_label = 'Phone Number'
 
   submit_button_text = 'Continue'
+
+  us_only_message = "Currently, we only support US phone numbers. International support is coming soon."
 %>
 
 <%= render HawthorneCore::UI::TitleComponent.new(text: title) %>
-<%= render HawthorneCore::UI::Form::FormWrapperComponent.new do %>
+<%= render HawthorneCore::UI::Form::FormWrapperComponent.new(instruction_message: instruction_message) do %>
   <%= form_with url: form_url do |f| %>
     <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :current_phone_number, label: current_phone_number_label, value: current_phone_number_value, disabled: true, required: true) if @current_phone_number.present? %>
     <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :new_phone_number, label: new_phone_number_label, required: true, autofocus: true) %>
     <%= render HawthorneCore::UI::Form::SubmitButtonComponent.new(form: f, text: submit_button_text) %>
   <% end %>
+  <%= render HawthorneCore::UI::Form::SupportMessageComponent.new(message: us_only_message) %>
 <% end %>

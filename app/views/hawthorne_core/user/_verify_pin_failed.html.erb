@@ -6,4 +6,5 @@
   message = 'That PIN doesn’t match, please check for a typo and try again' if local_assigns[:not_match]
   message = 'We couldn’t verify that PIN, so we sent you a new one' if local_assigns[:not_set]
 %>
+
 <%= render HawthorneCore::UI::Form::ErrorMessageComponent.new(message: message) %>

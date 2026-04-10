@@ -10,11 +10,11 @@ class HawthorneCore::Email::SendSignInPinJob < HawthorneCore::ApplicationJob
   def perform(user_id, keep_signed_in)
 
     # for user action logs, set the email type
-    type = HawthorneCore::Services::MailerSendSvc::SIGN_IN_VERIFICATION_PIN
+    type = HawthorneCore::Services::MailerSendSvc::SIGN_IN_PIN
 
     # find the user by their id
     user = HawthorneCore::User.
-      select(:user_id, :token, :email_address).
+      select(:user_id, :token, :email_address, :full_name).
       find_by(user_id: user_id)
 
     # find the users site record ... the pin is specific to the site
@@ -32,7 +32,7 @@ class HawthorneCore::Email::SendSignInPinJob < HawthorneCore::ApplicationJob
     end
 
     # the pin was not recently sent, send the email
-    HawthorneCore::Services::MailerSendSvc.send_sign_in_verification_pin(user.id, user.token, user.email_address, user_site.sign_in_pin, user_site.sign_in_pin_formatted, keep_signed_in)
+    HawthorneCore::Services::MailerSendSvc.send_sign_in_pin(user.id, user.token, user.email_address, user.first_name, user_site.sign_in_pin, user_site.sign_in_pin_formatted, keep_signed_in)
 
   end
 

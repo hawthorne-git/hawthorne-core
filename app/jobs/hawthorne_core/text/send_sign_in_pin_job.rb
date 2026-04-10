@@ -10,7 +10,7 @@ class HawthorneCore::Text::SendSignInPinJob < HawthorneCore::ApplicationJob
   def perform(user_id)
 
     # for user action logs, set the text message type
-    type = HawthorneCore::Services::TwilioTextSvc::SIGN_IN_VERIFICATION_PIN
+    type = HawthorneCore::Services::TwilioTextSvc::SIGN_IN_PIN
 
     # find the user by their id
     user = HawthorneCore::User.
@@ -32,7 +32,7 @@ class HawthorneCore::Text::SendSignInPinJob < HawthorneCore::ApplicationJob
     end
 
     # the pin was not recently sent, send the text message
-    HawthorneCore::Services::TwilioTextSvc.send_sign_in_verification_pin(user.id, user.phone_number, user_site.sign_in_pin_formatted)
+    HawthorneCore::Services::TwilioTextSvc.send_sign_in_pin(user.id, user.phone_number, user_site.sign_in_pin_formatted)
 
   end
 

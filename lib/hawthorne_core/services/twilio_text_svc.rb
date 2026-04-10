@@ -5,9 +5,9 @@ class HawthorneCore::Services::TwilioTextSvc
 
   # ----------------------------------------------------------------
 
-  PHONE_NUMBER_UPDATE_VERIFICATION_PIN = 'PHONE NUMBER UPDATE VERIFICATION PIN'.freeze
+  PHONE_NUMBER_UPDATE_VERIFICATION_PIN = 'PHONE NUMBER PIN'.freeze
 
-  SIGN_IN_VERIFICATION_PIN = 'SIGN-IN VERIFICATION PIN'.freeze
+  SIGN_IN_PIN = 'SIGN-IN PIN'.freeze
 
   # ----------------------------------------------------------------
 
@@ -15,7 +15,7 @@ class HawthorneCore::Services::TwilioTextSvc
   def self.send_phone_number_update_verification_pin(user_id, phone_number, pin_formatted) = send_text_message(PHONE_NUMBER_UPDATE_VERIFICATION_PIN, user_id, phone_number, verification_pin_message(pin_formatted))
 
   # send sign-in verification pin
-  def self.send_sign_in_verification_pin(user_id, phone_number, pin_formatted) = send_text_message(SIGN_IN_VERIFICATION_PIN, user_id, phone_number, verification_pin_message(pin_formatted))
+  def self.send_sign_in_pin(user_id, phone_number, pin_formatted) = send_text_message(SIGN_IN_PIN, user_id, phone_number, sign_in_pin_message(pin_formatted))
 
   # ----------------------------------------------------------------
 
@@ -35,6 +35,9 @@ class HawthorneCore::Services::TwilioTextSvc
   def self.twilio_phone_number = '18452534739'.freeze
 
   # ----------------------------------------------------------------
+
+  # define the sign-in pin text message - given a pin
+  def self.sign_in_pin_message(pin_formatted) = "#{HawthorneCore::Site.this_site_name}\n\nYour sign-in PIN is #{pin_formatted}"
 
   # define the verification pin text message - given a pin
   def self.verification_pin_message(pin_formatted) = "#{HawthorneCore::Site.this_site_name}: Your verification PIN is #{pin_formatted}."

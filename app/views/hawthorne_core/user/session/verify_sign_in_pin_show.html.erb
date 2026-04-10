@@ -6,7 +6,7 @@
 
   form_url = verify_sign_in_pin_path
 
-  title = 'Verify your PIN'
+  title = 'Verify your Sign-In PIN'
 
   instruction_message = "We sent your PIN to: #{@user.email_address}" if pin_delivery_method_via_email
   instruction_message = "We sent your PIN to: #{HawthorneCore::Helpers::PhoneNumber.masked(@user.phone_number)}" if pin_delivery_method_via_phone

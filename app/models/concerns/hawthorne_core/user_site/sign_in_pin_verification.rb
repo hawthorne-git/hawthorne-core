@@ -60,7 +60,7 @@ module HawthorneCore::UserSite::SignInPinVerification
           action: HawthorneCore::UserAction::Action::ACTIONS.fetch(:email_sent),
           success: true
         ).
-        where("note->>'email_type' = ?", HawthorneCore::Services::MailerSendSvc::SIGN_IN_VERIFICATION_PIN).
+        where("note->>'email_type' = ?", HawthorneCore::Services::MailerSendSvc::SIGN_IN_PIN).
         where("note->'personalization'->'data'->>'pin' = ?", sign_in_pin).
         where('created_at >= ?', HawthorneCore::User::PIN_RECENTLY_SENT_IN_SECONDS.seconds.ago).
         exists?
@@ -75,7 +75,7 @@ module HawthorneCore::UserSite::SignInPinVerification
           action: HawthorneCore::UserAction::Action::ACTIONS.fetch(:text_message_sent),
           success: true
         ).
-        where("note->>'text_message_type' = ?", HawthorneCore::Services::TwilioTextSvc::SIGN_IN_VERIFICATION_PIN).
+        where("note->>'text_message_type' = ?", HawthorneCore::Services::TwilioTextSvc::SIGN_IN_PIN).
         where("note->>'message' LIKE ?", "%#{sign_in_pin}%").
         where('created_at >= ?', HawthorneCore::User::PIN_RECENTLY_SENT_IN_SECONDS.seconds.ago).
         exists?

@@ -8,7 +8,7 @@ class HawthorneCore::Services::MailerSendSvc
 
   EMAIL_ADDRESS_UPDATE_VERIFICATION_PIN = 'EMAIL ADDRESS UPDATE VERIFICATION PIN'.freeze
 
-  SIGN_IN_VERIFICATION_PIN = 'SIGN-IN VERIFICATION PIN'.freeze
+  SIGN_IN_PIN = 'SIGN-IN VERIFICATION PIN'.freeze
 
   WELCOME_EMAIL = 'WELCOME EMAIL'.freeze
 
@@ -23,10 +23,11 @@ class HawthorneCore::Services::MailerSendSvc
   # ----------------------------------------------------------------
 
   # send sign-in verification pin
-  def self.send_sign_in_verification_pin(user_id, user_token, email_address, sign_in_pin, sign_in_pin_formatted, keep_signed_in)
+  def self.send_sign_in_pin(user_id, user_token, email_address, first_name, sign_in_pin, sign_in_pin_formatted, keep_signed_in)
+    first_name = (first_name.present? ? first_name : 'there')
     magic_link_url = HawthorneCore::AppConfig.site_base_url + '/verify-sign-in-pin-via-magic-link?token=' + user_token + '&pin=' + sign_in_pin.to_s + '&keep_signed_in=' + keep_signed_in.to_s
-    personalization = sign_in_verification_pin_personalization(email_address, magic_link_url, sign_in_pin_formatted)
-    send_email(SIGN_IN_VERIFICATION_PIN, user_id, email_address, sign_in_verification_pin_subject, sign_in_verification_pin_template, personalization)
+    personalization = sign_in_pin_personalization(email_address, first_name, magic_link_url, sign_in_pin_formatted)
+    send_email(SIGN_IN_PIN, user_id, email_address, sign_in_pin_subject, sign_in_pin_template, personalization)
   end
 
   # ----------------------------------------------------------------
@@ -67,11 +68,11 @@ class HawthorneCore::Services::MailerSendSvc
 
   # ----------------------
 
-  def self.sign_in_verification_pin_subject = 'Verify your email address'.freeze
+  def self.sign_in_pin_subject = 'Your sign-in link and PIN'.freeze
 
-  def self.sign_in_verification_pin_template = '0r83ql3vnkmgzw1j'.freeze
+  def self.sign_in_pin_template = '0r83ql3vnkmgzw1j'.freeze
 
-  def self.sign_in_verification_pin_personalization(email_address, magic_link_url, sign_in_pin_formatted) = mailer_send_personalization(email_address, { magic_link_url: magic_link_url, pin: sign_in_pin_formatted })
+  def self.sign_in_pin_personalization(email_address, first_name, magic_link_url, sign_in_pin_formatted) = mailer_send_personalization(email_address, { first_name: first_name, magic_link_url: magic_link_url, pin: sign_in_pin_formatted })
 
   # ----------------------
 

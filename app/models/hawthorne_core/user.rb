@@ -17,6 +17,12 @@ class HawthorneCore::User < HawthorneCore::ActiveRecordBaseApp
 
   # -----------------------------------------------------------------------------
 
+  def first_name = full_name.split(' ').first
+
+  def first_name? = first_name.present?
+
+  # -----------------------------------------------------------------------------
+
   # clear the users phone number,
   # and set the sign-in pin default delivery to EMAIL as they no longer have a phone number
   def clear_phone_number
