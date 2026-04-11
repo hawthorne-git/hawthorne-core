@@ -1,8 +1,7 @@
 <%# v3.0 %>
 
 <% if @navigation_component[:selected] %>
-  <a href="NO_LINK" class="px-3 py-2 font-semibold text-brand-heading rounded hover:bg-gray-100 no-underline hover:no-underline"><%= @navigation_component[:handle] %></a>
+  <%= link_to @navigation_component[:handle], @navigation_component[:url], class: "px-3 py-2 font-semibold text-brand-heading rounded hover:bg-gray-100 no-underline hover:no-underline" %>
 <% else %>
-  <% %>
   <%= link_to @navigation_component[:handle], @navigation_component[:url], class: "px-3 py-2 text-gray-700 rounded hover:bg-gray-100 no-underline hover:no-underline" %>
 <% end %>

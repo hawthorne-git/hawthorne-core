@@ -1,11 +1,6 @@
 # v3.0
 
-class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::ApplicationController
-
-  # -----------------------------------------------------------------------------
-
-  # verify that the user is signed-in prior to all actions
-  before_action :verify_signed_in?
+class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::AccountApplicationController
 
   # ----------------------------------------------------------------------------- 
 
@@ -24,12 +19,7 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Appli
 
     # ----------------------
 
-    @html_title = 'Update Phone Number | My Account'
-    @breadcrumbs = [
-      { title: 'My Account', link: account_path },
-      { title: 'Profile', link: account_profile_path },
-      { title: 'Update Phone Number', link: nil }
-    ]
+    @html_title = "#{@current_phone_number.blank? ? 'Add' : 'Update'} Phone Number | My Profile"
 
   end
 
@@ -97,12 +87,8 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Appli
 
     # ----------------------
 
-    @html_title = 'Update Phone Number | My Account'
-    @breadcrumbs = [
-      { title: 'My Account', link: account_path },
-      { title: 'Profile', link: account_profile_path },
-      { title: 'Update Phone Number', link: nil }
-    ]
+    @html_title = "#{@current_phone_number.blank? ? 'Add' : 'Update'} Phone Number | My Profile"
+
 
   end
 

@@ -6,10 +6,10 @@
   @user = @user.presence || HawthorneCore::User.select(:email_address, :full_name).find_by(user_id: session[:user_id])
 
   # create each navigation component
-  my_profile_navigation_component = { handle: 'My Profile', url: helpers.account_profile_phone_number_path, selected: (@selected_sidebar_navigation == 'My Profile') }
-  order_history_navigation_component = { handle: 'Order History', url: helpers.account_profile_phone_number_path, selected: (@selected_sidebar_navigation == 'Order History') }
-  shipping_addresses_navigation_component = { handle: 'Shipping Addresses', url: helpers.account_profile_phone_number_path, selected: (@selected_sidebar_navigation == 'Shipping Addresses') }
-  payment_methods_navigation_component = { handle: 'Payment Methods', url: helpers.account_profile_phone_number_path, selected: (@selected_sidebar_navigation == 'Payment Methods') }
+  my_profile_navigation_component = { handle: 'My Profile', url: helpers.account_profile_path, selected: (@selected_sidebar_navigation_item == 'My Profile') }
+  order_history_navigation_component = { handle: 'Order History', url: helpers.account_profile_phone_number_path, selected: (@selected_sidebar_navigation_item == 'Order History') }
+  shipping_addresses_navigation_component = { handle: 'Shipping Addresses', url: helpers.account_profile_phone_number_path, selected: (@selected_sidebar_navigation_item == 'Shipping Addresses') }
+  payment_methods_navigation_component = { handle: 'Payment Methods', url: helpers.account_profile_phone_number_path, selected: (@selected_sidebar_navigation_item == 'Payment Methods') }
 
   # set these navigation components into a list
   navigation_components =

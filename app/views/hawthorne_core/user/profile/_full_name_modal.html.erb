@@ -3,11 +3,11 @@
 <%
   form_url = account_profile_full_name_path
 
-  title = 'Edit Full Name'
+  title = "#{user.full_name.blank? ? 'Add' : 'Edit'} Full Name"
 
   full_name_label = 'First Name and Last Name'
-  full_name_value = @user.full_name
-  full_name_autofocus = @user.full_name.blank?
+  full_name_value = user.full_name
+  full_name_autofocus = user.full_name.blank?
 
   submit_button_text = 'Save'
 %>

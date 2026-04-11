@@ -15,8 +15,7 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
   # show the sign-in page ... also used for sign-up
   def sign_in_show
 
-    @html_title = 'Sign In | Sign Up'
-    @meta_description = 'Sign into your ' + HawthorneCore::Site.this_site_name + ' account'
+    @html_title = 'Sign-In'
 
   end
 
@@ -138,7 +137,7 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
 
     # ----------------------
 
-    @html_title = 'Verify Pin'
+    @html_title = 'Verify Sign-In Pin'
 
   end
 

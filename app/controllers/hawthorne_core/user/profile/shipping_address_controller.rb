@@ -1,11 +1,6 @@
 # v3.0
 
-class HawthorneCore::User::Profile::ShippingAddressController < HawthorneCore::ApplicationController
-
-  # -----------------------------------------------------------------------------
-
-  # verify that the user is signed-in prior to all actions
-  before_action :verify_signed_in?
+class HawthorneCore::User::Profile::ShippingAddressController < HawthorneCore::AccountApplicationController
 
   # -----------------------------------------------------------------------------
 

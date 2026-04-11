@@ -1,11 +1,6 @@
 # v3.0
 
-class HawthorneCore::User::ProfileController < HawthorneCore::ApplicationController
-
-  # -----------------------------------------------------------------------------
-
-  # verify that the user is signed in prior to all actions
-  before_action :verify_signed_in?
+class HawthorneCore::User::ProfileController < HawthorneCore::AccountApplicationController
 
   # -----------------------------------------------------------------------------
 
@@ -19,36 +14,7 @@ class HawthorneCore::User::ProfileController < HawthorneCore::ApplicationControl
 
     # ----------------------
 
-    @html_title = 'Profile | My Account'
-    @breadcrumbs = [
-      { title: 'My Account', link: account_path },
-      { title: 'Profile', link: nil }
-    ]
-
-  end
-
-  # -----------------------------------------------------------------------------
-
-  # update the users profile
-  # just their full name and pin default delivery - email address / phone number are done solo
-  def update
-
-    # get the request attributes
-    full_name = params[:full_name]
-    sign_in_pin_default_delivery = params[:sign_in_pin_default_delivery].upcase
-
-    # find the user
-    user = HawthorneCore::User.
-      select(:user_id, :full_name).
-      find_by(user_id: session[:user_id])
-
-    # update the users profile attributes - log it
-    attrs = { full_name: full_name, sign_in_pin_default_delivery: sign_in_pin_default_delivery }
-    user.update_columns(attrs)
-    HawthorneCore::UserAction::Log.update_profile(user.id, attrs, request.remote_ip, cookies[:user_session_token])
-
-    # redirect the user to view their account
-    redirect_to account_path
+    @html_title = 'My Profile'
 
   end
 

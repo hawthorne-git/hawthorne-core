@@ -8,9 +8,10 @@ module HawthorneCore
 
     isolate_namespace HawthorneCore
 
-    initializer "hawthorne_core.inflections" do
+    config.before_initialize do
       ActiveSupport::Inflector.inflections(:en) do |inflect|
-        inflect.acronym "UI"
+        inflect.acronym 'HTML'
+        inflect.acronym 'UI'
       end
     end
 

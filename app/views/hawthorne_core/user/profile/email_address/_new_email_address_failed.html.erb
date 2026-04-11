@@ -3,7 +3,7 @@
 <%
   message = 'Your new email address doesn’t look valid<br>Please check for a typo and try again' if local_assigns[:syntax_error]
   message = 'Your new email address is the same as your current one' if local_assigns[:identical]
-  message = 'Your new email address is already in use' if local_assigns[:taken]
+  message = 'This email address is already in use' if local_assigns[:taken]
 %>
 
 <%= render HawthorneCore::UI::Form::ErrorMessageComponent.new(message: message) %>

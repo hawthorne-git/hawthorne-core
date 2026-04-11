@@ -18,7 +18,7 @@ module HawthorneCore::Site::HawthornePrintCo
         has_checkout: true,
         contact_email: 'contact@hawthornesupplyco.com',
         email_from_tagline: 'Lindsay, Charlie, and your friends at Hawthorne',
-        mailer_send_welcome_template_id: 'neqvygmmvz5g0p7w'
+        mailer_send_welcome_template_id: '0r83ql3v63xgzw1j'
       }.freeze
 
     CONFIG.each do |key, value|

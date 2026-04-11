@@ -3,31 +3,23 @@
 <%
   form_url = account_profile_email_address_verify_pin_path
 
-  title = 'Verify your PIN'
+  title = 'Verify your email'
 
-  instruction_message = "We sent a PIN to: #{@new_email_address}"
+  instruction_message = "Enter the PIN we sent to #{@new_email_address}"
 
-  current_email_address_label = 'Current email address'
-  current_email_address_value = @current_email_address
+  submit_button_text = 'Verify and Update Email'
 
-  new_email_address_label = 'New email_address'
-  new_email_address_value = @new_email_address
-
-  pin_label = 'Verification PIN - Numbers only'
-
-  submit_button_text = 'Update Email Address'
+  resend_pin_message = "Didn't get the PIN? #{link_to 'Resend it', account_profile_email_address_resend_pin_path, data: { turbo: :false }}"
 %>
 
-<%= render HawthorneCore::UI::TitleComponent.new(text: title) %>
-<%= render HawthorneCore::UI::Form::FormWrapperComponent.new(instruction_message: instruction_message) do %>
-  <%= form_with url: form_url do |f| %>
-    <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :current_email_address, label: current_email_address_label, value: current_email_address_value, disabled: true) %>
-    <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :new_email_address, label: new_email_address_label, value: new_email_address_value, disabled: true) %>
-    <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :pin, label: pin_label, required: true, autofocus: true) %>
-    <%= render HawthorneCore::UI::Form::SubmitButtonComponent.new(form: f, text: submit_button_text) %>
+<%= render HawthorneCore::UI::User::Layout::MyProfileComponent.new(user: @user, title: title) do %>
+  <%= render HawthorneCore::UI::Form::FormWrapperComponent.new(instruction_message: instruction_message) do %>
+    <%= form_with url: form_url do |f| %>
+      <%= render HawthorneCore::UI::Form::Attr::PinTextFieldComponent.new(form: f) %>
+      <%= render HawthorneCore::UI::Form::SubmitButtonComponent.new(form: f, text: submit_button_text) %>
+    <% end %>
+    <%= render HawthorneCore::UI::Form::SupportMessageComponent.new(message: resend_pin_message) %>
   <% end %>
 <% end %>
 
-<div>
-  Didn’t get the PIN?  <%= link_to 'Resend it', account_profile_email_address_resend_pin_path, data: { turbo: :false } %>
-</div>
+<%= render '/hawthorne_core/user/verify_pin_auto_submit_js' %>

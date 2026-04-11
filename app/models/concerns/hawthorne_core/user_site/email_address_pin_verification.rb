@@ -69,7 +69,7 @@ module HawthorneCore::UserSite::EmailAddressPinVerification
           action: HawthorneCore::UserAction::Action::ACTIONS.fetch(:email_sent),
           success: true
         ).
-        where("note->>'email_type' = ?", HawthorneCore::Services::MailerSendSvc::EMAIL_ADDRESS_UPDATE_VERIFICATION_PIN).
+        where("note->>'email_type' = ?", HawthorneCore::Services::MailerSendSvc::EMAIL_ADDRESS_UPDATE_PIN).
         where("note->'personalization'->'data'->>'pin' = ?", new_email_address_pin).
         where('created_at >= ?', HawthorneCore::User::PIN_RECENTLY_SENT_IN_SECONDS.seconds.ago).
         exists?

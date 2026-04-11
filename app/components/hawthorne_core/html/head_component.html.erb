@@ -1,0 +1,27 @@
+<%# v3.0 %>
+
+<%
+  title = [@title.presence, HawthorneCore::Site.this_site_name].compact.join(' | ')
+%>
+
+<head>
+
+  <title><%= title %></title>
+
+  <meta name='viewport' content='width=device-width,initial-scale=1'>
+  <meta name='apple-mobile-web-app-capable' content='yes'>
+  <meta name='application-name' content='Hawthorne Print Co'>
+  <meta name='mobile-web-app-capable' content='yes'>
+
+  <%= helpers.csrf_meta_tags %>
+  <%= helpers.csp_meta_tag %>
+
+  <link rel='icon' href='/icon.png' type='image/png'>
+  <link rel='icon' href='/icon.svg' type='image/svg+xml'>
+  <link rel='apple-t  ouch-icon' href='/icon.png'>
+
+  <%= stylesheet_link_tag 'tailwind', 'data-turbo-track': 'reload' %>
+
+  <%= helpers.javascript_importmap_tags %>
+
+</head>

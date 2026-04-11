@@ -10,7 +10,7 @@ class HawthorneCore::Text::SendPhoneNumberUpdatePinJob < HawthorneCore::Applicat
   def perform(user_id)
 
     # for user action logs, set the text message type
-    type = HawthorneCore::Services::TwilioTextSvc::PHONE_NUMBER_UPDATE_VERIFICATION_PIN
+    type = HawthorneCore::Services::TwilioTextSvc::PHONE_NUMBER_UPDATE_PIN
 
     # find the users site record ... the new phone number pin is specific to each site
     user_site = HawthorneCore::UserSite.
@@ -27,7 +27,7 @@ class HawthorneCore::Text::SendPhoneNumberUpdatePinJob < HawthorneCore::Applicat
     end
 
     # the pin was not recently sent, send the text message
-    HawthorneCore::Services::TwilioTextSvc.send_phone_number_update_verification_pin(user_site.user_id, user_site.new_phone_number, user_site.new_phone_number_pin_formatted)
+    HawthorneCore::Services::TwilioTextSvc.send_phone_number_update_pin(user_site.user_id, user_site.new_phone_number, user_site.new_phone_number_pin_formatted)
 
   end
 

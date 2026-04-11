@@ -1,11 +1,6 @@
 # v3.0
 
-class HawthorneCore::User::Profile::EmailAddressController < HawthorneCore::ApplicationController
-
-  # -----------------------------------------------------------------------------
-
-  # verify that the user is signed-in prior to all actions
-  before_action :verify_signed_in?
+class HawthorneCore::User::Profile::EmailAddressController < HawthorneCore::AccountApplicationController
 
   # -----------------------------------------------------------------------------
 
@@ -24,12 +19,7 @@ class HawthorneCore::User::Profile::EmailAddressController < HawthorneCore::Appl
 
     # ----------------------
 
-    @html_title = 'Update Email Address | My Account'
-    @breadcrumbs = [
-      { title: 'My Account', link: account_path },
-      { title: 'Profile', link: account_profile_path },
-      { title: 'Update Email Address', link: nil }
-    ]
+    @html_title = 'Update Email Address | My Profile'
 
   end
 
@@ -98,18 +88,12 @@ class HawthorneCore::User::Profile::EmailAddressController < HawthorneCore::Appl
   # show the page for the user to verify their pin, to update the email address
   def verify_pin_show
 
-    # find the users current and new email addresses
-    @current_email_address = HawthorneCore::User.where(user_id: session[:user_id]).pick(:email_address)
+    # find the users new email addresses
     @new_email_address = HawthorneCore::UserSite.where(user_id: session[:user_id], site_id: HawthorneCore::Site.this_site_id).pick(:new_email_address)
 
     # ----------------------
 
-    @html_title = 'Update Email Address | My Account'
-    @breadcrumbs = [
-      { title: 'My Account', link: account_path },
-      { title: 'Profile', link: account_profile_path },
-      { title: 'Update Email Address', link: nil }
-    ]
+    @html_title = 'Update Email Address | My Profile'
 
   end
 

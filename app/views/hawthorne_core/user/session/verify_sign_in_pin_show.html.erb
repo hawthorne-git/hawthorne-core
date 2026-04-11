@@ -6,10 +6,10 @@
 
   form_url = verify_sign_in_pin_path
 
-  title = 'Verify your Sign-In PIN'
+  title = 'Verify your sign-in PIN'
 
-  instruction_message = "We sent your PIN to: #{@user.email_address}" if pin_delivery_method_via_email
-  instruction_message = "We sent your PIN to: #{HawthorneCore::Helpers::PhoneNumber.masked(@user.phone_number)}" if pin_delivery_method_via_phone
+  instruction_message = "Enter the 6-digit PIN we sent to #{@user.email_address}" if pin_delivery_method_via_email
+  instruction_message = "Enter the 6-digit PIN we sent to #{HawthorneCore::Helpers::PhoneNumber.masked(@user.phone_number)}" if pin_delivery_method_via_phone
 
   token_value = @user_token
 

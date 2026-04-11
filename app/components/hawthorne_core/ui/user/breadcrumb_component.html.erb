@@ -1,0 +1,14 @@
+<%# v3.0 %>
+
+<%
+  breadcrumb = { text: 'My Profile', url: helpers.account_path } if (@selected_sidebar_navigation_item == 'My Profile' and @title.downcase != @selected_sidebar_navigation_item.downcase)
+%>
+
+<% if breadcrumb %>
+  <div class="max-w-md mx-auto mb-4">
+    <%= link_to breadcrumb[:url], class: "inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-brand-heading no-underline hover:no-underline" do %>
+      <span>&#8592;</span>
+      <span><%= breadcrumb[:text] %></span>
+    <% end %>
+  </div>
+<% end %>

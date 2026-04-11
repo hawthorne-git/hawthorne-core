@@ -1,11 +1,13 @@
 <%# v3.0 %>
 
+<% @turbo_frame_errors_tag = @turbo_frame_errors_tag.presence || 'form_errors' %>
+
 <div class="max-w-md mx-auto px-4 pb-16">
   <% if @instruction_message.present? %>
     <div class="mb-6"><%= render HawthorneCore::UI::Form::InstructionMessageComponent.new(message: @instruction_message) %></div>
   <% end %>
-  <%= turbo_frame_tag('form_errors') %>
+  <%= turbo_frame_tag(@turbo_frame_errors_tag) %>
   <div class="flex flex-col gap-6">
     <%= content %>
   </div>
-</div>
+  </div>
