@@ -3,15 +3,26 @@
 <%
   title = 'My profile'
 
+  full_name_label = 'Full Name'
   full_name_value = @user.full_name
-  email_value = @user.email_address
+  full_name_url = account_profile_full_name_path
+
+  email_address_label = 'Email'
+  email_address_value = @user.email_address
+  email_address_url = account_profile_email_address_path
+
+  phone_number_label = 'Phone number'
   phone_number_value = HawthorneCore::Helpers::PhoneNumber.us_format(@user.phone_number)
+  phone_number_url = account_profile_phone_number_path
+
+  sign_in_pin_default_delivery_label = 'Sign-In PIN delivery'
+  sign_in_pin_default_delivery_value = @user.sign_in_pin_default_delivery_pretty_print
+  sign_in_pin_default_delivery_url = phone_number_value.present? ? account_profile_sign_in_pin_default_delivery_path : nil
 %>
 
 <%= render HawthorneCore::UI::User::Layout::MyProfileComponent.new(user: @user, title: title) do %>
-  <%= render HawthorneCore::UI::User::ProfileAttrComponent.new(label: 'Full Name', value: full_name_value, modal_element_id: 'profile_full_name_modal') %>
-  <%= render HawthorneCore::UI::User::ProfileAttrComponent.new(label: 'Email', value: email_value, url: account_profile_email_address_path) %>
-  <%= render HawthorneCore::UI::User::ProfileAttrComponent.new(label: 'Phone Number', value: phone_number_value, url: account_profile_phone_number_path) %>
+  <%= render HawthorneCore::UI::User::ProfileAttrComponent.new(label: full_name_label, value: full_name_value, url: full_name_url) %>
+  <%= render HawthorneCore::UI::User::ProfileAttrComponent.new(label: email_address_label, value: email_address_value, url: email_address_url) %>
+  <%= render HawthorneCore::UI::User::ProfileAttrComponent.new(label: phone_number_label, value: phone_number_value, url: phone_number_url) %>
+  <%= render HawthorneCore::UI::User::ProfileAttrComponent.new(label: sign_in_pin_default_delivery_label, value: sign_in_pin_default_delivery_value, url: sign_in_pin_default_delivery_url) %>
 <% end %>
-
-<%= render partial: 'hawthorne_core/user/profile/full_name_modal', locals: { user: @user, modal_element_id: 'profile_full_name_modal' } %>

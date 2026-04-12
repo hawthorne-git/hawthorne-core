@@ -21,6 +21,14 @@ class HawthorneCore::User < HawthorneCore::ActiveRecordBaseApp
 
   def first_name? = full_name.present?
 
+  def sign_in_pin_default_delivery_pretty_print
+    if sign_in_pin_default_delivery_via_email?
+      'Email'
+    elsif sign_in_pin_default_delivery_via_phone?
+      'Text Message'
+    end
+  end
+
   # -----------------------------------------------------------------------------
 
   # clear the users phone number,

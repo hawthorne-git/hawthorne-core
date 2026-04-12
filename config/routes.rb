@@ -20,7 +20,8 @@ HawthorneCore::Engine.routes.draw do
 
   get 'account/profile', to: 'user/profile#show'
 
-  post 'account/profile/full_name', to: 'user/profile/full_name#edit'
+  get 'account/profile/full-name', to: 'user/profile#full_name_show'
+  post 'account/profile/full-name', to: 'user/profile#full_name_update'
 
   get 'account/profile/email-address', to: 'user/profile/email_address#show'
   post 'account/profile/email-address-verify', to: 'user/profile/email_address#verify'
@@ -34,6 +35,9 @@ HawthorneCore::Engine.routes.draw do
   post 'account/profile/phone-number-verify-pin', to: 'user/profile/phone_number#verify_pin'
   get 'account/profile/phone-number-resend-pin', to: 'user/profile/phone_number#resend_pin'
   delete 'account/profile/phone-number-clear', to: 'user/profile/phone_number#clear'
+
+  get 'account/profile/sign-in-pin-default-delivery', to: 'user/profile#sign_in_pin_default_delivery_show'
+  post 'account/profile/sign-in-pin-default-delivery', to: 'user/profile#sign_in_pin_default_delivery_update'
 
   get 'account/profile/add-shipping-address', to: 'user/profile/shipping_address#new'
   get 'account/profile/add-shipping-address-select-country', to: 'user/profile/shipping_address#new_select_country'

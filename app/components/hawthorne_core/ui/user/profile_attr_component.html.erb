@@ -12,11 +12,11 @@
     <p class="text-gray-900"><%= @value %></p>
   </div>
   <div class="flex items-center gap-2 text-sm shrink-0">
-    <% if @modal_element_id %>
-      <button type="button" onclick="document.getElementById('<%= @modal_element_id %>').showModal()" class="text-sm text-brand-dark no-underline hover:underline shrink-0 bg-transparent border-none cursor-pointer p-0"><%= @action %></button>
-    <% end %>
     <% if @url %>
       <%= link_to @action, @url, class: "text-sm text-brand-dark no-underline hover:underline shrink-0 bg-transparent border-none cursor-pointer p-0" %>
+      <% if (@label.downcase == 'phone number') && (@action.downcase == 'update') %>
+        / <%= link_to 'Remove', helpers.account_profile_phone_number_clear_path, data: { turbo_method: :delete, turbo_confirm: 'Are you sure you want to remove your phone number from your account?' }, class: "text-sm text-brand-dark no-underline hover:underline shrink-0 bg-transparent border-none cursor-pointer p-0" %>
+      <% end %>
     <% end %>
   </div>
 </div>

@@ -58,6 +58,10 @@ module HawthorneCore::UserAction::Log
     success(user_id, action(:profile_updated), note, ip_address, user_session_token)
   end
 
+  def self.update_profile_failure(user_id, failure_reason, note, ip_address, user_session_token)
+    failure(user_id, action(:profile_updated), failure_reason, note, ip_address, user_session_token)
+  end
+
   # ------------------------
 
   def self.update_profile_email_address(user_id, note, ip_address, user_session_token)

@@ -172,8 +172,8 @@ class HawthorneCore::User::Profile::EmailAddressController < HawthorneCore::Acco
 
     # ----------------------
 
-    # redirect the user to view their account
-    redirect_to account_path
+    # redirect the user to view their profile
+    redirect_to account_profile_path
 
   end
 

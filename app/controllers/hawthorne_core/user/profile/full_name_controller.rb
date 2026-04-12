@@ -23,8 +23,8 @@ class HawthorneCore::User::Profile::FullNameController < HawthorneCore::AccountA
 
     # ----------------------
 
-    # redirect the user to view their account
-    redirect_to account_path
+    # redirect the user to view their profile
+    redirect_to account_profile_path
 
   end
 
