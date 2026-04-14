@@ -12,7 +12,8 @@ class HawthorneCore::User::Profile::ShippingAddressController < HawthorneCore::A
     @shipping_addresses = HawthorneCore::UserShippingAddress.
       select(:token, :full_name, :street_address, :street_address_extended, :city, :state_province, :postal_code, :country_code_alpha2, :phone_number).
       active.
-      where(user_id: session[:user_id])
+      where(user_id: session[:user_id]).
+      order(last_checkout_selected_at: :desc, created_at: :desc)
 
     # ----------------------
 
@@ -100,7 +101,7 @@ class HawthorneCore::User::Profile::ShippingAddressController < HawthorneCore::A
   # -----------------------------------------------------------------------------
 
   # user action when a country is selected - on adding
-  def new_selected_country = redirect_to account_profile_add_shipping_address_path(selected_country: params[:country_code_alpha2])
+  def new_selected_country = redirect_to account_profile_new_shipping_address_path(selected_country: params[:country_code_alpha2])
 
   # -----------------------------------------------------------------------------
 

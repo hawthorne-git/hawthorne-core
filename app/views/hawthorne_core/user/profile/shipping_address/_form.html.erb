@@ -43,7 +43,7 @@
 
     <%= form_with url: select_country_form_url do |f| %>
       <% if add_action %>
-        <%= render HawthorneCore::UI::Form::Attr::CountrySelectComponent.new(form: f, countries: @ship_to_countries, selected_country: @selected_country) %>
+        <%= render HawthorneCore::UI::Form::Attr::Address::CountrySelectComponent.new(form: f, countries: @ship_to_countries, selected_country: @selected_country) %>
       <% else %>
         <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :country, label: country_label, value: country_value, disabled: true) %>
       <% end %>

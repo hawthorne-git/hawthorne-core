@@ -6,5 +6,5 @@
   label: 'Country',
   options: options_from_collection_for_select(@countries, :code_alpha2, :handle, @selected_country&.code_alpha2),
   prompt: 'Select Country',
-  html_options: { onchange: 'if (this.value) this.form.requestSubmit()' }
+  html_options: { onchange: 'this.form.requestSubmit()' }
 ) %>
