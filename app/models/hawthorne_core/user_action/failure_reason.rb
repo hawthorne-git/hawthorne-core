@@ -17,6 +17,7 @@ module HawthorneCore::UserAction::FailureReason
       pin_not_set: 'PIN NOT SET',
       phone_number_identical: 'PHONE NUMBER IDENTICAL',
       phone_number_syntax_error: 'PHONE NUMBER SYNTAX ERROR',
+      shipping_address_identical: 'SHIPPING ADDRESS IDENTICAL',
       text_message_recently_sent: 'TEXT MESSAGE RECENTLY SENT',
       unexpected_state: 'UNEXPECTED STATE',
       user_not_found: 'USER NOT FOUND'

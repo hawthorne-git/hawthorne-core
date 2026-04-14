@@ -21,4 +21,13 @@ class HawthorneCore::UserShippingAddress < HawthorneCore::ActiveRecordBaseApp
 
   # -----------------------------------------------------------------------------
 
+  def self.identical?(attrs)
+    active.
+      where(attrs.except(:token)).
+      where.not(token: attrs[:token]).
+      exists?
+  end
+
+  # -----------------------------------------------------------------------------
+
 end

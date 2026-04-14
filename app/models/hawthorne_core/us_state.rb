@@ -12,4 +12,8 @@ class HawthorneCore::UsState < HawthorneCore::ActiveRecordBaseAdmin
 
   # -----------------------------------------------------------------------------
 
+  def self.ship_to = select(:handle, :code_alpha2).active.where(ship_to: true).order(handle: :asc)
+
+  # -----------------------------------------------------------------------------
+
 end

@@ -1,6 +1,6 @@
 # v3.0
 
-class HawthorneCore::UI::Form::Attr::Address::StateComponent < ViewComponent::Base
+class HawthorneCore::UI::Form::Attr::Address::StateSelectComponent < ViewComponent::Base
   def initialize(form:, attribute:, label:, value: nil, selected_country:, us_states:)
     @form = form
     @attribute = attribute

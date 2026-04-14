@@ -7,7 +7,7 @@
 
   sign_in_pin_default_delivery_label = 'Preferred PIN delivery at sign-in'
   sign_in_pin_default_delivery_options = [['Email', HawthorneCore::User::PIN_VIA_EMAIL], ['Text Message', HawthorneCore::User::PIN_VIA_PHONE]]
-  sign_in_pin_default_delivery_selected = @sign_in_pin_default_delivery
+  sign_in_pin_default_delivery_options_for_select  = options_for_select(sign_in_pin_default_delivery_options, @sign_in_pin_default_delivery)
 
   submit_button_text = 'Update Sign-In PIN Delivery'
 %>
@@ -15,7 +15,7 @@
 <%= render HawthorneCore::UI::User::Layout::MyProfileComponent.new(user: @user, title: title) do %>
   <%= render HawthorneCore::UI::Form::FormWrapperComponent.new do %>
     <%= form_with url: form_url do |f| %>
-      <%= render HawthorneCore::UI::Form::SelectFieldComponent.new(form: f, attribute: :sign_in_pin_default_delivery, label: sign_in_pin_default_delivery_label, options: sign_in_pin_default_delivery_options, selected: sign_in_pin_default_delivery_selected) %>
+      <%= render HawthorneCore::UI::Form::SelectFieldComponent.new(form: f, attribute: :sign_in_pin_default_delivery, label: sign_in_pin_default_delivery_label, options: sign_in_pin_default_delivery_options_for_select) %>
       <%= render HawthorneCore::UI::Form::SubmitButtonComponent.new(form: f, text: submit_button_text) %>
     <% end %>
   <% end %>

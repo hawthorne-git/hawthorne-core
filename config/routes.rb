@@ -39,10 +39,13 @@ HawthorneCore::Engine.routes.draw do
   get 'account/profile/sign-in-pin-default-delivery', to: 'user/profile#sign_in_pin_default_delivery_show'
   post 'account/profile/sign-in-pin-default-delivery', to: 'user/profile#sign_in_pin_default_delivery_update'
 
-  get 'account/profile/add-shipping-address', to: 'user/profile/shipping_address#new'
-  get 'account/profile/add-shipping-address-select-country', to: 'user/profile/shipping_address#new_select_country'
-  post 'account/profile/add-shipping-address-with-selected-country', to: 'user/profile/shipping_address#new_selected_country'
+  get 'account/profile/shipping-addresses', to: 'user/profile/shipping_address#index'
+  get 'account/profile/new-shipping-address', to: 'user/profile/shipping_address#new'
+  post 'account/profile/new-shipping-address-with-selected-country', to: 'user/profile/shipping_address#new_selected_country'
   post 'account/profile/add-shipping-address', to: 'user/profile/shipping_address#create'
+  get 'account/profile/edit-shipping-address', to: 'user/profile/shipping_address#edit'
+  patch 'account/profile/update-shipping-address', to: 'user/profile/shipping_address#update'
+
   delete 'account/profile/remove-shipping-address', to: 'user/profile/shipping_address#delete'
 
   # ----------------------

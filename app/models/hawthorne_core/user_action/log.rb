@@ -132,8 +132,10 @@ module HawthorneCore::UserAction::Log
     success(user_id, action(:shipping_address_added), note, ip_address, user_session_token)
   end
 
-  def self.shipping_address_failure(user_id, failure_reason, note, ip_address, user_session_token)
-    failure(user_id, action(:shipping_address), failure_reason, note, ip_address, user_session_token)
+  # ------------------------
+
+  def self.update_shipping_address(user_id, note, ip_address, user_session_token)
+    success(user_id, action(:shipping_address_updated), note, ip_address, user_session_token)
   end
 
   # ------------------------
@@ -142,8 +144,10 @@ module HawthorneCore::UserAction::Log
     success(user_id, action(:shipping_address_removed), note, ip_address, user_session_token)
   end
 
-  def self.remove_shipping_address_failure(user_id, failure_reason, note, ip_address, user_session_token)
-    failure(user_id, action(:shipping_address_removed), failure_reason, note, ip_address, user_session_token)
+  # ------------------------
+
+  def self.shipping_address_failure(user_id, failure_reason, note, ip_address, user_session_token)
+    failure(user_id, action(:shipping_address), failure_reason, note, ip_address, user_session_token)
   end
 
   # ----------------------------------------------------------------------------- Text Message

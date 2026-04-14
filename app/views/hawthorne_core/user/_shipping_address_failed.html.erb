@@ -1,0 +1,7 @@
+<%# v3.0 %>
+
+<%
+  message = 'This shipping address is already saved to your account' if local_assigns[:shipping_address_identical]
+%>
+
+<%= render HawthorneCore::UI::Form::ErrorMessageComponent.new(message: message) %>
