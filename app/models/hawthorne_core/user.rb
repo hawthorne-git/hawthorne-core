@@ -17,16 +17,19 @@ class HawthorneCore::User < HawthorneCore::ActiveRecordBaseApp
 
   # -----------------------------------------------------------------------------
 
+  # get the first name of the user
   def first_name = full_name.present? ? full_name.split(' ').first : ''
 
+  # determine if the user has a first name
   def first_name? = full_name.present?
 
+  # -----------------------------------------------------------------------------
+
+  # get the sign in pin default delivery, in a prettier format then what is saved in the database
   def sign_in_pin_default_delivery_pretty_print
-    if sign_in_pin_default_delivery_via_email?
-      'Email'
-    elsif sign_in_pin_default_delivery_via_phone?
-      'Text Message'
-    end
+    return 'Email' if sign_in_pin_default_delivery_via_email?
+    return 'Text Message' if sign_in_pin_default_delivery_via_phone?
+    nil
   end
 
   # -----------------------------------------------------------------------------
@@ -36,6 +39,11 @@ class HawthorneCore::User < HawthorneCore::ActiveRecordBaseApp
   def clear_phone_number
     update_columns(phone_number: nil, sign_in_pin_default_delivery: HawthorneCore::User::PIN_VIA_EMAIL)
   end
+
+  # -----------------------------------------------------------------------------
+
+  # determine if a specific user id is deleted
+  def self.deleted?(user_id) = exists?(user_id: user_id, deleted: true)
 
   # -----------------------------------------------------------------------------
 

@@ -6,6 +6,8 @@ class HawthorneCore::Services::MailerSendSvc
 
   # ----------------------------------------------------------------
 
+  DELETE_ACCOUNT_PIN = 'DELETE ACCOUNT PIN'.freeze
+
   EMAIL_ADDRESS_UPDATE_PIN = 'EMAIL ADDRESS UPDATE PIN'.freeze
 
   SIGN_IN_PIN = 'SIGN-IN PIN'.freeze
@@ -14,10 +16,19 @@ class HawthorneCore::Services::MailerSendSvc
 
   # ----------------------------------------------------------------
 
-  # send update email address pin
-  def self.send_email_address_update_pin(user_id, first_name, new_email_address, new_email_address_pin_formatted)
+  # ----------------------------------------------------------------
+
+  # send delete account pin
+  def self.send_delete_account_pin(user_id, email_address, first_name, delete_account_pin, delete_account_pin_formatted)
     first_name = first_name.presence || 'there'
-    personalization = email_address_update_pin_personalization(first_name, new_email_address, new_email_address_pin_formatted)
+    personalization = delete_account_pin_personalization(email_address, first_name, delete_account_pin, delete_account_pin_formatted)
+    send_email(DELETE_ACCOUNT_PIN, user_id, email_address, delete_account_pin_subject, delete_account_pin_template, personalization)
+  end
+
+  # send update email address pin
+  def self.send_email_address_update_pin(user_id, first_name, new_email_address, new_email_address_pin, new_email_address_pin_formatted)
+    first_name = first_name.presence || 'there'
+    personalization = email_address_update_pin_personalization(first_name, new_email_address, new_email_address_pin, new_email_address_pin_formatted)
     send_email(EMAIL_ADDRESS_UPDATE_PIN, user_id, new_email_address, email_address_update_pin_subject, email_address_update_pin_template, personalization)
   end
 
@@ -27,15 +38,17 @@ class HawthorneCore::Services::MailerSendSvc
   def self.send_sign_in_pin(user_id, user_token, email_address, first_name, sign_in_pin, sign_in_pin_formatted, keep_signed_in)
     first_name = first_name.presence || 'there'
     magic_link_url = HawthorneCore::AppConfig.site_base_url + '/verify-sign-in-pin-via-magic-link?token=' + user_token + '&pin=' + sign_in_pin.to_s + '&keep_signed_in=' + keep_signed_in.to_s
-    personalization = sign_in_pin_personalization(email_address, first_name, magic_link_url, sign_in_pin_formatted)
+    personalization = sign_in_pin_personalization(email_address, first_name, magic_link_url, sign_in_pin, sign_in_pin_formatted)
     send_email(SIGN_IN_PIN, user_id, email_address, sign_in_pin_subject, sign_in_pin_template, personalization)
   end
 
   # ----------------------------------------------------------------
 
   # send welcome email
-  def self.send_welcome_email(user_id, email_address)
-    send_email(WELCOME_EMAIL, user_id, email_address, welcome_email_subject, welcome_email_template, nil)
+  def self.send_welcome_email(user_id, email_address, first_name)
+    first_name = first_name.presence || 'there'
+    personalization = welcome_personalization(email_address, first_name)
+    send_email(WELCOME_EMAIL, user_id, email_address, welcome_email_subject, welcome_email_template, personalization)
   end
 
   # ----------------------------------------------------------------
@@ -61,11 +74,19 @@ class HawthorneCore::Services::MailerSendSvc
 
   # ----------------------
 
+  def self.delete_account_pin_subject = 'Delete your account'.freeze
+
+  def self.delete_account_pin_template = 'jy7zpl971w3g5vx6'.freeze
+
+  def self.delete_account_pin_personalization(email_address, first_name, delete_account_pin, delete_account_pin_formatted) = mailer_send_personalization(email_address, { first_name: first_name, pin: delete_account_pin, pin_formatted: delete_account_pin_formatted })
+
+  # ----------------------
+
   def self.email_address_update_pin_subject = 'Verify your new email address'.freeze
 
   def self.email_address_update_pin_template = '3z0vklooo7xl7qrx'.freeze
 
-  def self.email_address_update_pin_personalization(first_name, new_email_address, new_email_address_pin_formatted) = mailer_send_personalization(new_email_address, { first_name: first_name, pin: new_email_address_pin_formatted })
+  def self.email_address_update_pin_personalization(first_name, new_email_address, new_email_address_pin, new_email_address_pin_formatted) = mailer_send_personalization(new_email_address, { first_name: first_name, pin: new_email_address_pin, pin_formatted: new_email_address_pin_formatted })
 
   # ----------------------
 
@@ -73,13 +94,15 @@ class HawthorneCore::Services::MailerSendSvc
 
   def self.sign_in_pin_template = '0r83ql3vnkmgzw1j'.freeze
 
-  def self.sign_in_pin_personalization(email_address, first_name, magic_link_url, sign_in_pin_formatted) = mailer_send_personalization(email_address, { first_name: first_name, magic_link_url: magic_link_url, pin: sign_in_pin_formatted })
+  def self.sign_in_pin_personalization(email_address, first_name, magic_link_url, sign_in_pin, sign_in_pin_formatted) = mailer_send_personalization(email_address, { first_name: first_name, magic_link_url: magic_link_url, pin: sign_in_pin, pin_formatted: sign_in_pin_formatted })
 
   # ----------------------
 
   def self.welcome_email_subject = 'Welcome to ' + HawthorneCore::Site.this_site_name
 
   def self.welcome_email_template = HawthorneCore::Site.this_site_mailer_send_welcome_email_template_id
+
+  def self.welcome_personalization(email_address, first_name) = mailer_send_personalization(email_address, { first_name: first_name })
 
   # ----------------------------------------------------------------
 
@@ -109,7 +132,7 @@ class HawthorneCore::Services::MailerSendSvc
     if result[:success]
       HawthorneCore::UserAction::Log.email_sent(user_id, { email_type: email_type, email_address: email_address, personalization: personalization, mailer_send_message_id: result[:message_id] })
     else
-      HawthorneCore::UserAction::Log.email_sent_failure(user_id, HawthorneCore::UserAction::FailureReason.exception_caught, { email_type: email_type, email_address: email_address, personalization: personalization, exception_message: result[:exception_message] })
+      HawthorneCore::UserAction::Log.email_sent_failure(user_id, HawthorneCore::UserAction::FailureReason.exception_caught, { type: email_type, email_address: email_address, personalization: personalization, exception_message: result[:exception_message] })
       HawthorneCore::CapturedException.log('HawthorneCore::Services::MailerSendSvc.send_email', { email_type: email_type, user_id: user_id, email_address: email_address }, result[:exception])
     end
 

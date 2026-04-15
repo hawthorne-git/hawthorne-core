@@ -27,7 +27,7 @@ class HawthorneCore::Text::SendSignInPinJob < HawthorneCore::ApplicationJob
 
     # exit if a text message with this pin was recently sent to the user
     if user_site.sign_in_pin_recently_sent_via_text_message?
-      HawthorneCore::UserAction::Log.text_message_sent_failure(user.id, HawthorneCore::UserAction::FailureReason.text_message_recently_sent, { text_message_type: type, sign_in_pin: user_site.sign_in_pin })
+      HawthorneCore::UserAction::Log.text_message_sent_failure(user.id, HawthorneCore::UserAction::FailureReason.text_message_recently_sent, { type: type, sign_in_pin: user_site.sign_in_pin })
       return
     end
 

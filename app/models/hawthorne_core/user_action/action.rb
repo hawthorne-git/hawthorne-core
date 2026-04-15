@@ -7,6 +7,10 @@ module HawthorneCore::UserAction::Action
   ACTIONS =
     {
       account_created: 'ACCOUNT CREATED',
+      account_deleted: 'ACCOUNT DELETED',
+      delete_account_attrs_cleared: 'DELETE ACCOUNT ATTRIBUTES CLEARED',
+      delete_account_attrs_refreshed: 'DELETE ACCOUNT ATTRIBUTES REFRESHED',
+      delete_account_attrs_set: 'DELETE ACCOUNT ATTRIBUTES SET',
       email_sent: 'EMAIL SENT',
       email_address_verified: 'EMAIL ADDRESS VERIFIED',
       email_address_update_attrs_cleared: 'EMAIL ADDRESS UPDATE ATTRIBUTES CLEARED',

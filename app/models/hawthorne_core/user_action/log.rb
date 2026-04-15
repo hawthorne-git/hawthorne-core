@@ -8,6 +8,31 @@ module HawthorneCore::UserAction::Log
     success(user_id, action(:account_created), note, ip_address, user_session_token)
   end
 
+
+  # ----------------------------------------------------------------------------- Account (Delete)
+
+  def self.delete_account_attrs_cleared(user_id)
+    success_admin(user_id, action(:delete_account_attrs_cleared), nil)
+  end
+
+  def self.delete_account_attrs_refreshed(user_id, note)
+    success_admin(user_id, action(:delete_account_attrs_refreshed), note)
+  end
+
+  def self.delete_account_attrs_set(user_id, note)
+    success_admin(user_id, action(:delete_account_attrs_set), note)
+  end
+
+  # ------------------------
+
+  def self.delete_account(user_id, ip_address, user_session_token)
+    success(user_id, action(:account_deleted), nil, ip_address, user_session_token)
+  end
+
+  def self.delete_account_failure(user_id, failure_reason, note, ip_address, user_session_token)
+    failure(user_id, action(:account_deleted), failure_reason, note, ip_address, user_session_token)
+  end
+
   # ----------------------------------------------------------------------------- Email
 
   def self.email_sent(user_id, note)

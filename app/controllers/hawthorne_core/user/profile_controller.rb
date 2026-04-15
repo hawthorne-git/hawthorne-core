@@ -24,7 +24,7 @@ class HawthorneCore::User::ProfileController < HawthorneCore::AccountApplication
   def full_name_show
 
     # find the users full name
-    @full_name = HawthorneCore::User.where(user_id: session[:user_id]).pick(:full_name)
+    @full_name = HawthorneCore::User.active.where(user_id: session[:user_id]).pick(:full_name)
 
     # ----------------------
 

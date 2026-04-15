@@ -27,10 +27,10 @@ class HawthorneCore::Email::SendEmailAddressUpdatePinJob < HawthorneCore::Applic
     end
 
     # find the users first name - used in the greeting of the email
-    user_first_name = HawthorneCore::User.select(:full_name).find_by(user_id: user_id).first_name
+    first_name = HawthorneCore::User.select(:full_name).find_by(user_id: user_id).first_name
 
     # the pin was not recently sent, send the email
-    HawthorneCore::Services::MailerSendSvc.send_email_address_update_pin(user_site.user_id, user_first_name, user_site.new_email_address, user_site.new_email_address_pin_formatted)
+    HawthorneCore::Services::MailerSendSvc.send_email_address_update_pin(user_site.user_id, first_name, user_site.new_email_address, user_site.new_email_address_pin, user_site.new_email_address_pin_formatted)
 
   end
 

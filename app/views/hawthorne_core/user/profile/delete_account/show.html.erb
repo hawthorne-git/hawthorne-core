@@ -1,0 +1,19 @@
+<%# v3.0 %>
+
+<%
+  form_url = account_profile_delete_account_verify_path
+
+  title = 'Delete your account'
+
+  instruction_message = "<b>This action is permanent</b>. Your account will be permanently deleted and cannot be recovered."
+
+  submit_button_text = 'Send Verification PIN'
+%>
+
+<%= render HawthorneCore::UI::User::Layout::MyProfileComponent.new(user: @user, title: title) do %>
+  <%= render HawthorneCore::UI::Form::FormWrapperComponent.new(instruction_message: instruction_message) do %>
+    <%= form_with url: form_url do |f| %>
+      <%= render HawthorneCore::UI::Form::SubmitButtonComponent.new(form: f, text: submit_button_text) %>
+    <% end %>
+  <% end %>
+<% end %>

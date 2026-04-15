@@ -70,8 +70,8 @@ class HawthorneCore::Services::TwilioTextSvc
     if result[:success]
       HawthorneCore::UserAction::Log.text_message_sent(user_id, { text_message_type: text_message_type, phone_number: phone_number, message: message, twilio_message_id: result[:sid] })
     else
-      HawthorneCore::UserAction::Log.text_message_sent_failure(user_id, HawthorneCore::UserAction::FailureReason.exception_caught, { text_message_type: text_message_type, phone_number: phone_number, message: message, exception_message: result[:exception_message] })
-      HawthorneCore::CapturedException.log('HawthorneCore::Services::TwilioTextSvc.send_text_message', { text_message_type: text_message_type, user_id: user_id, phone_number: phone_number, message: message }, result[:exception])
+      HawthorneCore::UserAction::Log.text_message_sent_failure(user_id, HawthorneCore::UserAction::FailureReason.exception_caught, { type: text_message_type, phone_number: phone_number, message: message, exception_message: result[:exception_message] })
+      HawthorneCore::CapturedException.log('HawthorneCore::Services::TwilioTextSvc.send_text_message', { type: text_message_type, user_id: user_id, phone_number: phone_number, message: message }, result[:exception])
     end
 
   end

@@ -24,9 +24,9 @@ module HawthorneCore::UserAuthentication
       # find if a user id is attached to the cookie (user session)
       user_id = HawthorneCore::UserSession.where(token: cookies[:user_session_token]).pick(:user_id)
 
-      # if the user is present ... and if the user opted to keep as signed in
+      # if the user is present (and not deleted) ... and if the user opted to keep as signed in
       # set the user as signed in and reset the cookie expiration
-      if user_id.present?
+      if user_id.present? & !HawthorneCore::User.deleted?(user_id)
         keep_signed_in = HawthorneCore::UserSite.where(site_id: HawthorneCore::Site.this_site_id, user_id: user_id).pick(:keep_signed_in)
         if keep_signed_in
           session[:user_id] = user_id

@@ -21,7 +21,7 @@ module HawthorneCore::UserSite::EmailAddressPinVerification
 
     # ------------------------
 
-    # clear the new phone number attributes - log it
+    # clear the new email address attributes - log it
     def clear_new_email_address_attrs
       update_columns(new_email_address: nil, new_email_address_pin: nil, new_email_address_pin_created_at: nil, new_email_address_pin_failed_attempts_count: nil)
       HawthorneCore::UserAction::Log.new_email_address_attrs_cleared(user_id)
@@ -29,7 +29,7 @@ module HawthorneCore::UserSite::EmailAddressPinVerification
 
     # ------------------------
 
-    # set the new phone number attributes - log it
+    # set the new email address attributes - log it
     def set_new_email_address_attrs(new_email_address)
       attrs = { new_email_address: new_email_address, new_email_address_pin: SecureRandom.random_number(HawthorneCore::User::PIN_RANGE), new_email_address_pin_created_at: Time.current, new_email_address_pin_failed_attempts_count: 0 }
       update_columns(attrs)
@@ -38,7 +38,7 @@ module HawthorneCore::UserSite::EmailAddressPinVerification
 
     # ------------------------
 
-    # refresh the users new phone number pin / pin created at / failed attempts
+    # refresh the users new email address pin / pin created at / failed attempts
     def refresh_new_email_address_pin_attrs
       unless new_email_address_pin_active?
         attrs = { new_email_address_pin: SecureRandom.random_number(HawthorneCore::User::PIN_RANGE), new_email_address_pin_created_at: Time.current, new_email_address_pin_failed_attempts_count: 0 }
@@ -47,10 +47,10 @@ module HawthorneCore::UserSite::EmailAddressPinVerification
       end
     end
 
-    # refresh the users new phone number pin attributes, then send it via text message
+    # refresh the users new email address pin attributes, then send it via email
     def refresh_new_email_address_pin_attrs_then_send_it
       refresh_new_email_address_pin_attrs
-      HawthorneCore::Text::SendPhoneNumberUpdatePinJob.perform_later(user_id)
+      HawthorneCore::Email::SendEmailAddressUpdatePinJob.perform_later(user_id)
     end
 
     # ------------------------

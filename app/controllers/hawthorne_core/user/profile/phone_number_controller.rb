@@ -8,7 +8,7 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Accou
   def show
 
     # find the users phone number
-    @current_phone_number = HawthorneCore::User.where(user_id: session[:user_id]).pick(:phone_number)
+    @current_phone_number = HawthorneCore::User.active.where(user_id: session[:user_id]).pick(:phone_number)
 
     # find the users site record ... the new phone number attributes are specific to each site
     # then clear the users new phone number attributes
@@ -82,7 +82,7 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Accou
   def verify_pin_show
 
     # find the users current and new phone numbers
-    @current_phone_number = HawthorneCore::User.where(user_id: session[:user_id]).pick(:phone_number)
+    @current_phone_number = HawthorneCore::User.active.where(user_id: session[:user_id]).pick(:phone_number)
     @new_phone_number = HawthorneCore::UserSite.where(user_id: session[:user_id], site_id: HawthorneCore::Site.this_site_id).pick(:new_phone_number)
 
     # ----------------------

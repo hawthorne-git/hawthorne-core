@@ -75,25 +75,6 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
 
   # -----------------------------------------------------------------------------
 
-  # sign-out the user
-  def sign_out
-
-    # update the user / site record, as the user is forcing a sign-out - remove ability to keep signed in via cookie
-    HawthorneCore::UserSite.log_site_sign_out(session[:user_id])
-
-    # log that the user has signed out
-    HawthorneCore::UserAction::Log.sign_out(session[:user_id], request.remote_ip, cookies[:user_session_token])
-
-    # reset the session
-    reset_session
-
-    # redirect the user to the sites home page
-    redirect_to('/')
-
-  end
-
-  # -----------------------------------------------------------------------------
-
   # show the page for the user to verify their sign-in pin
   def verify_sign_in_pin_show
 
@@ -291,6 +272,25 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
 
     # redirect the user to view their account
     redirect_to account_path
+
+  end
+
+  # -----------------------------------------------------------------------------
+
+  # sign-out the user
+  def sign_out
+
+    # update the user / site record, as the user is forcing a sign-out - remove ability to keep signed in via cookie
+    HawthorneCore::UserSite.log_site_sign_out(session[:user_id])
+
+    # log that the user has signed out
+    HawthorneCore::UserAction::Log.sign_out(session[:user_id], request.remote_ip, cookies[:user_session_token])
+
+    # reset the session
+    reset_session
+
+    # redirect the user to the sites home page
+    redirect_to('/')
 
   end
 

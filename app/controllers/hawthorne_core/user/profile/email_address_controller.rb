@@ -8,7 +8,7 @@ class HawthorneCore::User::Profile::EmailAddressController < HawthorneCore::Acco
   def show
 
     # find the users email address
-    @current_email_address = HawthorneCore::User.where(user_id: session[:user_id]).pick(:email_address)
+    @current_email_address = HawthorneCore::User.active.where(user_id: session[:user_id]).pick(:email_address)
 
     # find the users site record ... the new email address attributes are specific to each site
     # then clear the users new email address attributes

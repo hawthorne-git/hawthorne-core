@@ -3,6 +3,7 @@
 class HawthorneCore::UserSite < HawthorneCore::ActiveRecordBaseApp
 
   include HawthorneCore::HasSiteId,
+          HawthorneCore::UserSite::DeleteAccountPinVerification,
           HawthorneCore::UserSite::EmailAddressPinVerification,
           HawthorneCore::UserSite::PhoneNumberPinVerification,
           HawthorneCore::UserSite::SignInPinVerification

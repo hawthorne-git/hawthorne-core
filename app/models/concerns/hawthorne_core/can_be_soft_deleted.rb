@@ -13,8 +13,7 @@ module HawthorneCore::CanBeSoftDeleted
 
     # mark the record as soft deleted ... set the deleted attribute to true
     def soft_delete
-      self.deleted = true
-      self.save!
+      update_columns(deleted: true, deleted_at: Time.current)
     end
 
     # ---------------------------------------------------------------------------------

@@ -22,7 +22,7 @@ class HawthorneCore::Text::SendPhoneNumberUpdatePinJob < HawthorneCore::Applicat
 
     # exit if a text message with this pin was recently sent to the user
     if user_site.new_phone_number_pin_recently_sent?
-      HawthorneCore::UserAction::Log.text_message_sent_failure(user_site.user_id, HawthorneCore::UserAction::FailureReason.text_message_recently_sent, { text_message_type: type, new_phone_number: user_site.new_phone_number, new_phone_number_pin: user_site.new_phone_number_pin })
+      HawthorneCore::UserAction::Log.text_message_sent_failure(user_site.user_id, HawthorneCore::UserAction::FailureReason.text_message_recently_sent, { type: type, new_phone_number: user_site.new_phone_number, new_phone_number_pin: user_site.new_phone_number_pin })
       return
     end
 
