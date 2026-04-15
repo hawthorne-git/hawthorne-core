@@ -7,9 +7,9 @@
 
   # create each navigation component
   my_profile_navigation_component = { handle: 'My Profile', url: helpers.account_profile_path, selected: (@selected_sidebar_navigation_item.downcase == 'my profile') }
-  order_history_navigation_component = { handle: 'Order History', url: helpers.account_profile_phone_number_path, selected: (@selected_sidebar_navigation_item.downcase == 'order history') }
+  order_history_navigation_component = { handle: 'Order History', url: helpers.account_order_history_path, selected: (@selected_sidebar_navigation_item.downcase == 'order history') }
   shipping_addresses_navigation_component = { handle: 'Shipping Addresses', url: helpers.account_profile_shipping_addresses_path, selected: (@selected_sidebar_navigation_item.downcase == 'shipping addresses') }
-  payment_methods_navigation_component = { handle: 'Payment Methods', url: helpers.account_profile_phone_number_path, selected: (@selected_sidebar_navigation_item.downcase == 'payment methods') }
+  payment_methods_navigation_component = { handle: 'Payment Methods', url: helpers.account_profile_payment_methods_path, selected: (@selected_sidebar_navigation_item.downcase == 'payment methods') }
 
   # set these navigation components into a list
   navigation_components =

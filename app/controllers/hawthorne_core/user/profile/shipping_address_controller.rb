@@ -19,7 +19,7 @@ class HawthorneCore::User::Profile::ShippingAddressController < HawthorneCore::A
 
     # if the user does not have any shipping addresses in their profile,
     # redirect the user to add their first shipping address
-    redirect_to account_profile_add_shipping_address_path unless @shipping_addresses.any?
+    redirect_to account_profile_new_shipping_address_path unless @shipping_addresses.any?
 
     # ----------------------
 

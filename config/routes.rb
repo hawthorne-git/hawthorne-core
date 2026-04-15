@@ -54,9 +54,15 @@ HawthorneCore::Engine.routes.draw do
   get 'account/profile/delete-account-resend-pin', to: 'user/profile/delete_account#resend_pin'
   get 'account-deleted', to: 'home#account_deleted'
 
+  get 'account/profile/payment-methods', to: 'user/profile/payment_methods#index'
+
   # ----------------------
 
   get 'sign-out', to: 'user/session#sign_out'
+
+  # ----------------------
+
+  get 'account/order-history', to: 'user/order_history#show'
 
   # ----------------------------------------------------------------------------
 
