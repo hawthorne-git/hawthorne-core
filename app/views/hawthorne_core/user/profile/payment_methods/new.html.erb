@@ -9,13 +9,13 @@
 <%= render HawthorneCore::UI::User::Layout::PaymentMethodsComponent.new(user: @user, title: title) do %>
 
   <div data-controller="stripe-card"
-       data-stripe-card-publishable-key-value="<%= @stripe_publishable_key %>"
+       data-stripe-card-publishable-key-value="<%= HawthorneCore::AppConfig.stripe_publishable_key %>"
        data-stripe-card-client-secret-value="<%= @stripe_setup_intent_client_secret %>">
 
     <form data-action="submit->stripe-card#submit" class="mt-6 max-w-md">
 
       <div class="mb-4">
-        <label class="block text-sm text-gray-500 mb-1">Card details</label>
+        <label class="block text-sm text-gray-500 mb-1">Credit card details</label>
         <div data-stripe-card-target="cardElement"
              class="w-full px-4 py-4 border border-gray-300 rounded-xl bg-white"></div>
       </div>
@@ -25,7 +25,7 @@
       <button type="submit"
               data-stripe-card-target="submit"
               class="w-full py-3.5 px-4 bg-brand hover:bg-brand-dark text-white text-base font-semibold rounded-xl transition-colors duration-150 cursor-pointer">
-        Save card
+        Add Credit Card
       </button>
 
     </form>

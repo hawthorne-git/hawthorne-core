@@ -49,6 +49,7 @@ HawthorneCore::Engine.routes.draw do
 
   get 'account/profile/payment-methods', to: 'user/profile/payment_methods#index'
   get 'account/profile/new-payment-method', to: 'user/profile/payment_methods#new'
+  post 'account/profile/payment-methods', to: 'user/profile/payment_methods#create'
 
   get 'account/profile/delete-account', to: 'user/profile/delete_account#show'
   post 'account/profile/delete-account-verify', to: 'user/profile/delete_account#verify'

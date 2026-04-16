@@ -32,11 +32,31 @@ class HawthorneCore::User::Profile::PaymentMethodsController < HawthorneCore::Ac
     # ----------------------
 
     @stripe_setup_intent_client_secret = HawthorneCore::Services::StripeSvc.setup_intent_client_secret(@user.stripe_customer_id, @user.id)
-    @stripe_publishable_key = HawthorneCore::AppConfig.stripe_publishable_key
 
     # ----------------------
 
     @html_title = 'Add Credit Card | My Profile'
+
+  end
+
+  # -----------------------------------------------------------------------------
+
+  # receive the stripe payment method id from the frontend and save it
+  def create
+
+    stripe_payment_method_id = params[:stripe_payment_method_id]
+
+    return head :unprocessable_entity if stripe_payment_method_id.blank?
+    return head :unprocessable_entity unless stripe_payment_method_id.start_with?('pm_')
+
+    # ----------------------
+
+    # TODO: save stripe_payment_method_id to the database
+    # e.g. current_user.payment_methods.create!(stripe_payment_method_id: stripe_payment_method_id)
+
+    # ----------------------
+
+    head :ok
 
   end
 
