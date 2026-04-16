@@ -183,6 +183,9 @@ class HawthorneCore::User::Profile::EmailAddressController < HawthorneCore::Acco
     # log it
     HawthorneCore::UserAction::Log.update_profile_email_address(user.id, { old_email_address: old_email_address, new_email_address: new_email_address }, request.remote_ip, cookies[:user_session_token])
 
+    # update the users email address, within stripe
+    HawthorneCore::Stripe::UpdateCustomerEmailAddressJob.perform_later(user.id)
+
     # ----------------------
 
     # redirect the user to view their profile

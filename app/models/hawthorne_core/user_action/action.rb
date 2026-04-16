@@ -32,6 +32,8 @@ module HawthorneCore::UserAction::Action
       sign_in_pin_verified: 'SIGN-IN PIN VERIFIED',
       sign_in_via_cookie: 'SIGN-IN VIA COOKIE',
       sign_out: 'SIGN-OUT',
+      stripe_customer_created: 'STRIPE CUSTOMER CREATED',
+      stripe_customer_email_address_updated: 'STRIPE CUSTOMER EMAIL ADDRESS UPDATED',
       text_message_sent: 'TEXT MESSAGE SENT'
     }.freeze
 

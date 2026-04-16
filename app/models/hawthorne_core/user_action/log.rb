@@ -175,6 +175,26 @@ module HawthorneCore::UserAction::Log
     failure(user_id, action(:shipping_address), failure_reason, note, ip_address, user_session_token)
   end
 
+  # ----------------------------------------------------------------------------- Stripe
+
+  def self.stripe_customer_created(user_id, note)
+    success_admin(user_id, action(:stripe_customer_created), note)
+  end
+
+  def self.stripe_customer_created_failure(user_id, failure_reason, note)
+    failure_admin(user_id, action(:stripe_customer_created), failure_reason, note)
+  end
+
+  # ------------------------
+
+  def self.stripe_customer_email_address_updated(user_id, note)
+    success_admin(user_id, action(:stripe_customer_email_address_updated), note)
+  end
+
+  def self.stripe_customer_email_address_updated_failure(user_id, failure_reason, note)
+    failure_admin(user_id, action(:stripe_customer_email_address_updated), failure_reason, note)
+  end
+
   # ----------------------------------------------------------------------------- Text Message
 
   def self.text_message_sent(user_id, note)

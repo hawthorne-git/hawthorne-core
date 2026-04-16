@@ -15,16 +15,6 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
   # show the sign-in page ... also used for sign-up
   def sign_in_show
 
-    customer = Stripe::Customer.create(
-      email: 'charlieprezzano@gmail.com',
-      metadata: {
-        user_id: 18
-      }
-    ) if false
-
-    puts customer.to_s
-    puts customer.id.to_s
-
     @html_title = 'Sign-In'
 
   end
@@ -194,7 +184,7 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
 
     # find the user by their token
     user = HawthorneCore::User.
-      select(:user_id, :token, :email_address, :email_address_verified).
+      select(:user_id, :token, :email_address, :email_address_verified, :stripe_customer_id).
       active.
       find_by(token: user_token)
 
@@ -276,9 +266,8 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
     # if this is the users first sign-in (on site) ... send the user a welcome email
     HawthorneCore::Email::SendWelcomeEmailJob.perform_later(user.id) if first_sign_in_on_site
 
-    # create the user a stripe account (if not done prior)
-
-
+    # create the user a stripe customer account (if not done prior)
+    HawthorneCore::Stripe::CreateCustomerJob.perform_later(user.id) unless user.stripe_customer?
 
     # TODO: if first sign-in EVER, redirect to enter phone number? or maybe on their third sign-in?
 
