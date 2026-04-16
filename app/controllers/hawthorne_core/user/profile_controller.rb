@@ -10,6 +10,7 @@ class HawthorneCore::User::ProfileController < HawthorneCore::AccountApplication
     # find the user
     @user = HawthorneCore::User.
       select(:user_id, :full_name, :email_address, :phone_number, :sign_in_pin_default_delivery).
+      active.
       find_by(user_id: session[:user_id])
 
     # ----------------------
@@ -45,6 +46,7 @@ class HawthorneCore::User::ProfileController < HawthorneCore::AccountApplication
     # find the user
     user = HawthorneCore::User.
       select(:user_id, :full_name).
+      active.
       find_by(user_id: session[:user_id])
 
     # ----------------------
@@ -72,7 +74,7 @@ class HawthorneCore::User::ProfileController < HawthorneCore::AccountApplication
   def sign_in_pin_default_delivery_show
 
     # find the users sign-in pin default delivery
-    @sign_in_pin_default_delivery = HawthorneCore::User.where(user_id: session[:user_id]).pick(:sign_in_pin_default_delivery)
+    @sign_in_pin_default_delivery = HawthorneCore::User.active.where(user_id: session[:user_id]).pick(:sign_in_pin_default_delivery)
 
     # ----------------------
 
@@ -93,6 +95,7 @@ class HawthorneCore::User::ProfileController < HawthorneCore::AccountApplication
     # find the user
     user = HawthorneCore::User.
       select(:user_id, :sign_in_pin_default_delivery).
+      active.
       find_by(user_id: session[:user_id])
 
     # ----------------------

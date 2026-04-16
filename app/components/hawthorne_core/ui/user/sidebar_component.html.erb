@@ -3,7 +3,7 @@
 <%
 
   # find the user, if not present
-  @user = @user.presence || HawthorneCore::User.select(:email_address, :full_name).find_by(user_id: session[:user_id])
+  @user = @user.presence || HawthorneCore::User.select(:email_address, :full_name).active.find_by(user_id: session[:user_id])
 
   # create each navigation component
   my_profile_navigation_component = { handle: 'My Profile', url: helpers.account_profile_path, selected: (@selected_sidebar_navigation_item.downcase == 'my profile') }

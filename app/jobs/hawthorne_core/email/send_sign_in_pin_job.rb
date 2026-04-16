@@ -15,6 +15,7 @@ class HawthorneCore::Email::SendSignInPinJob < HawthorneCore::ApplicationJob
     # find the user by their id
     user = HawthorneCore::User.
       select(:user_id, :token, :email_address, :full_name).
+      active.
       find_by(user_id: user_id)
 
     # find the users site record ... the pin is specific to the site

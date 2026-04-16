@@ -7,14 +7,19 @@ class HawthorneCore::User::Profile::EmailAddressController < HawthorneCore::Acco
   # show the page for the user to update their email address
   def show
 
-    # find the users email address
-    @current_email_address = HawthorneCore::User.active.where(user_id: session[:user_id]).pick(:email_address)
+    # find the user
+    @user = HawthorneCore::User.
+      select(:user_id, :email_address, :full_name).
+      active.
+      find_by(user_id: session[:user_id])
+
+    # ----------------------
 
     # find the users site record ... the new email address attributes are specific to each site
     # then clear the users new email address attributes
     HawthorneCore::UserSite.
       select(:user_site_id, :user_id).
-      find_by(user_id: session[:user_id], site_id: HawthorneCore::Site.this_site_id).
+      find_by(user_id: @user.id, site_id: HawthorneCore::Site.this_site_id).
       clear_new_email_address_attrs
 
     # ----------------------
@@ -36,6 +41,7 @@ class HawthorneCore::User::Profile::EmailAddressController < HawthorneCore::Acco
     # find the user
     user = HawthorneCore::User.
       select(:user_id, :email_address).
+      active.
       find_by(user_id: session[:user_id])
 
     # find the users site record ... the new email address attributes are specific to each site
@@ -88,8 +94,14 @@ class HawthorneCore::User::Profile::EmailAddressController < HawthorneCore::Acco
   # show the page for the user to verify their pin, to update the email address
   def verify_pin_show
 
-    # find the users new email addresses
-    @new_email_address = HawthorneCore::UserSite.where(user_id: session[:user_id], site_id: HawthorneCore::Site.this_site_id).pick(:new_email_address)
+    # find the user
+    @user = HawthorneCore::User.
+      select(:user_id, :email_address, :full_name).
+      active.
+      find_by(user_id: session[:user_id])
+
+    # find the users new email address
+    @new_email_address = HawthorneCore::UserSite.where(user_id: @user.id, site_id: HawthorneCore::Site.this_site_id).pick(:new_email_address)
 
     # ----------------------
 
@@ -118,6 +130,7 @@ class HawthorneCore::User::Profile::EmailAddressController < HawthorneCore::Acco
     # find the user
     user = HawthorneCore::User.
       select(:user_id, :email_address).
+      active.
       find_by(user_id: session[:user_id])
 
     # find the users site record ... the new email address attributes are specific to each site

@@ -5,15 +5,25 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
   # -----------------------------------------------------------------------------
 
   # verify that the user is signed in prior to signing out
-  before_action :verify_signed_in?, only: [:sign_out]
+  before_action :user_signed_in?, only: [:sign_out]
 
   # verify that the user is signed out prior to all action, but signing out
-  before_action :verify_signed_out?, except: [:sign_out]
+  before_action :user_signed_out?, except: [:sign_out]
 
   # -----------------------------------------------------------------------------
 
   # show the sign-in page ... also used for sign-up
   def sign_in_show
+
+    customer = Stripe::Customer.create(
+      email: 'charlieprezzano@gmail.com',
+      metadata: {
+        user_id: 18
+      }
+    ) if false
+
+    puts customer.to_s
+    puts customer.id.to_s
 
     @html_title = 'Sign-In'
 
@@ -44,6 +54,7 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
     # note that a user will have a single (and shared) Hawthorne account ... but alt sites (ex: William Morris) may be stand-alone
     user = HawthorneCore::User.
       select(:user_id, :token, :email_address, :phone_number, :sign_in_pin_default_delivery).
+      active.
       find_by(email_address: email_address, site_sharing_scope: HawthorneCore::Site.this_site_sharing_scope)
 
     # if the user exists, log that the user has accessed the site
@@ -263,10 +274,11 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
     user.log_site_sign_in(keep_signed_in)
 
     # if this is the users first sign-in (on site) ... send the user a welcome email
-    HawthorneCore::Email::SendWelcomeEmailJob.perform_later(user.id, user.email_address) if first_sign_in_on_site
+    HawthorneCore::Email::SendWelcomeEmailJob.perform_later(user.id) if first_sign_in_on_site
 
-    # TODO: create the user a stripe account (if not done prior)
-    # user.create_stripe_account
+    # create the user a stripe account (if not done prior)
+
+
 
     # TODO: if first sign-in EVER, redirect to enter phone number? or maybe on their third sign-in?
 

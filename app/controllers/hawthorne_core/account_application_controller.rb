@@ -4,8 +4,11 @@ class HawthorneCore::AccountApplicationController < ::HawthorneCore::Application
 
   # -----------------------------------------------------------------------------
 
-  # verify that the user is signed-in prior to all actions
-  before_action :verify_signed_in?
+  # verify that the user is signed-in
+  before_action :user_signed_in?
+
+  # verify that the signed-in user exists as an active user
+  before_action :active_user?
 
   # ---------------------------------------------------------------------------
 

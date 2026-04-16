@@ -3,12 +3,12 @@
 <%
   form_url = account_profile_phone_number_verify_path
 
-  title = "#{@current_phone_number.blank? ? 'Add' : 'Update'} phone number"
+  title = "#{@user.phone_number.blank? ? 'Add' : 'Update'} phone number"
 
   instruction_message = "Use your phone number to receive a PIN at sign-in"
 
   current_phone_number_label = 'Current phone number'
-  current_phone_number_value = HawthorneCore::Helpers::PhoneNumber.us_format(@current_phone_number)
+  current_phone_number_value = HawthorneCore::Helpers::PhoneNumber.us_format(@user.phone_number)
 
   new_phone_number_label = 'Phone number'
 

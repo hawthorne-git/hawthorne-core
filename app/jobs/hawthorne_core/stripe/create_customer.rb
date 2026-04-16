@@ -1,7 +1,7 @@
 # v3.0
 
-# sends a user a text message with their sign-in pin
-class HawthorneCore::Text::SendSignInPinJob < HawthorneCore::ApplicationJob
+# creates a customer, within the stripe payment service
+class HawthorneCore::Stripe::CreateCustomerJob < HawthorneCore::ApplicationJob
 
   queue_as :critical
 
@@ -9,12 +9,9 @@ class HawthorneCore::Text::SendSignInPinJob < HawthorneCore::ApplicationJob
 
   def perform(user_id)
 
-    # for user action logs, set the text message type
-    type = HawthorneCore::Services::TwilioTextSvc::SIGN_IN_PIN
-
     # find the user by their id
     user = HawthorneCore::User.
-      select(:user_id, :phone_number).
+      select(:user_id, :email_address, :stripe_customer_id).
       active.
       find_by(user_id: user_id)
 

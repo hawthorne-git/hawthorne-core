@@ -7,13 +7,16 @@ class HawthorneCore::Email::SendWelcomeEmailJob < HawthorneCore::ApplicationJob
 
   # ----------------------------------------------------------------
 
-  def perform(user_id, email_address)
+  def perform(user_id)
 
-    # find the users first name - used in the greeting of the email
-    first_name = HawthorneCore::User.select(:full_name).find_by(user_id: user_id).first_name
+    # find the user by their id
+    user = HawthorneCore::User.
+      select(:user_id, :email_address, :full_name).
+      active.
+      find_by(user_id: user_id)
 
     # send the email
-    HawthorneCore::Services::MailerSendSvc.send_welcome_email(user_id, email_address, first_name)
+    HawthorneCore::Services::MailerSendSvc.send_welcome_email(user.id, user.email_address, user.first_name)
 
   end
 

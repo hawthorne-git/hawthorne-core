@@ -28,6 +28,7 @@ module HawthorneCore
       HawthorneCore::AppConfig.smarty_auth_id
       HawthorneCore::AppConfig.smarty_auth_token
       HawthorneCore::AppConfig.smarty_embedded_key
+      HawthorneCore::AppConfig.stripe_secret_key
       HawthorneCore::AppConfig.twilio_password
       HawthorneCore::AppConfig.twilio_username
     end

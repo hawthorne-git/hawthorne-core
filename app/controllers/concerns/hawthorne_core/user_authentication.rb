@@ -45,9 +45,19 @@ module HawthorneCore::UserAuthentication
 
     # ---------------------------------------------------------------------------
 
+    # verify that the session user exists as an active user
+    # if not - reset the session and redirect the user to the sites home page
+    def active_user?
+      return if HawthorneCore::User.active.exists?(user_id: session[:user_id])
+      reset_session
+      redirect_to '/'
+    end
+
+    # ----------------------
+
     # verifies that the site user is signed in
     # if not - the user is signed out, the user is redirected to the sign-in page
-    def verify_signed_in?
+    def user_signed_in?
       redirect_to sign_in_path unless @signed_in
     end
 
@@ -55,7 +65,7 @@ module HawthorneCore::UserAuthentication
 
     # verifies that the site user is signed out
     # if not - the user is signed in, the user is redirected to their account page
-    def verify_signed_out?
+    def user_signed_out?
       redirect_to account_path if @signed_in
     end
 

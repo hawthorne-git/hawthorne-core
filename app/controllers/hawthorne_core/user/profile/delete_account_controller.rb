@@ -7,11 +7,19 @@ class HawthorneCore::User::Profile::DeleteAccountController < HawthorneCore::Acc
   # show the page for the user to start the process, to delete their account
   def show
 
+    # find the user
+    @user = HawthorneCore::User.
+      select(:user_id, :email_address, :full_name).
+      active.
+      find_by(user_id: session[:user_id])
+
+    # ----------------------
+
     # find the users site record ... the delete account attributes are specific to each site
     # then clear the users delete account attributes
     HawthorneCore::UserSite.
       select(:user_site_id, :user_id).
-      find_by(user_id: session[:user_id], site_id: HawthorneCore::Site.this_site_id).
+      find_by(user_id: @user.id, site_id: HawthorneCore::Site.this_site_id).
       clear_delete_account_attrs
 
     # ----------------------
@@ -32,6 +40,8 @@ class HawthorneCore::User::Profile::DeleteAccountController < HawthorneCore::Acc
       find_by(user_id: session[:user_id], site_id: HawthorneCore::Site.this_site_id).
       set_delete_account_attr
 
+    # ----------------------
+
     # send the user an email with a pin to verify that they want to delete their account
     HawthorneCore::Email::SendDeleteAccountPinJob.perform_later(session[:user_id])
 
@@ -46,8 +56,11 @@ class HawthorneCore::User::Profile::DeleteAccountController < HawthorneCore::Acc
   # show the page for the user to verify their pin, to update their phone number
   def verify_pin_show
 
-    # find the users email address
-    @email_address = HawthorneCore::User.active.where(user_id: session[:user_id]).pick(:email_address)
+    # find the user
+    @user = HawthorneCore::User.
+      select(:user_id, :email_address, :full_name).
+      active.
+      find_by(user_id: session[:user_id])
 
     # ----------------------
 
@@ -59,7 +72,10 @@ class HawthorneCore::User::Profile::DeleteAccountController < HawthorneCore::Acc
 
   # resend the user their pin, to delete their account
   # as the show action sends the user their pin - no need to here
-  def resend_pin = redirect_to account_profile_delete_account_path(resend_pin: true)
+  def resend_pin
+    HawthorneCore::Email::SendDeleteAccountPinJob.perform_later(session[:user_id])
+    redirect_to account_profile_delete_account_verify_pin_path
+  end
 
   # -----------------------------------------------------------------------------
 
@@ -74,6 +90,7 @@ class HawthorneCore::User::Profile::DeleteAccountController < HawthorneCore::Acc
     # find the user
     user = HawthorneCore::User.
       select(:user_id, :token).
+      active.
       find_by(user_id: session[:user_id])
 
     # find the users site record ... the new delete account attributes are specific to each site

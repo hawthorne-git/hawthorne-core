@@ -6,13 +6,19 @@ class HawthorneCore::User::Profile::ShippingAddressController < HawthorneCore::A
 
   def index
 
+    # find the user
+    @user = HawthorneCore::User.
+      select(:user_id, :email_address, :full_name).
+      active.
+      find_by(user_id: session[:user_id])
+
     # ----------------------
 
     # find the users shipping addresses
     @shipping_addresses = HawthorneCore::UserShippingAddress.
       select(:token, :full_name, :street_address, :street_address_extended, :city, :state_province, :postal_code, :country_code_alpha2, :phone_number).
       active.
-      where(user_id: session[:user_id]).
+      where(user_id: @user.id).
       order(last_checkout_selected_at: :desc, created_at: :desc)
 
     # ----------------------
@@ -41,18 +47,21 @@ class HawthorneCore::User::Profile::ShippingAddressController < HawthorneCore::A
     # ----------------------
 
     # find the user
-    user = HawthorneCore::User.
-      select(:user_id, :full_name, :phone_number).
+    @user = HawthorneCore::User.
+      select(:user_id, :email_address, :full_name, :phone_number).
+      active.
       find_by(user_id: session[:user_id])
-
-    # set the users shipping address defaults ... add in their name / phone number
-    @shipping_address = HawthorneCore::UserShippingAddress.new
-    @shipping_address.full_name = user.full_name
-    @shipping_address.phone_number = HawthorneCore::Helpers::PhoneNumber.us_format(user.phone_number)
 
     # ----------------------
 
-    # find the selected country ... if present
+    # set the users shipping address defaults ... add in their name / phone number
+    @shipping_address = HawthorneCore::UserShippingAddress.new
+    @shipping_address.full_name = @user.full_name
+    @shipping_address.phone_number = HawthorneCore::Helpers::PhoneNumber.us_format(@user.phone_number)
+
+    # ----------------------
+
+    # find the selected country (by the user) ... if present
     if selected_country_code_alpha2.present?
       @selected_country = HawthorneCore::Country.
         select(:handle, :code_alpha2, :code_alpha3).
@@ -62,19 +71,20 @@ class HawthorneCore::User::Profile::ShippingAddressController < HawthorneCore::A
 
     # ----------------------
 
-    # if a selected country is not present, default to Cloudflare
+    # if a selected country is not present, default to cloudflare
     unless @selected_country
 
-      # get the users country (code alpha 2) via Cloudflare
+      # get the users country (code alpha 2) via cloudflare
       cloudflare_country_code_alpha2 = request.headers['CF-IPCountry']
 
-      # in the unexpected case where the Cloudflare country code is not found within our list, set to US
+      # in the unexpected case where the cloudflare country code is not found within our list,
+      # log it and default it to select US
       unless HawthorneCore::Country.code_alpha2_exists?(cloudflare_country_code_alpha2)
+        HawthorneCore::UserAction::Log.shipping_address_failure(@user.id, HawthorneCore::UserAction::FailureReason.unexpected_state, { message: 'Country not found with Cloudflare country code', cloudflare_country_code: cloudflare_country_code_alpha2 }, request.remote_ip, cookies[:user_session_token])
         cloudflare_country_code_alpha2 = 'US'
-        HawthorneCore::UserAction::Log.shipping_address_failure(user.id, HawthorneCore::UserAction::FailureReason.unexpected_state, { message: 'Country not found with Cloudflare country code', cloudflare_country_code: cloudflare_country_code_alpha2 }, request.remote_ip, cookies[:user_session_token])
       end
 
-      # if the Cloudflare country is in our list of countries to ship to, set this as the selected country
+      # if the cloudflare country is in our list of countries to ship to, set this as the selected country
       # else this will force the user to select a country that we ship to
       if HawthorneCore::Country.ship_to?(cloudflare_country_code_alpha2)
         @selected_country = HawthorneCore::Country.
@@ -108,15 +118,13 @@ class HawthorneCore::User::Profile::ShippingAddressController < HawthorneCore::A
   # action to create the shipping address
   def create
 
-    # ----------------------
-
     # get the request attributes, and merge in the user id - needed to create the record
     attrs = normalized_address_params
     attrs = attrs.merge(user_id: session[:user_id])
 
     # ----------------------
 
-    # TODO: verify, and if not verified ... different action?
+    # TODO: verify address, and if not verified ... different action?
 
     # ----------------------
 
@@ -149,16 +157,27 @@ class HawthorneCore::User::Profile::ShippingAddressController < HawthorneCore::A
 
     # ----------------------
 
+    # find the user
+    @user = HawthorneCore::User.
+      select(:user_id, :email_address, :full_name).
+      active.
+      find_by(user_id: session[:user_id])
+
+    # in the unexpected case where the user is not found - reset the session and redirect the user to the sites home page
+    reset_session; redirect_to '/' and return unless @user
+
+    # ----------------------
+
     # find the users shipping address to edit
     @shipping_address = HawthorneCore::UserShippingAddress.
       select(:token, :full_name, :street_address, :street_address_extended, :city, :state_province, :postal_code, :country_code_alpha2, :phone_number).
       active.
-      find_by(user_id: session[:user_id], token: token)
+      find_by(user_id: @user.id, token: token)
 
     # in the unexpected case where the users shipping address is not found
     # log it, and redirect the user to view their shipping addresses
     unless @shipping_address
-      HawthorneCore::UserAction::Log.shipping_address_failure(session[:user_id], HawthorneCore::UserAction::FailureReason.unexpected_state, { message: 'Users shipping address not found', token: token }, request.remote_ip, cookies[:user_session_token])
+      HawthorneCore::UserAction::Log.shipping_address_failure(@user.id, HawthorneCore::UserAction::FailureReason.unexpected_state, { message: 'Users shipping address not found', token: token }, request.remote_ip, cookies[:user_session_token])
       redirect_to account_profile_shipping_addresses_path and return
     end
 
@@ -185,8 +204,6 @@ class HawthorneCore::User::Profile::ShippingAddressController < HawthorneCore::A
 
   def update
 
-    # ----------------------
-
     # get the request attributes
     attrs = normalized_address_params
 
@@ -207,7 +224,7 @@ class HawthorneCore::User::Profile::ShippingAddressController < HawthorneCore::A
 
     # ----------------------
 
-    # TODO: verify, and if not verified ... different action?
+    # TODO: verify address, and if not verified ... different action?
 
     # ----------------------
 
@@ -242,8 +259,9 @@ class HawthorneCore::User::Profile::ShippingAddressController < HawthorneCore::A
 
     # find the users shipping address to soft delete
     shipping_address = HawthorneCore::UserShippingAddress.
-      select(:user_shipping_address_id, :user_id, :deleted).
-      find_by(user_id: session[:user_id], token: token)
+      select(:user_shipping_address_id).
+      active.
+      find_by(user_id: user_id, token: token)
 
     # in the unexpected case where the users shipping address is not found
     # log it, and redirect the user to view their shipping addresses
@@ -256,7 +274,7 @@ class HawthorneCore::User::Profile::ShippingAddressController < HawthorneCore::A
     shipping_address.soft_delete
 
     # log it
-    HawthorneCore::UserAction::Log.remove_shipping_address(shipping_address.user_id, { user_shipping_address_id: shipping_address.id }, request.remote_ip, cookies[:user_session_token])
+    HawthorneCore::UserAction::Log.remove_shipping_address(session[:user_id], { user_shipping_address_id: shipping_address.id }, request.remote_ip, cookies[:user_session_token])
 
     # ----------------------
 

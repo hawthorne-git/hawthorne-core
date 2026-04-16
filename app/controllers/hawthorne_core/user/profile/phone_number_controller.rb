@@ -7,14 +7,19 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Accou
   # show the page for the user to update their phone number
   def show
 
-    # find the users phone number
-    @current_phone_number = HawthorneCore::User.active.where(user_id: session[:user_id]).pick(:phone_number)
+    # find the user
+    @user = HawthorneCore::User.
+      select(:user_id, :email_address, :full_name, :phone_number).
+      active.
+      find_by(user_id: session[:user_id])
+
+    # ----------------------
 
     # find the users site record ... the new phone number attributes are specific to each site
     # then clear the users new phone number attributes
     HawthorneCore::UserSite.
       select(:user_site_id, :user_id).
-      find_by(user_id: session[:user_id], site_id: HawthorneCore::Site.this_site_id).
+      find_by(user_id: @user.id, site_id: HawthorneCore::Site.this_site_id).
       clear_new_phone_number_attrs
 
     # ----------------------
@@ -36,6 +41,7 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Accou
     # find the user
     user = HawthorneCore::User.
       select(:user_id, :phone_number).
+      active.
       find_by(user_id: session[:user_id])
 
     # find the users site record ... the new phone number attributes are specific to each site
@@ -81,14 +87,18 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Accou
   # show the page for the user to verify their pin, to update their phone number
   def verify_pin_show
 
-    # find the users current and new phone numbers
-    @current_phone_number = HawthorneCore::User.active.where(user_id: session[:user_id]).pick(:phone_number)
-    @new_phone_number = HawthorneCore::UserSite.where(user_id: session[:user_id], site_id: HawthorneCore::Site.this_site_id).pick(:new_phone_number)
+    # find the user
+    @user = HawthorneCore::User.
+      select(:user_id, :email_address, :full_name).
+      active.
+      find_by(user_id: session[:user_id])
+
+    # find the users new phone number
+    @new_phone_number = HawthorneCore::UserSite.where(user_id: @user.id, site_id: HawthorneCore::Site.this_site_id).pick(:new_phone_number)
 
     # ----------------------
 
     @html_title = "#{@current_phone_number.blank? ? 'Add' : 'Update'} Phone Number | My Profile"
-
 
   end
 
@@ -113,6 +123,7 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Accou
     # find the user
     user = HawthorneCore::User.
       select(:user_id, :phone_number).
+      active.
       find_by(user_id: session[:user_id])
 
     # find the users site record ... the new phone number attributes are specific to each site
@@ -180,6 +191,7 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Accou
     # find the user
     user = HawthorneCore::User.
       select(:user_id, :phone_number).
+      active.
       find_by(user_id: session[:user_id])
 
     # ----------------------

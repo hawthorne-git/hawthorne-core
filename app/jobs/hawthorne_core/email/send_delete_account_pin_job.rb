@@ -15,6 +15,7 @@ class HawthorneCore::Email::SendDeleteAccountPinJob < HawthorneCore::Application
     # find the user by their id
     user = HawthorneCore::User.
       select(:user_id, :email_address, :full_name).
+      active.
       find_by(user_id: user_id)
 
     # find the users site record ... the delete account pin is specific to each site
