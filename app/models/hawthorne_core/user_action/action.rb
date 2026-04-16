@@ -34,6 +34,7 @@ module HawthorneCore::UserAction::Action
       sign_out: 'SIGN-OUT',
       stripe_customer_created: 'STRIPE CUSTOMER CREATED',
       stripe_customer_email_address_updated: 'STRIPE CUSTOMER EMAIL ADDRESS UPDATED',
+      stripe_customer_setup_intent_created: 'STRIPE CUSTOMER SETUP INTERNET CREATED',
       text_message_sent: 'TEXT MESSAGE SENT'
     }.freeze
 

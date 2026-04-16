@@ -28,6 +28,8 @@ module HawthorneCore
 
     def self.smarty_embedded_key = fetch_env_attr('SMARTY_EMBEDDED_KEY')
 
+    def self.stripe_publishable_key = fetch_env_attr('STRIPE_PUBLISHABLE_KEY')
+
     def self.stripe_secret_key = fetch_env_attr('STRIPE_SECRET_KEY')
 
     def self.twilio_password = fetch_env_attr('TWILIO_PASSWORD')

@@ -47,14 +47,15 @@ HawthorneCore::Engine.routes.draw do
   patch 'account/profile/update-shipping-address', to: 'user/profile/shipping_address#update'
   delete 'account/profile/remove-shipping-address', to: 'user/profile/shipping_address#delete'
 
+  get 'account/profile/payment-methods', to: 'user/profile/payment_methods#index'
+  get 'account/profile/new-payment-method', to: 'user/profile/payment_methods#new'
+
   get 'account/profile/delete-account', to: 'user/profile/delete_account#show'
   post 'account/profile/delete-account-verify', to: 'user/profile/delete_account#verify'
   get 'account/profile/delete-account-verify-pin', to: 'user/profile/delete_account#verify_pin_show'
   post 'account/profile/delete-account-verify-pin', to: 'user/profile/delete_account#verify_pin'
   get 'account/profile/delete-account-resend-pin', to: 'user/profile/delete_account#resend_pin'
   get 'account-deleted', to: 'home#account_deleted'
-
-  get 'account/profile/payment-methods', to: 'user/profile/payment_methods#index'
 
   # ----------------------
 
