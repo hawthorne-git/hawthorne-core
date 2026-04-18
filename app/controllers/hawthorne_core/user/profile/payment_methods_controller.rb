@@ -7,32 +7,15 @@ class HawthorneCore::User::Profile::PaymentMethodsController < HawthorneCore::Ac
   def index
 
     # find the user
-    @user = user = HawthorneCore::User.
-      select(:user_id, :email_address, :full_name, :stripe_customer_id).
+    @user = HawthorneCore::User.
+      select(:user_id, :stripe_customer_id, :full_name, :email_address).
       active.
       find_by(user_id: session[:user_id])
 
-    # find the users active payment methods (in our database) ... just credit cards to start
-    payment_methods = HawthorneCore::UserPaymentMethod.
-      select(:user_payment_method_id, :token, :stripe_payment_method_id, :default).
-      active.
-      where(user_id: user.id)
-
-    # find the users credit cards (in stripe)
-    credit_cards = HawthorneCore::Services::StripeSvc.find_all_customer_credit_cards(user.stripe_customer_id, user.id)
-
     # ----------------------
 
-    # find all active credit cards
-    @active_credit_cards = []
-    credit_cards.each do |credit_card|
-      payment_method = payment_methods.find { |_payment_method| _payment_method.stripe_payment_method_id == credit_card[:stripe_payment_method_id] }
-      next unless payment_method.present?
-      next unless HawthorneCore::UserPaymentMethod.credit_card_active?(credit_card[:credit_card_expiration_month], credit_card[:credit_card_expiration_year])
-      @active_credit_cards.push(credit_card.merge(token: payment_method.token, default: payment_method.default))
-    end
-
-    # ----------------------
+    # find the users active stripe credit cards
+    @active_credit_cards = HawthorneCore::UserPaymentMethod.active_stripe_credit_cards(@user.id, @user.stripe_customer_id)
 
     # if the user does not have any active credit cards in their profile,
     # redirect the user to add their first credit card

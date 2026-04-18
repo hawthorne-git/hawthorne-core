@@ -51,6 +51,10 @@ module HawthorneCore::UserAction::Log
     failure(user_id, action(:credit_card_removed), failure_reason, note, ip_address, user_session_token)
   end
 
+  def self.update_credit_card_default_attr(user_id, note, ip_address, user_session_token)
+    success(user_id, action(:credit_card_default_attr_updated), note, ip_address, user_session_token)
+  end
+
   # ----------------------------------------------------------------------------- Email
 
   def self.email_sent(user_id, note)
