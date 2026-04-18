@@ -22,13 +22,42 @@ class HawthorneCore::Services::StripeSvc
 
   # ----------------------------------------------------------------
 
+  # detach a payment method from a customer (removes the credit card)
+  def self.detach_payment_method(stripe_payment_method_id, user_id)
+    Stripe::PaymentMethod.detach(stripe_payment_method_id)
+  rescue Stripe::StripeError => e
+    HawthorneCore::CapturedException.log('HawthorneCore::Services::StripeSvc.detach_payment_method', { user_id: user_id, stripe_payment_method_id: stripe_payment_method_id }, e)
+  end
+
+  # ----------------------------------------------------------------
+
+  # find all customer credit cards, in an array of hashes
+  def self.find_all_customer_credit_cards(customer_id, user_id)
+    payment_methods = Stripe::PaymentMethod.list(customer: customer_id, type: 'card')
+    payment_methods.data.map do |payment_method|
+      {
+        stripe_payment_method_id: payment_method.id,
+        stripe_fingerprint: payment_method.card.fingerprint,
+        brand: payment_method.card.brand,
+        credit_card_last4: payment_method.card.last4,
+        credit_card_expiration_month: payment_method.card.exp_month,
+        credit_card_expiration_year: payment_method.card.exp_year
+      }
+    end
+  rescue Stripe::StripeError => e
+    HawthorneCore::CapturedException.log('HawthorneCore::Services::StripeSvc.find_all_customer_credit_cards', { user_id: user_id, customer_id: customer_id }, e)
+    nil
+  end
+
+  # ----------------------------------------------------------------
+
   # update the customers email address
   def self.update_customer_email_address(customer_id, user_id, email_address)
     Stripe::Customer.update(customer_id, { email: email_address })
     HawthorneCore::UserAction::Log.stripe_customer_email_address_updated(user_id, { stripe_customer_id: customer_id, new_email_address: email_address })
   rescue Stripe::StripeError => e
     HawthorneCore::UserAction::Log.stripe_customer_email_address_updated_failure(user_id, HawthorneCore::UserAction::FailureReason.exception_caught, { stripe_customer_id: customer_id, new_email_address: email_address, exception_message: e.message })
-    HawthorneCore::CapturedException.log('HawthorneCore::Services::StripeSvc.update_customer_email_address', {  stripe_customer_id: customer_id, user_id: user_id, new_email_address: email_address }, e)
+    HawthorneCore::CapturedException.log('HawthorneCore::Services::StripeSvc.update_customer_email_address', { stripe_customer_id: customer_id, user_id: user_id, new_email_address: email_address }, e)
   end
 
   # ----------------------------------------------------------------
@@ -45,7 +74,7 @@ class HawthorneCore::Services::StripeSvc
     setup_intent.client_secret
   rescue Stripe::StripeError => e
     HawthorneCore::UserAction::Log.stripe_customer_setup_intent_created_failure(user_id, HawthorneCore::UserAction::FailureReason.exception_caught, { stripe_customer_id: customer_id, user_id: user_id, exception_message: e.message })
-    HawthorneCore::CapturedException.log('HawthorneCore::Services::StripeSvc.setup_intent_client_secret', {  stripe_customer_id: customer_id, user_id: user_id }, e)
+    HawthorneCore::CapturedException.log('HawthorneCore::Services::StripeSvc.setup_intent_client_secret', { stripe_customer_id: customer_id, user_id: user_id }, e)
   end
 
   # ----------------------------------------------------------------

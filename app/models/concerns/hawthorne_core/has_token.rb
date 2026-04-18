@@ -28,6 +28,7 @@ module HawthorneCore::HasToken
   TOKEN_LENGTHS =
     {
       'users' => 12,
+      'user_payment_methods' => 12,
       'user_shipping_addresses' => 12
     }.freeze
 

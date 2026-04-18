@@ -8,6 +8,8 @@ module HawthorneCore::UserAction::Action
     {
       account_created: 'ACCOUNT CREATED',
       account_deleted: 'ACCOUNT DELETED',
+      credit_card_added: 'CREDIT CARD ADDED',
+      credit_card_removed: 'CREDIT CARD REMOVED',
       delete_account_attrs_cleared: 'DELETE ACCOUNT ATTRIBUTES CLEARED',
       delete_account_attrs_refreshed: 'DELETE ACCOUNT ATTRIBUTES REFRESHED',
       delete_account_attrs_set: 'DELETE ACCOUNT ATTRIBUTES SET',

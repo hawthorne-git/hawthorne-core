@@ -3,7 +3,7 @@
 # updates a customers email address, within the stripe payment service
 class HawthorneCore::Stripe::UpdateCustomerEmailAddressJob < HawthorneCore::ApplicationJob
 
-  queue_as :critical
+  queue_as :default
 
   # ----------------------------------------------------------------
 

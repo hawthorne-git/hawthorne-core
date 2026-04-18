@@ -33,6 +33,24 @@ module HawthorneCore::UserAction::Log
     failure(user_id, action(:account_deleted), failure_reason, note, ip_address, user_session_token)
   end
 
+  # ----------------------------------------------------------------------------- Credit Card
+
+  def self.add_credit_card(user_id, note, ip_address, user_session_token)
+    success(user_id, action(:credit_card_added), note, ip_address, user_session_token)
+  end
+
+  def self.add_credit_card_failure(user_id, failure_reason, note, ip_address, user_session_token)
+    failure(user_id, action(:credit_card_added), failure_reason, note, ip_address, user_session_token)
+  end
+
+  def self.remove_credit_card(user_id, note, ip_address, user_session_token)
+    success(user_id, action(:credit_card_removed), note, ip_address, user_session_token)
+  end
+
+  def self.remove_credit_card_failure(user_id, failure_reason, note, ip_address, user_session_token)
+    failure(user_id, action(:credit_card_removed), failure_reason, note, ip_address, user_session_token)
+  end
+
   # ----------------------------------------------------------------------------- Email
 
   def self.email_sent(user_id, note)
