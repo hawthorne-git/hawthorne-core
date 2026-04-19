@@ -24,13 +24,8 @@
 
   <%= helpers.javascript_importmap_tags %>
 
-  <%= helpers.content_for(:head) %>
-
-  <!-- Privacy-friendly analytics by Plausible -->
-  <script async src="https://plausible.io/js/pa-mn3pZASE_npNIh-H4mkBu.js"></script>
-  <script>
-      window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
-      plausible.init()
-  </script>
+  <% if Rails.env.production? && ENV['PLAUSIBLE_DOMAIN'].present? %>
+    <script defer data-domain='<%= ENV['PLAUSIBLE_DOMAIN'] %>' src='https://plausible.io/js/script.js'></script>
+  <% end %>
 
 </head>
