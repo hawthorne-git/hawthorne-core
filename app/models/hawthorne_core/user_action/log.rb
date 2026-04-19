@@ -47,14 +47,6 @@ module HawthorneCore::UserAction::Log
     success(user_id, action(:credit_card_removed), note, ip_address, user_session_token)
   end
 
-  def self.remove_credit_card_failure(user_id, failure_reason, note, ip_address, user_session_token)
-    failure(user_id, action(:credit_card_removed), failure_reason, note, ip_address, user_session_token)
-  end
-
-  def self.update_credit_card_default_attr(user_id, note, ip_address, user_session_token)
-    success(user_id, action(:credit_card_default_attr_updated), note, ip_address, user_session_token)
-  end
-
   # ----------------------------------------------------------------------------- Email
 
   def self.email_sent(user_id, note)
@@ -199,32 +191,24 @@ module HawthorneCore::UserAction::Log
 
   # ----------------------------------------------------------------------------- Stripe
 
+  def self.stripe_credit_card_created(user_id, note)
+    success_admin(user_id, action(:stripe_credit_card_created), note)
+  end
+
+  def self.stripe_credit_card_detached(user_id, note)
+    success_admin(user_id, action(:stripe_credit_card_detached), note)
+  end
+
   def self.stripe_customer_created(user_id, note)
     success_admin(user_id, action(:stripe_customer_created), note)
   end
-
-  def self.stripe_customer_created_failure(user_id, failure_reason, note)
-    failure_admin(user_id, action(:stripe_customer_created), failure_reason, note)
-  end
-
-  # ------------------------
 
   def self.stripe_customer_email_address_updated(user_id, note)
     success_admin(user_id, action(:stripe_customer_email_address_updated), note)
   end
 
-  def self.stripe_customer_email_address_updated_failure(user_id, failure_reason, note)
-    failure_admin(user_id, action(:stripe_customer_email_address_updated), failure_reason, note)
-  end
-
-  # ------------------------
-
-  def self.stripe_customer_setup_intent_created(user_id, note)
-    success_admin(user_id, action(:stripe_customer_setup_intent_created), note)
-  end
-
-  def self.stripe_customer_setup_intent_created_failure(user_id, failure_reason, note)
-    failure_admin(user_id, action(:stripe_customer_setup_intent_created), failure_reason, note)
+  def self.stripe_setup_intent_created(user_id, note)
+    success_admin(user_id, action(:stripe_setup_intent_created), note)
   end
 
   # ----------------------------------------------------------------------------- Text Message

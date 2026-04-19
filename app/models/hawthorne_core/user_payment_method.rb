@@ -25,19 +25,27 @@ class HawthorneCore::UserPaymentMethod < HawthorneCore::ActiveRecordBaseApp
 
   # -----------------------------------------------------------------------------
 
+  # get the number of active credit cards for a user
+  def self.nbr_active_credit_cards(user_id) = active.where(user_id: user_id).count
+
+  # determine if the user has exactly one active credit card
+  def self.one_active_credit_card?(user_id) = (nbr_active_credit_cards(user_id) == 1)
+
+  # -----------------------------------------------------------------------------
+
   # determine if the user has a defaulted payment method
   def self.defaulted_payment_method_exists?(user_id) = active.exists?(user_id: user_id, default: true)
+
+  # set all the user payment methods to not be defaulted
+  def self.set_all_payment_methods_to_not_defaulted(user_id) = where(user_id: user_id).update_all(default: false)
 
   # -----------------------------------------------------------------------------
 
   # clean up a users defaulted payment methods
-  # if the user has more than 1 defaulted - which should not happen, set those that are defaulted, to not be
+  # if the user has more than 1 defaulted - which should not happen, set all as not defaulted
   def self.clean_defaulted(user_id)
     return if where(user_id: user_id, default: true).count <= 1
-    where(user_id: user_id, default: true).each do |payment_method|
-      payment_method.update_columns(default: false)
-      HawthorneCore::UserAction::Log.update_credit_card_default_attr(user_id, { user_payment_method_id: payment_method.id, default: false, message: 'Removing as default as more than 1 payment methods are marked as default' }, 'ADMIN', 'ADMIN')
-    end
+    where(user_id: user.id).update_all(default: false)
   end
 
   # -----------------------------------------------------------------------------
@@ -49,25 +57,25 @@ class HawthorneCore::UserPaymentMethod < HawthorneCore::ActiveRecordBaseApp
     # clean the users defaulted payment methods, if needed
     clean_defaulted(user_id)
 
-    # find the users active payment methods (in our database) ... just credit cards to start
-    payment_methods = select(:user_payment_method_id, :token, :stripe_payment_method_id, :default).active.where(user_id: user_id)
+    # find the users active stripe credit card payment methods (in our database)
+    payment_methods = select(:user_payment_method_id, :token, :stripe_payment_method_id, :default).
+      active.
+      where(user_id: user_id, payment_method_type: 'CREDIT_CARD').
+      where.not(stripe_payment_method_id: nil)
 
     # find the users credit cards (in stripe)
-    credit_cards = HawthorneCore::Services::StripeSvc.find_all_customer_credit_cards(stripe_customer_id, user_id)
+    credit_cards = HawthorneCore::Services::StripeSvc.find_all_customer_credit_cards(user_id, stripe_customer_id)
 
     # find all active credit cards
     # in the process, if an expired credit card is marked as default - remove it as default
     active_credit_cards = []
     credit_cards.each do |credit_card|
-      payment_method = payment_methods.find { |_payment_method| _payment_method.stripe_payment_method_id == credit_card[:stripe_payment_method_id] }
+      payment_method = payment_methods.find { |pm| pm.stripe_payment_method_id == credit_card[:stripe_payment_method_id] }
       next unless payment_method.present?
       if HawthorneCore::UserPaymentMethod.credit_card_active?(credit_card[:credit_card_expiration_month], credit_card[:credit_card_expiration_year])
         active_credit_cards.push(credit_card.merge(token: payment_method.token, default: payment_method.default))
       else
-        if payment_method.default?
-          payment_method.update_columns(default: false)
-          HawthorneCore::UserAction::Log.update_credit_card_default_attr(user_id, { user_payment_method_id: payment_method.id, default: false, message: 'Removing as default as this credit card is expired', expiration_month: credit_card[:credit_card_expiration_month], expiration_year: credit_card[:credit_card_expiration_year] }, 'ADMIN', 'ADMIN')
-        end
+        payment_method.update_columns(default: false) if payment_method.default?
       end
     end
 

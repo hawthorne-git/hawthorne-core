@@ -9,7 +9,6 @@ module HawthorneCore::UserAction::Action
       account_created: 'ACCOUNT CREATED',
       account_deleted: 'ACCOUNT DELETED',
       credit_card_added: 'CREDIT CARD ADDED',
-      credit_card_default_attr_updated: 'CREDIT CARD DEFAULT ATTR UPDATED',
       credit_card_removed: 'CREDIT CARD REMOVED',
       delete_account_attrs_cleared: 'DELETE ACCOUNT ATTRIBUTES CLEARED',
       delete_account_attrs_refreshed: 'DELETE ACCOUNT ATTRIBUTES REFRESHED',
@@ -35,9 +34,11 @@ module HawthorneCore::UserAction::Action
       sign_in_pin_verified: 'SIGN-IN PIN VERIFIED',
       sign_in_via_cookie: 'SIGN-IN VIA COOKIE',
       sign_out: 'SIGN-OUT',
+      stripe_credit_card_created: 'STRIPE CREDIT CARD CREATED',
+      stripe_credit_card_detached: 'STRIPE CREDIT CARD DETACHED',
       stripe_customer_created: 'STRIPE CUSTOMER CREATED',
       stripe_customer_email_address_updated: 'STRIPE CUSTOMER EMAIL ADDRESS UPDATED',
-      stripe_customer_setup_intent_created: 'STRIPE CUSTOMER SETUP INTERNET CREATED',
+      stripe_setup_intent_created: 'STRIPE SETUP INTERNET CREATED',
       text_message_sent: 'TEXT MESSAGE SENT'
     }.freeze
 

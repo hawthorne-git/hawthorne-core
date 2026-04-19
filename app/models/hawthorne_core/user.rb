@@ -6,6 +6,7 @@ class HawthorneCore::User < HawthorneCore::ActiveRecordBaseApp
           HawthorneCore::HasToken,
           HawthorneCore::User::EmailVerification,
           HawthorneCore::User::PinVerification,
+          HawthorneCore::User::PaymentMethods,
           HawthorneCore::User::SingleSignOn,
           HawthorneCore::User::SiteAccess
 
@@ -22,9 +23,6 @@ class HawthorneCore::User < HawthorneCore::ActiveRecordBaseApp
 
   # determine if the user has a first name
   def first_name? = full_name.present?
-
-  # determine if the user has a stripe customer account
-  def stripe_customer? = stripe_customer_id.present?
 
   # -----------------------------------------------------------------------------
 

@@ -16,10 +16,7 @@ class HawthorneCore::Stripe::CreateCustomerJob < HawthorneCore::ApplicationJob
       find_by(user_id: user_id)
 
     # exit in the unexpected case where the user already has a stripe customer account
-    if user.stripe_customer?
-      HawthorneCore::UserAction::Log.stripe_customer_created_failure(user_id, HawthorneCore::UserAction::FailureReason.unexpected_state, { message: 'User already has a Stripe customer account', stripe_customer_id: user.stripe_customer_id })
-      return
-    end
+    return if user.stripe_customer?
 
     # create the customer, within stripe
     # attach the stripe customer id to the user

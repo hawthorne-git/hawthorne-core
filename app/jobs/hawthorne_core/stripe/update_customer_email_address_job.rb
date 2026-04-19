@@ -16,7 +16,7 @@ class HawthorneCore::Stripe::UpdateCustomerEmailAddressJob < HawthorneCore::Appl
       find_by(user_id: user_id)
 
     # update the customers email address, within stripe
-    HawthorneCore::Services::StripeSvc.update_customer_email_address(user.stripe_customer_id, user.id, user.email_address)
+    HawthorneCore::Services::StripeSvc.update_customer_email_address(user.id, user.email_address, user.stripe_customer_id)
 
   end
 

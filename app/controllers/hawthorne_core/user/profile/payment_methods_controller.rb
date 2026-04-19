@@ -8,17 +8,14 @@ class HawthorneCore::User::Profile::PaymentMethodsController < HawthorneCore::Ac
 
     # find the user
     @user = HawthorneCore::User.
-      select(:user_id, :stripe_customer_id, :full_name, :email_address).
+      select(:user_id, :email_address, :full_name, :stripe_customer_id).
       active.
       find_by(user_id: session[:user_id])
 
-    # ----------------------
-
     # find the users active stripe credit cards
-    @active_credit_cards = HawthorneCore::UserPaymentMethod.active_stripe_credit_cards(@user.id, @user.stripe_customer_id)
+    @active_credit_cards = @user.active_stripe_credit_cards
 
-    # if the user does not have any active credit cards in their profile,
-    # redirect the user to add their first credit card
+    # redirect the user to add a card if they do not have any active credit cards
     redirect_to account_profile_new_payment_method_path and return unless @active_credit_cards.any?
 
     # ----------------------
@@ -38,11 +35,9 @@ class HawthorneCore::User::Profile::PaymentMethodsController < HawthorneCore::Ac
       active.
       find_by(user_id: session[:user_id])
 
-    # ----------------------
-
     # set up the user to add a credit card,
-    # the setup intent - client secret is an identifier for the user to add a credit card to their stripe account
-    @stripe_setup_intent_client_secret = HawthorneCore::Services::StripeSvc.setup_intent_client_secret(@user.stripe_customer_id, @user.id)
+    # the setup intent - client secret is a stripe identifier for the user to add a credit card to their stripe account
+    @stripe_setup_intent_client_secret = HawthorneCore::Services::StripeSvc.setup_intent_client_secret(@user.id, @user.stripe_customer_id)
 
     # ----------------------
 
@@ -72,20 +67,18 @@ class HawthorneCore::User::Profile::PaymentMethodsController < HawthorneCore::Ac
     # if invalid - log it, return back and display all payment methods
     if stripe_payment_method_id.blank? || !stripe_payment_method_id.start_with?('pm_')
       HawthorneCore::UserAction::Log.add_credit_card_failure(user.id, HawthorneCore::UserAction::FailureReason.stripe_payment_method_id_invalid, { stripe_payment_method_id: stripe_payment_method_id }, request.remote_ip, cookies[:user_session_token])
-      redirect_to account_profile_new_payment_method_path and return if true
+      redirect_to account_profile_new_payment_method_path and return
     end
 
     # ----------------------
 
-    # determine if the user has a defaulted payment method
-    has_default_payment_method = HawthorneCore::UserPaymentMethod.defaulted_payment_method_exists?(user.id)
-
     # create the user payment method
+    # set as  default, if the user does not have an existing defaulted payment method
     HawthorneCore::UserPaymentMethod.create!(
       user_id: user.id,
       payment_method_type: 'CREDIT_CARD',
       stripe_payment_method_id: stripe_payment_method_id,
-      default: !has_default_payment_method
+      default: !user.defaulted_payment_method_exists?
     )
 
     # log it
@@ -100,8 +93,8 @@ class HawthorneCore::User::Profile::PaymentMethodsController < HawthorneCore::Ac
 
   # -----------------------------------------------------------------------------
 
-  # remove a credit card
-  def destroy
+  # remove a credit card - soft delete in our database, and detach in stripe
+  def delete
 
     # get the request attributes
     token = params[:token]
@@ -110,41 +103,40 @@ class HawthorneCore::User::Profile::PaymentMethodsController < HawthorneCore::Ac
 
     # find the user
     user = HawthorneCore::User.
-      select(:user_id, :stripe_customer_id).
+      select(:user_id).
       active.
       find_by(user_id: session[:user_id])
 
     # ----------------------
 
-    # find the payment method to remove
+    # find the payment method to soft delete / detach in stripe
     payment_method = HawthorneCore::UserPaymentMethod.
       select(:user_payment_method_id, :stripe_payment_method_id, :default).
       active.
       find_by(user_id: user.id, token: token)
 
     # in the unexpected case where the payment method is not found
-    # log it, and redirect the user to view their payment methods
-    unless payment_method
-      HawthorneCore::UserAction::Log.remove_credit_card_failure(user.id, HawthorneCore::UserAction::FailureReason.unexpected_state, { message: 'Payment method not found', token: token }, request.remote_ip, cookies[:user_session_token])
-      redirect_to account_profile_payment_methods_path and return
-    end
+    # redirect the user to view their payment methods
+    redirect_to account_profile_payment_methods_path and return unless payment_method
 
     # ----------------------
 
     # detach the payment method from stripe
-    HawthorneCore::Services::StripeSvc.detach_payment_method(payment_method.stripe_payment_method_id, user.id)
+    HawthorneCore::Services::StripeSvc.detach_payment_method(user.id, payment_method.stripe_payment_method_id)
 
     # soft delete the record
     payment_method.soft_delete
 
-    # if this was the default, assign default to the next active payment method
-    if payment_method.default
-      next_payment_method = HawthorneCore::UserPaymentMethod.active.where(user_id: user.id).first
-      next_payment_method&.update!(default: true)
-    end
-
     # log it
     HawthorneCore::UserAction::Log.remove_credit_card(user.id, { token: token }, request.remote_ip, cookies[:user_session_token])
+
+    # ----------------------
+
+    # if this user has one active credit card - set this card as the default
+    if user.one_active_credit_card?
+      payment_method_to_default = HawthorneCore::UserPaymentMethod.active.where(user_id: user.id).first
+      payment_method_to_default.update_columns(default: true)
+    end
 
     # ----------------------
 
@@ -182,12 +174,15 @@ class HawthorneCore::User::Profile::PaymentMethodsController < HawthorneCore::Ac
 
     # ----------------------
 
-    # clear the existing default and set the new one
-    HawthorneCore::UserPaymentMethod.active.where(user_id: user.id).update_all(default: false)
-    payment_method.update!(default: true)
+    # set all the user payment methods to not be defaulted
+    user.set_all_payment_methods_to_not_defaulted
+
+    # update the selected payment method as the default
+    payment_method.update_columns(default: true)
 
     # ----------------------
 
+    # redirect the user to view their payment methods
     redirect_to account_profile_payment_methods_path
 
   end
