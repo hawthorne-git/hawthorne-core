@@ -1,0 +1,30 @@
+<%# v3.0 %>
+
+<div class="border border-gray-200 rounded-xl p-5 bg-white flex flex-col mb-4">
+
+  <%# Brand + last 4 %>
+  <div class="flex items-center gap-2 mb-1">
+    <p class="font-semibold text-gray-900 capitalize"><%= @payment_method[:brand] %> ending in <%= @payment_method[:credit_card_last4] %></p>
+    <% if @payment_method[:default] %>
+      <span class="text-xs font-medium text-white rounded px-3 py-0.5" style="background-color: var(--color-brand);">Default</span>
+    <% end %>
+  </div>
+
+  <%# Expiry %>
+  <p class="text-sm text-gray-600">Expires <%= @payment_method[:credit_card_expiration_month].to_s.rjust(2, '0') %>/<%= @payment_method[:credit_card_expiration_year] %></p>
+
+  <%# Actions %>
+  <div class="mt-4 pt-4 border-t border-gray-100 flex items-center gap-4 text-sm">
+    <% unless @payment_method[:default] %>
+      <%= link_to 'Set as default',
+                  helpers.account_profile_set_default_payment_method_path(token: @payment_method[:token]),
+                  data: { turbo_method: :patch },
+                  class: "text-brand-dark no-underline hover:underline" %>
+    <% end %>
+    <%= link_to 'Remove',
+                helpers.account_profile_remove_payment_method_path(token: @payment_method[:token]),
+                data: { turbo_method: :delete, turbo_confirm: 'Remove this credit card?' },
+                class: "text-brand-dark no-underline hover:underline" %>
+  </div>
+
+</div>
