@@ -261,7 +261,7 @@ class HawthorneCore::User::Profile::ShippingAddressController < HawthorneCore::A
     shipping_address = HawthorneCore::UserShippingAddress.
       select(:user_shipping_address_id).
       active.
-      find_by(user_id: user_id, token: token)
+      find_by(user_id: session[:user_id], token: token)
 
     # in the unexpected case where the users shipping address is not found
     # log it, and redirect the user to view their shipping addresses
