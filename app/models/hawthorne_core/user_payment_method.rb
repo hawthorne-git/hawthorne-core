@@ -45,7 +45,7 @@ class HawthorneCore::UserPaymentMethod < HawthorneCore::ActiveRecordBaseApp
   # if the user has more than 1 defaulted - which should not happen, set all as not defaulted
   def self.clean_defaulted(user_id)
     return if where(user_id: user_id, default: true).count <= 1
-    where(user_id: user.id).update_all(default: false)
+    where(user_id: user_id).update_all(default: false)
   end
 
   # -----------------------------------------------------------------------------
