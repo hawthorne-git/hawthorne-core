@@ -24,7 +24,7 @@ class HawthorneCore::User::Profile::EmailAddressController < HawthorneCore::Acco
 
     # ----------------------
 
-    @html_title = 'Update Email Address | My Profile'
+    @html_title = 'Update Email Address | Profile'
 
   end
 
@@ -105,7 +105,7 @@ class HawthorneCore::User::Profile::EmailAddressController < HawthorneCore::Acco
 
     # ----------------------
 
-    @html_title = 'Update Email Address | My Profile'
+    @html_title = 'Update Email Address | Profile'
 
   end
 

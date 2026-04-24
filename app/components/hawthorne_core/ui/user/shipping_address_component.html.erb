@@ -29,10 +29,10 @@
   <%# Actions %>
   <div class="mt-4 pt-4 border-t border-gray-100 flex items-center gap-4 text-sm">
     <%= link_to 'Edit',
-                helpers.account_profile_edit_shipping_address_path(token: @shipping_address.token),
+                helpers.account_edit_address_path(token: @shipping_address.token),
                 class: "text-brand-dark no-underline hover:underline" %>
     <%= link_to 'Remove',
-                helpers.account_profile_remove_shipping_address_path(token: @shipping_address.token),
+                helpers.account_remove_address_path(token: @shipping_address.token),
                 data: { turbo_method: :delete, turbo_confirm: 'Remove this shipping address?' },
                 class: "text-brand-dark no-underline hover:underline" %>
   </div>

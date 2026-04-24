@@ -1,8 +1,8 @@
 <%# v3.0 %>
 
 <%
-  breadcrumb = { text: 'My Profile', url: helpers.account_profile_path } if (@selected_sidebar_navigation_item.downcase == 'my profile' and @title.downcase != @selected_sidebar_navigation_item.downcase)
-  breadcrumb = { text: 'Shipping Addresses', url: helpers.account_profile_shipping_addresses_path } if (@selected_sidebar_navigation_item.downcase == 'shipping addresses' and @title.downcase != @selected_sidebar_navigation_item.downcase)
+  breadcrumb = { text: 'Profile', url: helpers.account_profile_path } if (@selected_sidebar_navigation_item.downcase == 'profile' and @title.downcase != @selected_sidebar_navigation_item.downcase)
+  breadcrumb = { text: 'Addresses', url: helpers.account_addresses_path } if (@selected_sidebar_navigation_item.downcase == 'addresses' and @title.downcase != @selected_sidebar_navigation_item.downcase)
 %>
 
 <% if breadcrumb %>

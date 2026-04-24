@@ -24,7 +24,7 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Accou
 
     # ----------------------
 
-    @html_title = "#{@current_phone_number.blank? ? 'Add' : 'Update'} Phone Number | My Profile"
+    @html_title = "#{@current_phone_number.blank? ? 'Add' : 'Update'} Phone Number | Profile"
 
   end
 
@@ -98,7 +98,7 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Accou
 
     # ----------------------
 
-    @html_title = "#{@current_phone_number.blank? ? 'Add' : 'Update'} Phone Number | My Profile"
+    @html_title = "#{@current_phone_number.blank? ? 'Add' : 'Update'} Phone Number | Profile"
 
   end
 

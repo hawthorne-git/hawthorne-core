@@ -3,8 +3,8 @@
 <%
   add_action = (action == 'add')
 
-  select_country_form_url = add_action ? account_profile_new_shipping_address_with_selected_country_path : nil
-  form_url = add_action ? account_profile_add_shipping_address_path : account_profile_update_shipping_address_path
+  select_country_form_url = add_action ? account_new_address_with_selected_country_path : nil
+  form_url = add_action ? account_add_address_path : account_profile_update_shipping_address_path
 
   title = "#{action.capitalize} shipping address"
 

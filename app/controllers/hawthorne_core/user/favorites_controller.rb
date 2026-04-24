@@ -1,17 +1,15 @@
 # v3.0
 
-class HawthorneCore::User::OrderHistoryController < HawthorneCore::AccountApplicationController
+class HawthorneCore::User::FavoritesController < HawthorneCore::AccountApplicationController
 
   # -----------------------------------------------------------------------------
 
-  # show the order history  page
+  # show the users favorite page
   def show
-
-    # TODO: final all orders
 
     # ----------------------
 
-    @html_title = 'Order History'
+    @html_title = 'Favorites'
 
   end
 

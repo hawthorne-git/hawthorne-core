@@ -6,18 +6,22 @@
   @user = @user.presence || HawthorneCore::User.select(:email_address, :full_name).active.find_by(user_id: session[:user_id])
 
   # create each navigation component
-  my_profile_navigation_component = { handle: 'My Profile', url: helpers.account_profile_path, selected: (@selected_sidebar_navigation_item.downcase == 'my profile') }
-  order_history_navigation_component = { handle: 'Order History', url: helpers.account_order_history_path, selected: (@selected_sidebar_navigation_item.downcase == 'order history') }
-  shipping_addresses_navigation_component = { handle: 'Shipping Addresses', url: helpers.account_profile_shipping_addresses_path, selected: (@selected_sidebar_navigation_item.downcase == 'shipping addresses') }
-  payment_methods_navigation_component = { handle: 'Payment Methods', url: helpers.account_profile_payment_methods_path, selected: (@selected_sidebar_navigation_item.downcase == 'payment methods') }
+  addresses_navigation_component = { handle: 'Addresses', url: helpers.account_addresses_path, selected: (@selected_sidebar_navigation_item.downcase == 'addresses') }
+  favorites_navigation_component = { handle: 'Favorites', url: helpers.account_favorites_path, selected: (@selected_sidebar_navigation_item.downcase == 'favorites') }
+  notifications_navigation_component = { handle: 'Notifications', url: helpers.account_notifications_path, selected: (@selected_sidebar_navigation_item.downcase == 'notifications') }
+  orders_navigation_component = { handle: 'Orders', url: helpers.account_orders_path, selected: (@selected_sidebar_navigation_item.downcase == 'orders') }
+  payments_navigation_component = { handle: 'Payments', url: helpers.account_payments_path, selected: (@selected_sidebar_navigation_item.downcase == 'payments') }
+  profile_navigation_component = { handle: 'Profile', url: helpers.account_profile_path, selected: (@selected_sidebar_navigation_item.downcase == 'profile') }
 
   # set these navigation components into a list
   navigation_components =
     [
-      my_profile_navigation_component,
-      order_history_navigation_component,
-      shipping_addresses_navigation_component,
-      payment_methods_navigation_component
+      profile_navigation_component,
+      favorites_navigation_component,
+      orders_navigation_component,
+      notifications_navigation_component,
+      addresses_navigation_component,
+      payments_navigation_component
     ]
 
 %>

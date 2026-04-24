@@ -24,7 +24,7 @@ class HawthorneCore::User::Profile::DeleteAccountController < HawthorneCore::Acc
 
     # ----------------------
 
-    @html_title = 'Delete Account | My Profile'
+    @html_title = 'Delete Account | Profile'
 
   end
 
@@ -64,7 +64,7 @@ class HawthorneCore::User::Profile::DeleteAccountController < HawthorneCore::Acc
 
     # ----------------------
 
-    @html_title = 'Delete Account | My Profile'
+    @html_title = 'Delete Account | Profile'
 
   end
 

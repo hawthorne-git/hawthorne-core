@@ -15,7 +15,7 @@ class HawthorneCore::User::ProfileController < HawthorneCore::AccountApplication
 
     # ----------------------
 
-    @html_title = 'My Profile'
+    @html_title = 'Profile'
 
   end
 
@@ -29,7 +29,7 @@ class HawthorneCore::User::ProfileController < HawthorneCore::AccountApplication
 
     # ----------------------
 
-    @html_title = 'Full Name | My Profile'
+    @html_title = 'Full Name | Profile'
 
   end
 
@@ -78,7 +78,7 @@ class HawthorneCore::User::ProfileController < HawthorneCore::AccountApplication
 
     # ----------------------
 
-    @html_title = 'Sign-In PIN Delivery | My Profile'
+    @html_title = 'Sign-In PIN Delivery | Profile'
 
   end
 

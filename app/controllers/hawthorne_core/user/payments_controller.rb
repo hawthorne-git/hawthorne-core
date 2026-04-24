@@ -1,6 +1,6 @@
 # v3.0
 
-class HawthorneCore::User::Profile::PaymentMethodsController < HawthorneCore::AccountApplicationController
+class HawthorneCore::User::PaymentsController < HawthorneCore::AccountApplicationController
 
   # -----------------------------------------------------------------------------
 
@@ -20,7 +20,7 @@ class HawthorneCore::User::Profile::PaymentMethodsController < HawthorneCore::Ac
 
     # ----------------------
 
-    @html_title = 'Payment Methods | My Profile'
+    @html_title = 'Payments | Profile'
 
   end
 
@@ -41,7 +41,7 @@ class HawthorneCore::User::Profile::PaymentMethodsController < HawthorneCore::Ac
 
     # ----------------------
 
-    @html_title = 'Add Credit Card | My Profile'
+    @html_title = 'Add Credit Card | Profile'
 
   end
 
@@ -67,7 +67,7 @@ class HawthorneCore::User::Profile::PaymentMethodsController < HawthorneCore::Ac
     # if invalid - log it, return back and display all payment methods
     if stripe_payment_method_id.blank? || !stripe_payment_method_id.start_with?('pm_')
       HawthorneCore::UserAction::Log.add_credit_card_failure(user.id, HawthorneCore::UserAction::FailureReason.stripe_payment_method_id_invalid, { stripe_payment_method_id: stripe_payment_method_id }, request.remote_ip, cookies[:user_session_token])
-      redirect_to account_profile_new_payment_method_path and return
+      redirect_to account_new_payment_path and return
     end
 
     # ----------------------
@@ -87,7 +87,7 @@ class HawthorneCore::User::Profile::PaymentMethodsController < HawthorneCore::Ac
     # ----------------------
 
     # redirect the user to view their payment methods
-    redirect_to account_profile_new_payment_method_path
+    redirect_to account_new_payment_path
 
   end
 

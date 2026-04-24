@@ -1,6 +1,6 @@
 # v3.0
 
-class HawthorneCore::User::Profile::ShippingAddressController < HawthorneCore::AccountApplicationController
+class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicationController
 
   # -----------------------------------------------------------------------------
 
@@ -25,11 +25,11 @@ class HawthorneCore::User::Profile::ShippingAddressController < HawthorneCore::A
 
     # if the user does not have any shipping addresses in their profile,
     # redirect the user to add their first shipping address
-    redirect_to account_profile_new_shipping_address_path and return unless @shipping_addresses.any?
+    redirect_to account_new_address_path and return unless @shipping_addresses.any?
 
     # ----------------------
 
-    @html_title = 'Shipping Addresses | My Profile'
+    @html_title = 'Addresses | Profile'
 
   end
 
@@ -104,14 +104,14 @@ class HawthorneCore::User::Profile::ShippingAddressController < HawthorneCore::A
 
     # ----------------------
 
-    @html_title = 'Add Shipping Address | My Profile'
+    @html_title = 'Add Address | Profile'
 
   end
 
   # -----------------------------------------------------------------------------
 
   # user action when a country is selected - on adding
-  def new_selected_country = redirect_to account_profile_new_shipping_address_path(selected_country: params[:country_code_alpha2])
+  def new_selected_country = redirect_to account_new_address_path(selected_country: params[:country_code_alpha2])
 
   # -----------------------------------------------------------------------------
 
@@ -144,7 +144,7 @@ class HawthorneCore::User::Profile::ShippingAddressController < HawthorneCore::A
     # ----------------------
 
     # redirect the user to view their shipping addresses
-    redirect_to account_profile_shipping_addresses_path
+    redirect_to account_addresses_path
 
   end
 
@@ -178,7 +178,7 @@ class HawthorneCore::User::Profile::ShippingAddressController < HawthorneCore::A
     # log it, and redirect the user to view their shipping addresses
     unless @shipping_address
       HawthorneCore::UserAction::Log.shipping_address_failure(@user.id, HawthorneCore::UserAction::FailureReason.unexpected_state, { message: 'Users shipping address not found', token: token }, request.remote_ip, cookies[:user_session_token])
-      redirect_to account_profile_shipping_addresses_path and return
+      redirect_to account_addresses_path and return
     end
 
     # ----------------------
@@ -196,7 +196,7 @@ class HawthorneCore::User::Profile::ShippingAddressController < HawthorneCore::A
 
     # ----------------------
 
-    @html_title = 'Update Shipping Address | My Profile'
+    @html_title = 'Update Address | Profile'
 
   end
 
@@ -219,7 +219,7 @@ class HawthorneCore::User::Profile::ShippingAddressController < HawthorneCore::A
     # log it, and redirect the user to view their shipping addresses
     unless shipping_address
       HawthorneCore::UserAction::Log.shipping_address_failure(session[:user_id], HawthorneCore::UserAction::FailureReason.unexpected_state, { message: 'Users shipping address not found', token: attrs[:token] }, request.remote_ip, cookies[:user_session_token])
-      redirect_to account_profile_shipping_addresses_path and return
+      redirect_to account_addresses_path and return
     end
 
     # ----------------------
@@ -244,7 +244,7 @@ class HawthorneCore::User::Profile::ShippingAddressController < HawthorneCore::A
     # ----------------------
 
     # redirect the user to view their shipping addresses
-    redirect_to account_profile_shipping_addresses_path
+    redirect_to account_addresses_path
 
   end
 
@@ -267,7 +267,7 @@ class HawthorneCore::User::Profile::ShippingAddressController < HawthorneCore::A
     # log it, and redirect the user to view their shipping addresses
     unless shipping_address
       HawthorneCore::UserAction::Log.shipping_address_failure(session[:user_id], HawthorneCore::UserAction::FailureReason.unexpected_state, { message: 'Users shipping address not found', token: token }, request.remote_ip, cookies[:user_session_token])
-      redirect_to account_profile_shipping_addresses_path and return
+      redirect_to account_addresses_path and return
     end
 
     # soft delete the record
@@ -279,7 +279,7 @@ class HawthorneCore::User::Profile::ShippingAddressController < HawthorneCore::A
     # ----------------------
 
     # redirect the user to view their shipping addresses
-    redirect_to account_profile_shipping_addresses_path
+    redirect_to account_addresses_path
 
   end
 
