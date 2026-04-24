@@ -18,9 +18,6 @@ class HawthorneCore::User::Profile::PaymentMethodsController < HawthorneCore::Ac
     # find the users active stripe credit cards
     @active_credit_cards = @user.active_stripe_credit_cards
 
-    # redirect the user to add a card if they do not have any active credit cards
-    redirect_to account_profile_new_payment_method_path and return unless @active_credit_cards.any?
-
     # ----------------------
 
     @html_title = 'Payment Methods | My Profile'

@@ -26,10 +26,12 @@ class HawthorneCore::UserPaymentMethod < HawthorneCore::ActiveRecordBaseApp
   # -----------------------------------------------------------------------------
 
   # get the number of active credit cards for a user
-  def self.nbr_active_credit_cards(user_id) = active.where(user_id: user_id).count
+  def self.nbr_active_credit_cards(user_id) = active.where(user_id: user_id, payment_method_type: 'CREDIT_CARD').count
 
   # determine if the user has exactly one active credit card
   def self.one_active_credit_card?(user_id) = (nbr_active_credit_cards(user_id) == 1)
+
+  def self.only_active_credit_card(user_id) = one_active_credit_card?(user_id) ? active.where(user_id: user_id).first : nil
 
   # -----------------------------------------------------------------------------
 

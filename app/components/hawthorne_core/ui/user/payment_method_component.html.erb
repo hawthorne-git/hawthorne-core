@@ -21,10 +21,11 @@
                   data: { turbo_method: :patch },
                   class: "text-brand-dark no-underline hover:underline" %>
     <% end %>
-    <%= link_to 'Remove',
-                helpers.account_profile_remove_payment_method_path(token: @payment_method[:token]),
-                data: { turbo_method: :delete, turbo_confirm: 'Remove this credit card?' },
-                class: "text-brand-dark no-underline hover:underline" %>
+    <%= button_to 'Remove',
+                  helpers.account_profile_delete_payment_method_path(token: @payment_method[:token]),
+                  method: :delete,
+                  data: { turbo_confirm: 'Remove this credit card?' },
+                  class: "text-brand-dark no-underline hover:underline bg-transparent border-0 p-0 cursor-pointer text-sm" %>
   </div>
 
 </div>
