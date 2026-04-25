@@ -38,15 +38,15 @@ HawthorneCore::Engine.routes.draw do
 
   # phone number
   get 'account/profile/phone-number', to: 'user/profile/phone_number#show'
-  post 'account/profile/phone-number-verify', to: 'user/profile/phone_number#verify'
-  get 'account/profile/phone-number-verify-pin', to: 'user/profile/phone_number#verify_pin_show'
-  post 'account/profile/phone-number-verify-pin', to: 'user/profile/phone_number#verify_pin'
-  get 'account/profile/phone-number-resend-pin', to: 'user/profile/phone_number#resend_pin'
+  post 'account/profile/verify-phone-number', to: 'user/profile/phone_number#verify'
+  get 'account/profile/verify-phone-number-pin', to: 'user/profile/phone_number#verify_pin_show'
+  post 'account/profile/verify-phone-number-pin', to: 'user/profile/phone_number#verify_pin'
+  get 'account/profile/resend-phone-number-pin', to: 'user/profile/phone_number#resend_pin'
   delete 'account/profile/remove-phone-number', to: 'user/profile/phone_number#delete'
 
   # sign-in pin default delivery
-  get 'account/profile/sign-in-pin-default-delivery', to: 'user/profile#sign_in_pin_default_delivery_show'
-  post 'account/profile/sign-in-pin-default-delivery', to: 'user/profile#sign_in_pin_default_delivery_update'
+  get 'account/profile/sign-in-code-default-delivery', to: 'user/profile#sign_in_pin_default_delivery_show'
+  post 'account/profile/sign-in-code-default-delivery', to: 'user/profile#sign_in_pin_default_delivery_update'
 
   # delete account
   get 'account/profile/delete-account', to: 'user/profile/delete_account#show'

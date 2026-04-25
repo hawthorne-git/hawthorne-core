@@ -17,7 +17,7 @@
 
   sign_in_pin_default_delivery_label = 'Sign-In Code delivery'
   sign_in_pin_default_delivery_value = @user.sign_in_pin_default_delivery_pretty_print
-  sign_in_pin_default_delivery_url = phone_number_value.present? ? account_profile_sign_in_pin_default_delivery_path : nil
+  sign_in_pin_default_delivery_url = phone_number_value.present? ? account_profile_sign_in_code_default_delivery_path : nil
 %>
 
 <%= render HawthorneCore::UI::User::Layout::ProfileComponent.new(user: @user, title: title) do %>
