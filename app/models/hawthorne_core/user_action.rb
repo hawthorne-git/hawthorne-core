@@ -10,8 +10,6 @@ class HawthorneCore::UserAction < HawthorneCore::ActiveRecordBaseLog
 
   def id = user_action_id
 
-  def self.create_record(**attrs) = create!(attrs)
-
   # -----------------------------------------------------------------------------
 
 end

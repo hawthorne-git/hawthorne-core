@@ -12,7 +12,7 @@
   resend_pin_message = "Didn't get the PIN? #{link_to 'Resend it', account_profile_phone_number_resend_pin_path, data: { turbo: :false }}"
 %>
 
-<%= render HawthorneCore::UI::User::Layout::MyProfileComponent.new(user: @user, title: title) do %>
+<%= render HawthorneCore::UI::User::Layout::ProfileComponent.new(user: @user, title: title) do %>
   <%= render HawthorneCore::UI::Form::FormWrapperComponent.new(instruction_message: instruction_message) do %>
     <%= form_with url: form_url do |f| %>
       <%= render HawthorneCore::UI::Form::Attr::PinTextFieldComponent.new(form: f) %>

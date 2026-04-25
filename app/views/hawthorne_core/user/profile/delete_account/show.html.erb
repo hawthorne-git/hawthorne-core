@@ -10,7 +10,7 @@
   submit_button_text = 'Send Verification PIN'
 %>
 
-<%= render HawthorneCore::UI::User::Layout::MyProfileComponent.new(user: @user, title: title) do %>
+<%= render HawthorneCore::UI::User::Layout::ProfileComponent.new(user: @user, title: title) do %>
   <%= render HawthorneCore::UI::Form::FormWrapperComponent.new(instruction_message: instruction_message) do %>
     <%= form_with url: form_url do |f| %>
       <%= render HawthorneCore::UI::Form::SubmitButtonComponent.new(form: f, text: submit_button_text) %>

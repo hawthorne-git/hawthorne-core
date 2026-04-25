@@ -6,7 +6,7 @@
 
 <script src="https://js.stripe.com/v3/"></script>
 
-<%= render HawthorneCore::UI::User::Layout::PaymentMethodsComponent.new(user: @user, title: title) do %>
+<%= render HawthorneCore::UI::User::Layout::PaymentsComponent.new(user: @user, title: title) do %>
 
   <form id="payment-form" data-client-secret="<%= @stripe_setup_intent_client_secret %>" class="mt-6 max-w-md">
 

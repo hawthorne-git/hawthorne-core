@@ -12,7 +12,7 @@
   submit_button_text =  "#{@full_name.blank? ? 'Add' : 'Update'} Full Name"
 %>
 
-<%= render HawthorneCore::UI::User::Layout::MyProfileComponent.new(user: @user, title: title) do %>
+<%= render HawthorneCore::UI::User::Layout::ProfileComponent.new(user: @user, title: title) do %>
   <%= render HawthorneCore::UI::Form::FormWrapperComponent.new do %>
     <%= form_with url: form_url, method: :post do |f| %>
       <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :full_name, label: full_name_label, value: full_name_value, required: true, autofocus: full_name_autofocus) %>

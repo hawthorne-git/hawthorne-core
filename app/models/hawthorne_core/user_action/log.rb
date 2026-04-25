@@ -93,13 +93,7 @@ module HawthorneCore::UserAction::Log
 
   # ----------------------------------------------------------------------------- Profile
 
-  def self.update_profile(user_id, note, ip_address, user_session_token)
-    success(user_id, action(:profile_updated), note, ip_address, user_session_token)
-  end
-
-  def self.update_profile_failure(user_id, failure_reason, note, ip_address, user_session_token)
-    failure(user_id, action(:profile_updated), failure_reason, note, ip_address, user_session_token)
-  end
+  def self.update_profile(**attrs) = success(**attrs, action: action(:profile_updated))
 
   # ------------------------
 
@@ -225,19 +219,15 @@ module HawthorneCore::UserAction::Log
   # ----------------------------------------------------------------------------- Core Logger
   # -----------------------------------------------------------------------------
 
-  def self.log(user_id, action, success, failure_reason, note, ip_address, user_session_token)
-    HawthorneCore::User::LogActionJob.perform_later(user_id, action, success, failure_reason, note, ip_address, user_session_token)
-  end
+  def self.log(**attrs) = HawthorneCore::User::LogActionJob.perform_later(**attrs)
 
   # ------------------------
 
-  def self.success(user_id, action, note, ip_address, user_session_token)
-    log(user_id, action, true, nil, note, ip_address, user_session_token)
-  end
+  def self.success_failure(failure_reason: nil, **attrs) = log(**attrs, failure_reason:, **HawthorneCore::RequestContext.get)
 
-  def self.failure(user_id, action, failure_reason, note, ip_address, user_session_token)
-    log(user_id, action, false, failure_reason, note, ip_address, user_session_token)
-  end
+  def self.success(**attrs) = success_failure(**attrs, success: true)
+
+  def self.failure(**attrs) = success_failure(**attrs, success: false)
 
   # ------------------------
 

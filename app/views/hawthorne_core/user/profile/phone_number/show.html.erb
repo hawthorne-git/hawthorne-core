@@ -17,7 +17,7 @@
   us_only_message = "Currently, we only support US phone numbers. International support is coming soon."
 %>
 
-<%= render HawthorneCore::UI::User::Layout::MyProfileComponent.new(user: @user, title: title) do %>
+<%= render HawthorneCore::UI::User::Layout::ProfileComponent.new(user: @user, title: title) do %>
   <%= render HawthorneCore::UI::Form::FormWrapperComponent.new(instruction_message: instruction_message) do %>
     <%= form_with url: form_url do |f| %>
       <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :current_phone_number, label: current_phone_number_label, value: current_phone_number_value, disabled: true, required: true) if @current_phone_number.present? %>

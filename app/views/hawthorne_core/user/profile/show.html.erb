@@ -15,12 +15,12 @@
   phone_number_value = HawthorneCore::Helpers::PhoneNumber.us_format(@user.phone_number)
   phone_number_url = account_profile_phone_number_path
 
-  sign_in_pin_default_delivery_label = 'Sign-In PIN delivery'
+  sign_in_pin_default_delivery_label = 'Sign-In Code delivery'
   sign_in_pin_default_delivery_value = @user.sign_in_pin_default_delivery_pretty_print
   sign_in_pin_default_delivery_url = phone_number_value.present? ? account_profile_sign_in_pin_default_delivery_path : nil
 %>
 
-<%= render HawthorneCore::UI::User::Layout::MyProfileComponent.new(user: @user, title: title) do %>
+<%= render HawthorneCore::UI::User::Layout::ProfileComponent.new(user: @user, title: title) do %>
   <%= render HawthorneCore::UI::User::ProfileAttrComponent.new(label: full_name_label, value: full_name_value, url: full_name_url) %>
   <%= render HawthorneCore::UI::User::ProfileAttrComponent.new(label: email_address_label, value: email_address_value, url: email_address_url) %>
   <%= render HawthorneCore::UI::User::ProfileAttrComponent.new(label: phone_number_label, value: phone_number_value, url: phone_number_url) %>

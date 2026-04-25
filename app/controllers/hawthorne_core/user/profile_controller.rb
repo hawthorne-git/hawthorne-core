@@ -21,7 +21,7 @@ class HawthorneCore::User::ProfileController < HawthorneCore::AccountApplication
 
   # -----------------------------------------------------------------------------
 
-  # show the page for the user to update their full name
+  # show the page for the user to add / update their full name
   def full_name_show
 
     # find the users full name
@@ -35,7 +35,7 @@ class HawthorneCore::User::ProfileController < HawthorneCore::AccountApplication
 
   # ----------------------
 
-  # update the users full name
+  # add / update the users full name
   def full_name_update
 
     # get the request attributes
@@ -51,7 +51,7 @@ class HawthorneCore::User::ProfileController < HawthorneCore::AccountApplication
 
     # ----------------------
 
-    # temporarily capture the old and new full name values, for logging
+    # temporarily capture the old and new values, for logging
     old_full_name = user.full_name
     new_full_name = full_name
 
@@ -59,7 +59,7 @@ class HawthorneCore::User::ProfileController < HawthorneCore::AccountApplication
     user.update_columns(full_name: new_full_name)
 
     # log it
-    HawthorneCore::UserAction::Log.update_profile(user.id, { old_full_name: old_full_name, new_full_name: new_full_name }, request.remote_ip, cookies[:user_session_token])
+    HawthorneCore::UserAction::Log.update_profile(note: { old_full_name: old_full_name, new_full_name: new_full_name })
 
     # ----------------------
 
@@ -78,7 +78,7 @@ class HawthorneCore::User::ProfileController < HawthorneCore::AccountApplication
 
     # ----------------------
 
-    @html_title = 'Sign-In PIN Delivery | Profile'
+    @html_title = 'Sign-In Code Delivery | Profile'
 
   end
 
@@ -100,15 +100,14 @@ class HawthorneCore::User::ProfileController < HawthorneCore::AccountApplication
 
     # ----------------------
 
+    sign_in_pin_default_delivery = 'sdsfd'
+
     # in the unexpected case where the selected pin delivery method is not an expected value - log it, return back to their profile
-    unless HawthorneCore::User::SIGN_IN_PIN_DELIVERY_METHODS.include?(sign_in_pin_default_delivery)
-      HawthorneCore::UserAction::Log.update_profile_failure(user.id, HawthorneCore::UserAction::FailureReason.unexpected_state, { controller_action: 'sign_in_pin_default_delivery_update', message: 'Unexpected pin delivery method', pin_delivery_method: sign_in_pin_default_delivery }, request.remote_ip, cookies[:user_session_token])
-      redirect_to account_profile_path and return
-    end
+    redirect_to account_profile_path and return unless HawthorneCore::User::SIGN_IN_PIN_DELIVERY_METHODS.include?(sign_in_pin_default_delivery)
 
     # ----------------------
 
-    # temporarily capture the old and new sign-in pin default delivery values, for logging
+    # temporarily capture the old and new values, for logging
     old_sign_in_pin_default_delivery = user.sign_in_pin_default_delivery
     new_sign_in_pin_default_delivery = sign_in_pin_default_delivery
 

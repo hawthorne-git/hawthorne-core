@@ -164,7 +164,7 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Accou
 
     # the pin is verified!
 
-    # temporarily capture the old and new phone numbers, for logging
+    # temporarily capture the old and new values, for logging
     old_phone_number = user.phone_number
     new_phone_number = user_site.new_phone_number
 
@@ -196,7 +196,7 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Accou
 
     # ----------------------
 
-    # temporarily capture the old phone numbers, for logging
+    # temporarily capture the old value, for logging
     old_phone_number = user.phone_number
 
     # clear the users phone number

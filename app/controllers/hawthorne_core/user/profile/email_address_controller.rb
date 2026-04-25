@@ -171,7 +171,7 @@ class HawthorneCore::User::Profile::EmailAddressController < HawthorneCore::Acco
 
     # the pin is verified!
 
-    # temporarily capture the old and new email addresses, for logging
+    # temporarily capture the old and new values, for logging
     old_email_address = user.email_address
     new_email_address = user_site.new_email_address
 
