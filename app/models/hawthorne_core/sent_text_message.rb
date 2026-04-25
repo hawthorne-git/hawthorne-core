@@ -10,8 +10,6 @@ class HawthorneCore::SentTextMessage < HawthorneCore::ActiveRecordBaseLog
 
   def id = sent_text_message_id
 
-  def self.create_record(**attrs) = create!(attrs)
-
   # -----------------------------------------------------------------------------
 
 end

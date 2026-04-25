@@ -3,13 +3,13 @@
 <%
   form_url = account_profile_phone_number_verify_pin_path
 
-  title = 'Verify your PIN'
+  title = 'Verify your code'
 
-  instruction_message = "Enter the PIN we sent to #{HawthorneCore::Helpers::PhoneNumber.us_format(@new_phone_number)}"
+  instruction_message = "Enter the code we sent to #{HawthorneCore::Helpers::PhoneNumber.us_format(phone_number: @new_phone_number)}"
 
   submit_button_text = "Verify and #{@current_phone_number.blank? ? 'Add' : 'Update'} Phone Number"
 
-  resend_pin_message = "Didn't get the PIN? #{link_to 'Resend it', account_profile_phone_number_resend_pin_path, data: { turbo: :false }}"
+  resend_pin_message = "Didn't get the code? #{link_to 'Resend it', account_profile_phone_number_resend_pin_path, data: { turbo: :false }}"
 %>
 
 <%= render HawthorneCore::UI::User::Layout::ProfileComponent.new(user: @user, title: title) do %>

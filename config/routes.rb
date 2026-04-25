@@ -42,7 +42,7 @@ HawthorneCore::Engine.routes.draw do
   get 'account/profile/phone-number-verify-pin', to: 'user/profile/phone_number#verify_pin_show'
   post 'account/profile/phone-number-verify-pin', to: 'user/profile/phone_number#verify_pin'
   get 'account/profile/phone-number-resend-pin', to: 'user/profile/phone_number#resend_pin'
-  delete 'account/profile/phone-number-clear', to: 'user/profile/phone_number#clear'
+  delete 'account/profile/remove-phone-number', to: 'user/profile/phone_number#delete'
 
   # sign-in pin default delivery
   get 'account/profile/sign-in-pin-default-delivery', to: 'user/profile#sign_in_pin_default_delivery_show'

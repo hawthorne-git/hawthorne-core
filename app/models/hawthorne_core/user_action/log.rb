@@ -63,57 +63,33 @@ module HawthorneCore::UserAction::Log
     success_admin(user_id, action(:email_address_verified), note)
   end
 
-  # ----------------------------------------------------------------------------- Email (Update)
+  # ----------------------------------------------------------------------------- Email Attrs (Update)
 
-  def self.new_email_address_attrs_cleared(user_id)
-    success_admin(user_id, action(:email_address_update_attrs_cleared), nil)
-  end
+  def self.new_email_address_attrs_cleared(**attrs) = success_admin(**attrs, action: action(:email_address_update_attrs_cleared))
 
-  def self.new_email_address_attrs_refreshed(user_id, note)
-    success_admin(user_id, action(:email_address_update_attrs_refreshed), note)
-  end
+  def self.new_email_address_attrs_refreshed(**attrs) = success_admin(**attrs, action: action(:email_address_update_attrs_refreshed))
 
-  def self.new_email_address_attrs_set(user_id, note)
-    success_admin(user_id, action(:email_address_update_attrs_set), note)
-  end
+  def self.new_email_address_attrs_set(**attrs) = success_admin(**attrs, action: action(:email_address_update_attrs_set))
 
-  # ----------------------------------------------------------------------------- Phone (Update)
+  # ----------------------------------------------------------------------------- Phone Attrs (Update)
 
-  def self.new_phone_number_attrs_cleared(user_id)
-    success_admin(user_id, action(:phone_number_update_attrs_cleared), nil)
-  end
+  def self.new_phone_number_attrs_cleared(**attrs) = success_admin(**attrs, action: action(:phone_number_update_attrs_cleared))
 
-  def self.new_phone_number_attrs_refreshed(user_id, note)
-    success_admin(user_id, action(:phone_number_update_attrs_refreshed), note)
-  end
+  def self.new_phone_number_attrs_refreshed(**attrs) = success_admin(**attrs, action: action(:phone_number_update_attrs_refreshed))
 
-  def self.new_phone_number_attrs_set(user_id, note)
-    success_admin(user_id, action(:phone_number_update_attrs_set), note)
-  end
+  def self.new_phone_number_attrs_set(**attrs) = success_admin(**attrs, action: action(:phone_number_update_attrs_set))
 
   # ----------------------------------------------------------------------------- Profile
 
   def self.update_profile(**attrs) = success(**attrs, action: action(:profile_updated))
 
-  # ------------------------
+  def self.update_profile_email_address(**attrs) = success(**attrs, action: action(:profile_email_address_updated))
 
-  def self.update_profile_email_address(user_id, note, ip_address, user_session_token)
-    success(user_id, action(:profile_email_address_updated), note, ip_address, user_session_token)
-  end
+  def self.update_profile_email_address_failure(**attrs) = failure(**attrs, action: action(:profile_email_address_updated))
 
-  def self.update_profile_email_address_failure(user_id, failure_reason, note, ip_address, user_session_token)
-    failure(user_id, action(:profile_email_address_updated), failure_reason, note, ip_address, user_session_token)
-  end
+  def self.update_profile_phone_number(**attrs) = success(**attrs, action: action(:profile_phone_number_updated))
 
-  # ------------------------
-
-  def self.update_profile_phone_number(user_id, note, ip_address, user_session_token)
-    success(user_id, action(:profile_phone_number_updated), note, ip_address, user_session_token)
-  end
-
-  def self.update_profile_phone_number_failure(user_id, failure_reason, note, ip_address, user_session_token)
-    failure(user_id, action(:profile_phone_number_updated), failure_reason, note, ip_address, user_session_token)
-  end
+  def self.update_profile_phone_number_failure(**attrs) = failure(**attrs, action: action(:profile_phone_number_updated))
 
   # ----------------------------------------------------------------------------- Sign-In
 
@@ -207,13 +183,9 @@ module HawthorneCore::UserAction::Log
 
   # ----------------------------------------------------------------------------- Text Message
 
-  def self.text_message_sent(user_id, note)
-    success_admin(user_id, action(:text_message_sent), note)
-  end
+  def self.text_message_sent(**attrs) = success_admin(**attrs, action: action(:text_message_sent))
 
-  def self.text_message_sent_failure(user_id, failure_reason, note)
-    failure_admin(user_id, action(:text_message_sent), failure_reason, note)
-  end
+  def self.text_message_sent_failure(**attrs) = failure_admin(**attrs, action: action(:text_message_sent))
 
   # -----------------------------------------------------------------------------
   # ----------------------------------------------------------------------------- Core Logger
@@ -231,13 +203,14 @@ module HawthorneCore::UserAction::Log
 
   # ------------------------
 
-  def self.success_admin(user_id, action, note)
-    log(user_id, action, true, nil, note, 'ADMIN', 'ADMIN')
+  def self.success_failure_admin(failure_reason: nil, **attrs)
+    user_id = HawthorneCore::RequestContext.get[:user_id].presence || attrs[:user_id]
+    log(**attrs, failure_reason:, user_id: user_id, ip_address: 'ADMIN', user_session_token: 'ADMIN')
   end
 
-  def self.failure_admin(user_id, action, failure_reason, note)
-    log(user_id, action, false, failure_reason, note, 'ADMIN', 'ADMIN')
-  end
+  def self.success_admin(**attrs) = success_failure_admin(**attrs, success: true)
+
+  def self.failure_admin(**attrs) = success_failure_admin(**attrs, success: false)
 
   # ----------------------------------------------------------------------------- Action Lookup
 

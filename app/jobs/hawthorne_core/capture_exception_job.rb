@@ -1,17 +1,10 @@
 # v3.0
 
-# capture an exception
+# log an exception
 class HawthorneCore::CaptureExceptionJob < HawthorneCore::ApplicationJob
 
-  queue_as :critical
+  queue_as :default
 
-  def perform(code_location, exception_class, exception_message, note)
-    HawthorneCore::CapturedException.create_record(
-      code_location: code_location,
-      exception_class: exception_class,
-      exception_message: exception_message,
-      note: note
-    )
-  end
+  def perform(**attrs) = HawthorneCore::CapturedException.create!(**attrs)
 
 end

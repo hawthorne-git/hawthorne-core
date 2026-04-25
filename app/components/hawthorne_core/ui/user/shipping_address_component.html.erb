@@ -23,7 +23,7 @@
 
   <%# Phone %>
   <% if @shipping_address.phone_number.present? %>
-    <p class="text-sm text-gray-600 mt-1"><%= HawthorneCore::Helpers::PhoneNumber.us_format(@shipping_address.phone_number) %></p>
+    <p class="text-sm text-gray-600 mt-1"><%= HawthorneCore::Helpers::PhoneNumber.us_format(phone_number: @shipping_address.phone_number) %></p>
   <% end %>
 
   <%# Actions %>

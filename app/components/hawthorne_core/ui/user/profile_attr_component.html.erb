@@ -15,7 +15,7 @@
     <% if @url %>
       <%= link_to @action, @url, data: { turbo: :false }, class: "text-sm text-brand-dark no-underline hover:underline shrink-0 bg-transparent border-none cursor-pointer p-0" %>
       <% if (@label.downcase == 'phone number') && (@action.downcase == 'update') %>
-        / <%= link_to 'Remove', helpers.account_profile_phone_number_clear_path, data: { turbo_method: :delete, turbo_confirm: 'Remove your phone number?' }, class: "text-sm text-brand-dark no-underline hover:underline shrink-0 bg-transparent border-none cursor-pointer p-0" %>
+        / <%= link_to 'Remove', helpers.account_profile_remove_phone_number_path, data: { turbo_method: :delete, turbo_confirm: 'Remove your phone number?' }, class: "text-sm text-brand-dark no-underline hover:underline shrink-0 bg-transparent border-none cursor-pointer p-0" %>
       <% end %>
     <% end %>
   </div>

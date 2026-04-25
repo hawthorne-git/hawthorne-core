@@ -57,7 +57,7 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
     # set the users shipping address defaults ... add in their name / phone number
     @shipping_address = HawthorneCore::UserShippingAddress.new
     @shipping_address.full_name = @user.full_name
-    @shipping_address.phone_number = HawthorneCore::Helpers::PhoneNumber.us_format(@user.phone_number)
+    @shipping_address.phone_number = HawthorneCore::Helpers::PhoneNumber.us_format(phone_number: @user.phone_number)
 
     # ----------------------
 

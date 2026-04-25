@@ -5,14 +5,14 @@
 
   title = "#{@user.phone_number.blank? ? 'Add' : 'Update'} phone number"
 
-  instruction_message = "Use your phone number to receive a PIN at sign-in"
+  instruction_message = "Use your phone number to receive a sign-in code"
 
   current_phone_number_label = 'Current phone number'
-  current_phone_number_value = HawthorneCore::Helpers::PhoneNumber.us_format(@user.phone_number)
+  current_phone_number_value = HawthorneCore::Helpers::PhoneNumber.us_format(phone_number: @user.phone_number)
 
   new_phone_number_label = 'Phone number'
 
-  submit_button_text = 'Send Verification PIN'
+  submit_button_text = 'Send Verification Code'
 
   us_only_message = "Currently, we only support US phone numbers. International support is coming soon."
 %>

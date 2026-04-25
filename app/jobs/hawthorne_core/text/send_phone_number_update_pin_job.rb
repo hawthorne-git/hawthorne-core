@@ -7,7 +7,7 @@ class HawthorneCore::Text::SendPhoneNumberUpdatePinJob < HawthorneCore::Applicat
 
   # ----------------------------------------------------------------
 
-  def perform(user_id)
+  def perform(user_id:)
 
     # for user action logs, set the text message type
     type = HawthorneCore::Services::TwilioTextSvc::PHONE_NUMBER_UPDATE_PIN
@@ -28,12 +28,12 @@ class HawthorneCore::Text::SendPhoneNumberUpdatePinJob < HawthorneCore::Applicat
 
     # exit if a text message with this pin was recently sent to the user
     if user_site.new_phone_number_pin_recently_sent?
-      HawthorneCore::UserAction::Log.text_message_sent_failure(user.id, HawthorneCore::UserAction::FailureReason.text_message_recently_sent, { type: type, new_phone_number: user_site.new_phone_number, new_phone_number_pin: user_site.new_phone_number_pin })
+      HawthorneCore::UserAction::Log.text_message_sent_failure(user_id: user.id, failure_reason: HawthorneCore::UserAction::FailureReason.text_message_recently_sent, note: { type: type, new_phone_number: user_site.new_phone_number, new_phone_number_pin: user_site.new_phone_number_pin })
       return
     end
 
     # the pin was not recently sent, send the text message
-    HawthorneCore::Services::TwilioTextSvc.send_phone_number_update_pin(user.id, user_site.new_phone_number, user_site.new_phone_number_pin_formatted)
+    HawthorneCore::Services::TwilioTextSvc.send_phone_number_update_pin(user_id: user.id, phone_number: user_site.new_phone_number, pin_formatted: user_site.new_phone_number_pin_formatted)
 
   end
 

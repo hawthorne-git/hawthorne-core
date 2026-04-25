@@ -53,15 +53,15 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Accou
 
     # verify that the new phone number does not have a syntax error
     # if invalid - log it, return back and display an error message
-    unless HawthorneCore::Helpers::PhoneNumber.us_syntax_valid?(new_phone_number)
-      HawthorneCore::UserAction::Log.update_profile_phone_number_failure(user.id, HawthorneCore::UserAction::FailureReason.phone_number_syntax_error, { new_phone_number: new_phone_number }, request.remote_ip, cookies[:user_session_token])
+    unless HawthorneCore::Helpers::PhoneNumber.us_syntax_valid?(phone_number: new_phone_number)
+      HawthorneCore::UserAction::Log.update_profile_phone_number_failure(failure_reason: HawthorneCore::UserAction::FailureReason.phone_number_syntax_error, note: { new_phone_number: new_phone_number })
       render turbo_stream: turbo_stream.update('form_errors', partial: 'new_phone_number_failed', locals: { syntax_error: true }) and return
     end
 
     # verify that the new phone number does not match the current phone number
     # if identical - log it, return back and display an error message
-    if HawthorneCore::Helpers::PhoneNumber.match?(user.phone_number, new_phone_number)
-      HawthorneCore::UserAction::Log.update_profile_phone_number_failure(session[:user_id], HawthorneCore::UserAction::FailureReason.phone_number_identical, { current_phone_number: user.phone_number, new_phone_number: new_phone_number }, request.remote_ip, cookies[:user_session_token])
+    if HawthorneCore::Helpers::PhoneNumber.match?(phone_number: user.phone_number, phone_number_to_match: new_phone_number)
+      HawthorneCore::UserAction::Log.update_profile_phone_number_failure(failure_reason: HawthorneCore::UserAction::FailureReason.phone_number_identical, note: { current_phone_number: user.phone_number, new_phone_number: new_phone_number })
       render turbo_stream: turbo_stream.update('form_errors', partial: 'new_phone_number_failed', locals: { identical: true }) and return
     end
 
@@ -71,10 +71,10 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Accou
 
     # set the users new phone number attributes
     # the user needs to verify their new phone number, via a pin, prior to updating their profile in the database
-    user_site.set_new_phone_number_attrs(new_phone_number)
+    user_site.set_new_phone_number_attrs(new_phone_number: new_phone_number)
 
     # send the user a text message with a pin to verify their new phone number
-    HawthorneCore::Text::SendPhoneNumberUpdatePinJob.perform_later(user.id)
+    HawthorneCore::Text::SendPhoneNumberUpdatePinJob.perform_later(user_id: user.id)
 
     # ----------------------
 
@@ -106,7 +106,7 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Accou
 
   # resend the user their pin, to update their phone number
   def resend_pin
-    HawthorneCore::Text::SendPhoneNumberUpdatePinJob.perform_later(session[:user_id])
+    HawthorneCore::Text::SendPhoneNumberUpdatePinJob.perform_later(user_id: session[:user_id])
     redirect_to account_profile_phone_number_verify_pin_path
   end
 
@@ -122,7 +122,7 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Accou
 
     # find the user
     user = HawthorneCore::User.
-      select(:user_id, :phone_number).
+      select(:user_id, :phone_number, :sign_in_pin_default_delivery).
       active.
       find_by(user_id: session[:user_id])
 
@@ -148,7 +148,7 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Accou
     # if the entered pin does not match - log it, increment the number of failed attempts
     # if the max number of failed attempts reached ... refresh the users pin, resend
     # lastly, when the entered pin does not match, return back and display an error message
-    unless user_site.new_phone_number_pin_match?(pin)
+    unless user_site.new_phone_number_pin_match?(pin_to_match: pin)
       HawthorneCore::UserAction::Log.update_profile_phone_number_failure(user.id, HawthorneCore::UserAction::FailureReason.pin_not_match, { entered_pin: pin, pin_to_match: user_site.new_phone_number_pin }, request.remote_ip, cookies[:user_session_token])
       user_site.add_new_phone_number_pin_failed_attempt
       if user_site.new_phone_number_pin_max_failed_attempts_reached?
@@ -164,17 +164,10 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Accou
 
     # the pin is verified!
 
-    # temporarily capture the old and new values, for logging
-    old_phone_number = user.phone_number
-    new_phone_number = user_site.new_phone_number
-
-    # update the users phone number and set this as default delivery
-    # then clear the users new phone number attributes, for site
-    user.update_columns(phone_number: new_phone_number, sign_in_pin_default_delivery: HawthorneCore::User::PIN_VIA_PHONE)
+    # set the users phone number,
+    # then clear the users new phone number attributes - for site
+    user.update_phone_number(new_phone_number: user_site.new_phone_number)
     user_site.clear_new_phone_number_attrs
-
-    # log it
-    HawthorneCore::UserAction::Log.update_profile_phone_number(user.id, { old_phone_number: old_phone_number, new_phone_number: new_phone_number }, request.remote_ip, cookies[:user_session_token])
 
     # ----------------------
 
@@ -185,25 +178,15 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Accou
 
   # -----------------------------------------------------------------------------
 
-  # clear the users phone number
-  def clear
+  # delete the users phone number
+  def delete
 
-    # find the user
-    user = HawthorneCore::User.
-      select(:user_id, :phone_number).
+    # find the user, and remove their phone number
+    HawthorneCore::User.
+      select(:user_id, :phone_number, :sign_in_pin_default_delivery).
       active.
-      find_by(user_id: session[:user_id])
-
-    # ----------------------
-
-    # temporarily capture the old value, for logging
-    old_phone_number = user.phone_number
-
-    # clear the users phone number
-    user.clear_phone_number
-
-    # log it
-    HawthorneCore::UserAction::Log.update_profile_phone_number(user.id, { old_phone_number: old_phone_number, new_phone_number: nil }, request.remote_ip, cookies[:user_session_token])
+      find_by(user_id: session[:user_id]).
+      remove_phone_number
 
     # ----------------------
 
