@@ -73,7 +73,7 @@ module HawthorneCore::UserAuthentication
 
     # set the users id, ip address and user session token into the request context
     def set_request_context
-      HawthorneCore::RequestContext.set(user_id: session[:user_id], ip_address: request.remote_ip, user_session_token: cookies[:user_session_token])
+      HawthorneCore::RequestContext.set(user_id: session[:user_id], ip: request.remote_ip, user_session_token: cookies[:user_session_token])
     end
 
     # ----------------------

@@ -5,19 +5,19 @@
 
   title = 'Continue with email'
 
-  instruction_message = 'Enter your email address. If you already have an account, we’ll sign you in. If not, we’ll create one for you.'
+  instruction_message = 'Enter your email. If you already have an account, we’ll sign you in. If not, we’ll create one for you.'
 
-  email_address_label = 'Email'
-  email_address_value = 'charlieprezzano@gmail.com' if Rails.env.development?
+  email_label = 'Email'
+  email_value = 'charlieprezzano@gmail.com' if Rails.env.development?
 
-  submit_button_text = 'Send PIN'
+  submit_button_text = 'Send Code'
 %>
 
 <%= render HawthorneCore::UI::TitleComponent.new(text: title)  %>
 <%= render HawthorneCore::UI::Form::FormWrapperComponent.new(instruction_message: instruction_message) do %>
   <%= form_with url: form_url do |f| %>
     <%= render HawthorneCore::UI::Form::HiddenFieldComponent.new(form: f, attribute: :keep_signed_in, value: 1, required: true) %>
-    <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :email_address, label: email_address_label, value: email_address_value, required: true, maxlength: 320) %>
+    <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :email, label: email_label, value: email_value, required: true, maxlength: 320) %>
     <%= render HawthorneCore::UI::Form::SubmitButtonComponent.new(form: f, text: submit_button_text) %>
   <% end %>
 <% end %>

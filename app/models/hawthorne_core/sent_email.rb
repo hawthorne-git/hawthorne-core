@@ -10,8 +10,6 @@ class HawthorneCore::SentEmail < HawthorneCore::ActiveRecordBaseLog
 
   def id = sent_email_id
 
-  def self.create_record(**attrs) = create!(attrs)
-
   # -----------------------------------------------------------------------------
 
 end

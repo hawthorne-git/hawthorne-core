@@ -13,11 +13,11 @@ class HawthorneCore::User::CaptureSessionLocationJob < HawthorneCore::Applicatio
     # find the user session
     # return if the session is not found, or if the ip address is not set
     user_session = HawthorneCore::UserSession.find_by(user_session_id: user_session_id)
-    return if user_session&.ip_address.blank?
+    return if user_session&.ip.blank?
 
     # find the location, via the GeocoderSvc service
     # return if the location is not returned
-    location = HawthorneCore::Services::GeocoderSvc.find_location_by_ip_address(user_session.ip_address)
+    location = HawthorneCore::Services::GeocoderSvc.find_location_by_ip(ip: user_session.ip)
     return unless location
 
     # set the location into the user session

@@ -9,7 +9,7 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Accou
 
     # find the user
     @user = HawthorneCore::User.
-      select(:user_id, :email_address, :full_name, :phone_number).
+      select(:user_id, :email, :full_name, :phone_number).
       active.
       find_by(user_id: session[:user_id])
 
@@ -42,13 +42,13 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Accou
 
     # verify that the new phone number does not have a syntax error
     unless HawthorneCore::Helpers::PhoneNumber.us_syntax_valid?(phone_number: new_phone_number)
-      HawthorneCore::UserAction::Log.update_profile_phone_number_failure(failure_reason: HawthorneCore::UserAction::FailureReason.phone_number_syntax_error, note: { new_phone_number: new_phone_number })
+      HawthorneCore::UserAction::Log.update_profile_failure(failure_reason: HawthorneCore::UserAction::FailureReason.phone_number_syntax_error, note: { new_phone_number: new_phone_number })
       render turbo_stream: turbo_stream.update('form_errors', partial: 'new_phone_number_failed', locals: { syntax_error: true }) and return
     end
 
     # verify that the new phone number does not match the current phone number
     if HawthorneCore::Helpers::PhoneNumber.match?(phone_number: user.phone_number, phone_number_to_match: new_phone_number)
-      HawthorneCore::UserAction::Log.update_profile_phone_number_failure(failure_reason: HawthorneCore::UserAction::FailureReason.phone_number_identical, note: { current_phone_number: user.phone_number, new_phone_number: new_phone_number })
+      HawthorneCore::UserAction::Log.update_profile_failure(failure_reason: HawthorneCore::UserAction::FailureReason.phone_number_identical, note: { current_phone_number: user.phone_number, new_phone_number: new_phone_number })
       render turbo_stream: turbo_stream.update('form_errors', partial: 'new_phone_number_failed', locals: { identical: true }) and return
     end
 
@@ -57,25 +57,25 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Accou
     # the new phone number is valid!
 
     # set the users new phone number attributes
-    user.set_new_phone_number_attrs(new_phone_number: new_phone_number)
+    user.set_new_phone_number_attrs(new_phone_number:)
 
-    # send the user a text message with a pin to verify their new phone number
-    HawthorneCore::Text::SendPhoneNumberUpdatePinJob.perform_later(user_id: user.id)
+    # send the user a text message with a code to verify their new phone number
+    HawthorneCore::Text::SendPhoneNumberUpdateCodeJob.perform_later(user_id: user.id)
 
     # ----------------------
 
-    redirect_to account_profile_verify_phone_number_pin_path
+    redirect_to account_profile_verify_phone_number_code_path
 
   end
 
   # -----------------------------------------------------------------------------
 
-  # show the page for the user to verify their pin, to update their phone number
-  def verify_pin_show
+  # show the page for the user to verify their code, to update their phone number
+  def verify_code_show
 
     # find the user
     @user = HawthorneCore::User.
-      select(:user_id, :email_address, :full_name, :phone_number).
+      select(:user_id, :email, :full_name, :phone_number).
       active.
       find_by(user_id: session[:user_id])
 
@@ -87,65 +87,65 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Accou
 
   # -----------------------------------------------------------------------------
 
-  # resend the user their pin, to update their phone number
-  def resend_pin
-    HawthorneCore::Text::SendPhoneNumberUpdatePinJob.perform_later(user_id: session[:user_id])
-    redirect_to account_profile_verify_phone_number_pin_path
+  # resend the user their code, to update their phone number
+  def resend_code
+    HawthorneCore::Text::SendPhoneNumberUpdateCodeJob.perform_later(user_id: session[:user_id])
+    redirect_to account_profile_verify_phone_number_code_path
   end
 
   # -----------------------------------------------------------------------------
 
-  # verify the users pin, to update their phone number
-  def verify_pin
+  # verify the users code, to update their phone number
+  def verify_code
 
     # get the request attributes
-    pin = params[:pin]
+    code = params[:code]
 
     # ----------------------
 
     # find the user
     user = HawthorneCore::User.
-      select(:user_id, :phone_number, :sign_in_pin_default_delivery).
+      select(:user_id, :phone_number, :sign_in_code_default_delivery).
       active.
       find_by(user_id: session[:user_id])
 
     # find the users site record ... the new phone number attributes are specific to each site
     user_site = HawthorneCore::UserSite.
-      select(:user_site_id, :user_id, :new_phone_number, :new_phone_number_pin, :new_phone_number_pin_created_at, :new_phone_number_pin_failed_attempts_count).
+      select(:user_site_id, :user_id, :new_phone_number, :new_phone_number_code, :new_phone_number_code_created_at, :new_phone_number_code_failed_attempts_count).
       find_by(user_id: user.id, site_id: HawthorneCore::Site.this_site_id)
 
     # ----------------------
 
-    # if the pin is inactive ...
-    # refresh the pin, resend, then return back and display an error message
-    unless user_site.new_phone_number_pin_active?
-      (pin_not_set = true; failure_reason = HawthorneCore::UserAction::FailureReason.pin_not_set) unless user_site.new_phone_number_pin_set?
-      (pin_expired = true; failure_reason = HawthorneCore::UserAction::FailureReason.pin_expired) if user_site.new_phone_number_pin_expired?
-      (pin_max_failed_attempts_reached = true; failure_reason = HawthorneCore::UserAction::FailureReason.pin_max_failed_attempts_reached) if user_site.new_phone_number_pin_max_failed_attempts_reached?
-      HawthorneCore::UserAction::Log.update_profile_phone_number_failure(failure_reason: failure_reason, note: { new_phone_number_pin: user_site.new_phone_number_pin, new_phone_number_pin_created_at: user_site.new_phone_number_pin_created_at, new_phone_number_pin_failed_attempts_count: user_site.new_phone_number_pin_failed_attempts_count })
-      user_site.refresh_new_phone_number_pin_attrs_then_send_it
-      render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/verify_pin_failed', locals: { not_set: pin_not_set, expired: pin_expired, max_failed_attempts_reached: pin_max_failed_attempts_reached }) and return
+    # if the code is inactive ...
+    # refresh the code, resend, then return back and display an error message
+    unless user_site.new_phone_number_code_active?
+      (code_not_set = true; failure_reason = HawthorneCore::UserAction::FailureReason.code_not_set) unless user_site.new_phone_number_code_set?
+      (code_expired = true; failure_reason = HawthorneCore::UserAction::FailureReason.code_expired) if user_site.new_phone_number_code_expired?
+      (code_max_failed_attempts_reached = true; failure_reason = HawthorneCore::UserAction::FailureReason.code_max_failed_attempts_reached) if user_site.new_phone_number_code_max_failed_attempts_reached?
+      HawthorneCore::UserAction::Log.update_profile_failure(failure_reason: failure_reason, note: { new_phone_number_code: user_site.new_phone_number_code, new_phone_number_code_created_at: user_site.new_phone_number_code_created_at, new_phone_number_code_failed_attempts_count: user_site.new_phone_number_code_failed_attempts_count })
+      user_site.refresh_new_phone_number_code_attrs_then_send_it
+      render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/verify_code_failed', locals: { not_set: code_not_set, expired: code_expired, max_failed_attempts_reached: code_max_failed_attempts_reached }) and return
     end
 
-    # verify the pin - it is set, not expired, and has not reached the max number of failed attempts
-    # if the entered pin does not match - log it, increment the number of failed attempts
-    # if the max number of failed attempts reached ... refresh the users pin, resend
-    # lastly, when the entered pin does not match, return back and display an error message
-    unless user_site.new_phone_number_pin_match?(pin_to_match: pin)
-      HawthorneCore::UserAction::Log.update_profile_phone_number_failure(failure_reason: HawthorneCore::UserAction::FailureReason.pin_not_match, note: { entered_pin: pin, pin_to_match: user_site.new_phone_number_pin })
-      user_site.add_new_phone_number_pin_failed_attempt
-      if user_site.new_phone_number_pin_max_failed_attempts_reached?
-        pin_max_failed_attempts_reached = true
-        user_site.refresh_new_phone_number_pin_attrs_then_send_it
+    # verify the code - it is set, not expired, and has not reached the max number of failed attempts
+    # if the entered code does not match - log it, increment the number of failed attempts
+    # if the max number of failed attempts reached ... refresh the users code, resend
+    # lastly, when the entered code does not match, return back and display an error message
+    unless user_site.new_phone_number_code_match?(code_to_match: code)
+      HawthorneCore::UserAction::Log.update_profile_failure(failure_reason: HawthorneCore::UserAction::FailureReason.code_not_match, note: { action: 'VERIFY_PHONE_NUMBER', entered_code: code, code_to_match: user_site.new_phone_number_code })
+      user_site.add_new_phone_number_code_failed_attempt
+      if user_site.new_phone_number_code_max_failed_attempts_reached?
+        code_max_failed_attempts_reached = true
+        user_site.refresh_new_phone_number_code_attrs_then_send_it
       else
-        pin_not_match = true
+        code_not_match = true
       end
-      render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/verify_pin_failed', locals: { not_match: pin_not_match, max_failed_attempts_reached: pin_max_failed_attempts_reached }) and return
+      render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/verify_code_failed', locals: { not_match: code_not_match, max_failed_attempts_reached: code_max_failed_attempts_reached }) and return
     end
 
     # ----------------------
 
-    # the pin is verified!
+    # the code is verified!
 
     # update the users phone number
     user.update_phone_number(new_phone_number: user_site.new_phone_number)
@@ -164,7 +164,7 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Accou
 
     # find the user, then remove their phone number
     HawthorneCore::User.
-      select(:user_id, :phone_number, :sign_in_pin_default_delivery).
+      select(:user_id, :phone_number, :sign_in_code_default_delivery).
       active.
       find_by(user_id: session[:user_id]).
       remove_phone_number

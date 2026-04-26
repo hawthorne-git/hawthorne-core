@@ -11,26 +11,26 @@
         if (submitting) return
 
         // get the html form attribute with an input action - that triggers this event
-        // exit if the attribute is not the PIN field
-        const pinField = event.target
-        if (pinField.dataset.behavior !== 'auto-submit-6-digit') return
+        // exit if the attribute is not the code field
+        const codeField = event.target
+        if (codeField.dataset.behavior !== 'auto-submit-6-digit') return
 
-        // remove all non-digit characters from the PIN field
-        pinField.value = pinField.value.replace(/\D/g, '')
+        // remove all non-digit characters from the code field
+        codeField.value = codeField.value.replace(/\D/g, '')
 
-        // exit if the PIN field does not equal 6 digits
-        if (pinField.value.length !== 6) return
+        // exit if the code field does not equal 6 digits
+        if (codeField.value.length !== 6) return
 
         // set that we are submitting
         submitting = true
 
         // find the submit button, then disable - avoid double submit / click
         // set the button as enabled - avoid double click
-        const submitButton = pinField.form.querySelector('input[type="submit"], button[type="submit"]')
+        const submitButton = codeField.form.querySelector('input[type="submit"], button[type="submit"]')
         submitButton.disabled = true
 
         // submit the form
-        pinField.form.requestSubmit()
+        codeField.form.requestSubmit()
 
     })
 
@@ -38,8 +38,8 @@
     // set submitting to be false, and enable the submit button
     document.addEventListener("turbo:before-stream-render", () => {
         submitting = false
-        const pinField = document.querySelector('[data-behavior="auto-submit-6-digit"]')
-        pinField.form.querySelector('input[type="submit"], button[type="submit"]').disabled = false
+        const codeField = document.querySelector('[data-behavior="auto-submit-6-digit"]')
+        codeField.form.querySelector('input[type="submit"], button[type="submit"]').disabled = false
     })
 
 </script>

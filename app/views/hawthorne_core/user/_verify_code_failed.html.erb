@@ -1,0 +1,10 @@
+<%# v3.0 %>
+
+<%
+  message = 'Your code has expired, so we’ve sent you a new one' if local_assigns[:expired]
+  message = 'There have been too many unsuccessful attempts, so we’ve sent you a new code' if local_assigns[:max_failed_attempts_reached]
+  message = 'That code doesn’t match, please check for a typo and try again' if local_assigns[:not_match]
+  message = 'We couldn’t verify that code, so we sent you a new one' if local_assigns[:not_set]
+%>
+
+<%= render HawthorneCore::UI::Form::ErrorMessageComponent.new(message: message) %>

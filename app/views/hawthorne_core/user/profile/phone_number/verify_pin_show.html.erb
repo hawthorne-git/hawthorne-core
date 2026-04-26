@@ -1,7 +1,7 @@
 <%# v3.0 %>
 
 <%
-  form_url = account_profile_verify_phone_number_pin_path
+  form_url = account_profile_verify_phone_number_code_path
 
   title = 'Verify your code'
 
@@ -9,17 +9,17 @@
 
   submit_button_text = "Verify and #{@user.phone_number.blank? ? 'Add' : 'Update'} Phone Number"
 
-  resend_pin_message = "Didn't get the code? #{link_to 'Resend it', account_profile_resend_phone_number_pin_path, data: { turbo: :false }}"
+  resend_code_message = "Didn't get the code? #{link_to 'Resend it', account_profile_resend_phone_number_code_path, data: { turbo: :false }}"
 %>
 
 <%= render HawthorneCore::UI::User::Layout::ProfileComponent.new(user: @user, title: title) do %>
   <%= render HawthorneCore::UI::Form::FormWrapperComponent.new(instruction_message: instruction_message) do %>
     <%= form_with url: form_url do |f| %>
-      <%= render HawthorneCore::UI::Form::Attr::PinTextFieldComponent.new(form: f) %>
+      <%= render HawthorneCore::UI::Form::Attr::CodeTextFieldComponent.new(form: f) %>
       <%= render HawthorneCore::UI::Form::SubmitButtonComponent.new(form: f, text: submit_button_text) %>
     <% end %>
-    <%= render HawthorneCore::UI::Form::SupportMessageComponent.new(message: resend_pin_message) %>
+    <%= render HawthorneCore::UI::Form::SupportMessageComponent.new(message: resend_code_message) %>
   <% end %>
 <% end %>
 
-<%= render '/hawthorne_core/user/verify_pin_auto_submit_js' %>
+<%= render '/hawthorne_core/user/verify_code_auto_submit_js' %>

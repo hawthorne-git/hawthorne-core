@@ -5,17 +5,31 @@ class HawthorneCore::Services::TwilioTextSvc
 
   # ----------------------------------------------------------------
 
-  PHONE_NUMBER_UPDATE_PIN = 'PHONE NUMBER UPDATE PIN'.freeze
+  PHONE_NUMBER_UPDATE_CODE = 'PHONE NUMBER UPDATE CODE'.freeze
 
-  SIGN_IN_PIN = 'SIGN-IN PIN'.freeze
+  SIGN_IN_CODE = 'SIGN-IN CODE'.freeze
 
   # ----------------------------------------------------------------
 
-  # send update phone number pin
-  def self.send_phone_number_update_pin(user_id:, phone_number:, pin_formatted:) = send_text_message(text_message_type: PHONE_NUMBER_UPDATE_PIN, user_id: user_id, phone_number: phone_number, message: pin_message(pin: pin_formatted))
+  # send update phone number code
+  def self.send_phone_number_update_code(user_id:, phone_number:, code_formatted:)
+    send_text_message(
+      text_message_type: PHONE_NUMBER_UPDATE_CODE,
+      user_id: user_id,
+      phone_number: phone_number,
+      message: code_message(code: code_formatted)
+    )
+  end
 
-  # send sign-in pin
-  def self.send_sign_in_pin(user_id:, phone_number:, pin_formatted:) = send_text_message(text_message_type: SIGN_IN_PIN, user_id: user_id, phone_number: phone_number, message: sign_in_pin_message(pin: pin_formatted))
+  # send sign-in code
+  def self.send_sign_in_code(user_id:, phone_number:, code_formatted:)
+    send_text_message(
+      text_message_type: SIGN_IN_CODE,
+      user_id: user_id,
+      phone_number: phone_number,
+      message: sign_in_code_message(code: code_formatted)
+    )
+  end
 
   # ----------------------------------------------------------------
 
@@ -33,11 +47,11 @@ class HawthorneCore::Services::TwilioTextSvc
 
   # ----------------------------------------------------------------
 
-  # define the sign-in pin text message - given a pin
-  def self.sign_in_pin_message(pin:) = "#{HawthorneCore::Site.this_site_name}\n\nYour sign-in code is #{pin}"
+  # define the sign-in code text message - given a code
+  def self.sign_in_code_message(code:) = "#{HawthorneCore::Site.this_site_name}\n\nYour sign-in code is #{code}"
 
-  # define the pin text message - given a pin
-  def self.pin_message(pin:) = "#{HawthorneCore::Site.this_site_name}\n\nYour code is #{pin}."
+  # define the code text message - given a code
+  def self.code_message(code:) = "#{HawthorneCore::Site.this_site_name}\n\nYour code is #{code}."
 
   # ----------------------------------------------------------------
 
@@ -45,11 +59,15 @@ class HawthorneCore::Services::TwilioTextSvc
   def self.send_text_message(text_message_type:, user_id:, phone_number:, message:)
 
     # send the text message, via twilio
-    result = send_twilio_text_message(from_phone_number: twilio_phone_number, to_phone_number: phone_number, body: message)
+    result = send_twilio_text_message(
+      from_phone_number: twilio_phone_number,
+      to_phone_number: phone_number,
+      body: message
+    )
 
     # log the text message
     HawthorneCore::SentTextMessage.create!(
-      user_id: user_id,
+      user_id:,
       text_message_service: 'TWILIO',
       text_message_type: text_message_type,
       from_phone_number: twilio_phone_number,
@@ -65,10 +83,10 @@ class HawthorneCore::Services::TwilioTextSvc
 
     # log the user action / exception (if caught)
     if result[:success]
-      HawthorneCore::UserAction::Log.text_message_sent(user_id: user_id, note: { text_message_type: text_message_type, phone_number: phone_number, message: message, twilio_message_id: result[:sid] })
+      HawthorneCore::UserAction::Log.text_message_sent(user_id:, note: { text_message_type: text_message_type, phone_number: phone_number, message: message, twilio_message_id: result[:sid] })
     else
-      HawthorneCore::UserAction::Log.text_message_sent_failure(user_id: user_id, failure_reason: HawthorneCore::UserAction::FailureReason.exception_caught, note: { type: text_message_type, phone_number: phone_number, message: message, exception_message: result[:exception_message] })
-      HawthorneCore::CapturedException.log(code_location: 'HawthorneCore::Services::TwilioTextSvc.send_text_message', note: { type: text_message_type, user_id: user_id, phone_number: phone_number, message: message }, e: result[:exception])
+      HawthorneCore::UserAction::Log.text_message_sent_failure(user_id:, failure_reason: HawthorneCore::UserAction::FailureReason.exception_caught, note: { type: text_message_type, phone_number: phone_number, message: message, exception_message: result[:exception_message] })
+      HawthorneCore::CapturedException.log(location: 'HawthorneCore::Services::TwilioTextSvc.send_text_message', note: { type: text_message_type, user_id: user_id, phone_number: phone_number, message: message }, e: result[:exception])
     end
 
   end

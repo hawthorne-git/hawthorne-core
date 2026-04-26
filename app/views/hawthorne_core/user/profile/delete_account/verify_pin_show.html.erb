@@ -1,23 +1,23 @@
 <%# v3.0 %>
 
 <%
-  form_url = account_profile_delete_account_verify_pin_path
+  form_url = account_profile_delete_account_verify_code_path
 
   title = 'Delete your account1'
 
-  instruction_message = "<b>This action is permanent</b>. Your account will be permanently deleted and cannot be recovered.<br><br>Enter the PIN we sent to #{@user.email_address} to delete your account."
+  instruction_message = "<b>This action is permanent</b>. Your account will be permanently deleted and cannot be recovered.<br><br>Enter the code we sent to #{@user.email} to delete your account."
 
   submit_button_text = 'Delete Account'
 
-  resend_pin_message = "Didn't get the PIN? #{link_to 'Resend it', account_profile_delete_account_resend_pin_path, data: { turbo: :false }}"
+  resend_code_message = "Didn't get the code? #{link_to 'Resend it', account_profile_delete_account_resend_code_path, data: { turbo: :false }}"
 %>
 
 <%= render HawthorneCore::UI::User::Layout::ProfileComponent.new(user: @user, title: title) do %>
   <%= render HawthorneCore::UI::Form::FormWrapperComponent.new(instruction_message: instruction_message) do %>
     <%= form_with url: form_url do |f| %>
-      <%= render HawthorneCore::UI::Form::Attr::PinTextFieldComponent.new(form: f) %>
+      <%= render HawthorneCore::UI::Form::Attr::CodeTextFieldComponent.new(form: f) %>
       <%= render HawthorneCore::UI::Form::SubmitButtonComponent.new(form: f, text: submit_button_text) %>
     <% end %>
-    <%= render HawthorneCore::UI::Form::SupportMessageComponent.new(message: resend_pin_message) %>
+    <%= render HawthorneCore::UI::Form::SupportMessageComponent.new(message: resend_code_message) %>
   <% end %>
 <% end %>

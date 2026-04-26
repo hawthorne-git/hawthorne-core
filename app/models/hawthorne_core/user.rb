@@ -4,7 +4,7 @@ class HawthorneCore::User < HawthorneCore::ActiveRecordBaseApp
 
   include HawthorneCore::CanBeSoftDeleted,
           HawthorneCore::HasToken,
-          HawthorneCore::User::EmailVerification,
+          HawthorneCore::User::Email,
           HawthorneCore::User::Name,
           HawthorneCore::User::PaymentMethods,
           HawthorneCore::User::PhoneNumber,

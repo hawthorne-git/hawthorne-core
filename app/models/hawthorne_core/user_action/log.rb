@@ -4,10 +4,9 @@ module HawthorneCore::UserAction::Log
 
   # ----------------------------------------------------------------------------- Account
 
-  def self.account_created(user_id, note, ip_address, user_session_token)
-    success(user_id, action(:account_created), note, ip_address, user_session_token)
+  def self.account_created(user_id, note)
+    success(user_id, action(:account_created), note)
   end
-
 
   # ----------------------------------------------------------------------------- Account (Delete)
 
@@ -25,53 +24,43 @@ module HawthorneCore::UserAction::Log
 
   # ------------------------
 
-  def self.delete_account(user_id, ip_address, user_session_token)
-    success(user_id, action(:account_deleted), nil, ip_address, user_session_token)
+  def self.delete_account(user_id)
+    success(user_id, action(:account_deleted), nil)
   end
 
-  def self.delete_account_failure(user_id, failure_reason, note, ip_address, user_session_token)
-    failure(user_id, action(:account_deleted), failure_reason, note, ip_address, user_session_token)
+  def self.delete_account_failure(user_id, failure_reason, note)
+    failure(user_id, action(:account_deleted), failure_reason, note)
   end
 
   # ----------------------------------------------------------------------------- Credit Card
 
-  def self.add_credit_card(user_id, note, ip_address, user_session_token)
-    success(user_id, action(:credit_card_added), note, ip_address, user_session_token)
+  def self.add_credit_card(user_id, note)
+    success(user_id, action(:credit_card_added), note)
   end
 
-  def self.add_credit_card_failure(user_id, failure_reason, note, ip_address, user_session_token)
-    failure(user_id, action(:credit_card_added), failure_reason, note, ip_address, user_session_token)
+  def self.add_credit_card_failure(user_id, failure_reason, note)
+    failure(user_id, action(:credit_card_added), failure_reason, note)
   end
 
-  def self.remove_credit_card(user_id, note, ip_address, user_session_token)
-    success(user_id, action(:credit_card_removed), note, ip_address, user_session_token)
+  def self.remove_credit_card(user_id, note)
+    success(user_id, action(:credit_card_removed), note)
   end
 
   # ----------------------------------------------------------------------------- Email
 
-  def self.email_sent(user_id, note)
-    success_admin(user_id, action(:email_sent), note)
-  end
+  def self.email_sent(**attrs) = success_admin(**attrs, action: action(:email_sent))
 
-  def self.email_sent_failure(user_id, failure_reason, note)
-    failure_admin(user_id, action(:email_sent), failure_reason, note)
-  end
+  def self.email_sent_failure(**attrs) = failure_admin(**attrs, action: action(:email_sent))
 
-  # ------------------------
+  # ----------------------------------------------------------------------------- New Email Attrs
 
-  def self.email_address_verified(user_id, note)
-    success_admin(user_id, action(:email_address_verified), note)
-  end
+  def self.new_email_attrs_cleared(**attrs) = success_admin(**attrs, action: action(:email_update_attrs_cleared))
 
-  # ----------------------------------------------------------------------------- Email Attrs (Update)
+  def self.new_email_attrs_refreshed(**attrs) = success_admin(**attrs, action: action(:email_update_attrs_refreshed))
 
-  def self.new_email_address_attrs_cleared(**attrs) = success_admin(**attrs, action: action(:email_address_update_attrs_cleared))
+  def self.new_email_attrs_set(**attrs) = success_admin(**attrs, action: action(:email_update_attrs_set))
 
-  def self.new_email_address_attrs_refreshed(**attrs) = success_admin(**attrs, action: action(:email_address_update_attrs_refreshed))
-
-  def self.new_email_address_attrs_set(**attrs) = success_admin(**attrs, action: action(:email_address_update_attrs_set))
-
-  # ----------------------------------------------------------------------------- Phone Attrs (Update)
+  # ----------------------------------------------------------------------------- New Phone Number Attrs
 
   def self.new_phone_number_attrs_cleared(**attrs) = success_admin(**attrs, action: action(:phone_number_update_attrs_cleared))
 
@@ -83,13 +72,9 @@ module HawthorneCore::UserAction::Log
 
   def self.update_profile(**attrs) = success(**attrs, action: action(:profile_updated))
 
-  def self.update_profile_email_address(**attrs) = success(**attrs, action: action(:profile_email_address_updated))
+  def self.email_verified(**attrs) = success(**attrs, action: action(:email_verified)) #TODO
 
-  def self.update_profile_email_address_failure(**attrs) = failure(**attrs, action: action(:profile_email_address_updated))
-
-  def self.update_profile_phone_number(**attrs) = success(**attrs, action: action(:profile_phone_number_updated))
-
-  def self.update_profile_phone_number_failure(**attrs) = failure(**attrs, action: action(:profile_phone_number_updated))
+  def self.update_profile_failure(**attrs) = failure(**attrs, action: action(:profile_updated))
 
   # ----------------------------------------------------------------------------- Sign-In
 
@@ -97,8 +82,8 @@ module HawthorneCore::UserAction::Log
     success_admin(user_id, action(:sign_in), nil)
   end
 
-  def self.sign_in_failure(failure_reason, note, ip_address, user_session_token)
-    failure(nil, action(:sign_in), failure_reason, note, ip_address, user_session_token)
+  def self.sign_in_failure(failure_reason, note)
+    failure(nil, action(:sign_in), failure_reason, note)
   end
 
   # ------------------------
@@ -109,54 +94,54 @@ module HawthorneCore::UserAction::Log
 
   # ----------------------------------------------------------------------------- Sign-In Pin
 
-  def self.sign_in_pin_cleared(user_id)
-    success_admin(user_id, action(:sign_in_pin_cleared), nil)
+  def self.sign_in_code_cleared(user_id)
+    success_admin(user_id, action(:sign_in_code_cleared), nil)
   end
 
   # ------------------------
 
-  def self.sign_in_pin_created(user_id, note)
-    success_admin(user_id, action(:sign_in_pin_created), note)
+  def self.sign_in_code_created(user_id, note)
+    success_admin(user_id, action(:sign_in_code_created), note)
   end
 
   # ------------------------
 
-  def self.sign_in_pin_verified(user_id, ip_address, user_session_token)
-    success(user_id, action(:sign_in_pin_verified), nil, ip_address, user_session_token)
+  def self.sign_in_code_verified(user_id)
+    success(user_id, action(:sign_in_code_verified), nil)
   end
 
-  def self.sign_in_pin_verified_failure(user_id, failure_reason, note, ip_address, user_session_token)
-    failure(user_id, action(:sign_in_pin_verified), failure_reason, note, ip_address, user_session_token)
+  def self.sign_in_code_verified_failure(user_id, failure_reason, note)
+    failure(user_id, action(:sign_in_code_verified), failure_reason, note)
   end
 
   # ----------------------------------------------------------------------------- Sign-Out
 
-  def self.sign_out(user_id, ip_address, user_session_token)
-    success(user_id, action(:sign_out), nil, ip_address, user_session_token)
+  def self.sign_out(user_id)
+    success(user_id, action(:sign_out), nil)
   end
 
   # ----------------------------------------------------------------------------- Shipping Address
 
-  def self.add_shipping_address(user_id, note, ip_address, user_session_token)
-    success(user_id, action(:shipping_address_added), note, ip_address, user_session_token)
+  def self.add_shipping_address(user_id, note)
+    success(user_id, action(:shipping_address_added), note)
   end
 
   # ------------------------
 
-  def self.update_shipping_address(user_id, note, ip_address, user_session_token)
-    success(user_id, action(:shipping_address_updated), note, ip_address, user_session_token)
+  def self.update_shipping_address(user_id, note)
+    success(user_id, action(:shipping_address_updated), note)
   end
 
   # ------------------------
 
-  def self.remove_shipping_address(user_id, note, ip_address, user_session_token)
-    success(user_id, action(:shipping_address_removed), note, ip_address, user_session_token)
+  def self.remove_shipping_address(user_id, note)
+    success(user_id, action(:shipping_address_removed), note)
   end
 
   # ------------------------
 
-  def self.shipping_address_failure(user_id, failure_reason, note, ip_address, user_session_token)
-    failure(user_id, action(:shipping_address), failure_reason, note, ip_address, user_session_token)
+  def self.shipping_address_failure(user_id, failure_reason, note)
+    failure(user_id, action(:shipping_address), failure_reason, note)
   end
 
   # ----------------------------------------------------------------------------- Stripe
@@ -173,8 +158,8 @@ module HawthorneCore::UserAction::Log
     success_admin(user_id, action(:stripe_customer_created), note)
   end
 
-  def self.stripe_customer_email_address_updated(user_id, note)
-    success_admin(user_id, action(:stripe_customer_email_address_updated), note)
+  def self.stripe_customer_email_updated(user_id, note)
+    success_admin(user_id, action(:stripe_customer_email_updated), note)
   end
 
   def self.stripe_setup_intent_created(user_id, note)
@@ -205,7 +190,7 @@ module HawthorneCore::UserAction::Log
 
   def self.success_failure_admin(failure_reason: nil, **attrs)
     user_id = HawthorneCore::RequestContext.get[:user_id].presence || attrs[:user_id]
-    log(**attrs, failure_reason:, user_id: user_id, ip_address: 'ADMIN', user_session_token: 'ADMIN')
+    log(**attrs, failure_reason:, user_id: user_id, ip: 'ADMIN', user_session_token: 'ADMIN')
   end
 
   def self.success_admin(**attrs) = success_failure_admin(**attrs, success: true)

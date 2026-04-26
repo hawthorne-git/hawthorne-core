@@ -3,10 +3,10 @@
 class HawthorneCore::UserSite < HawthorneCore::ActiveRecordBaseApp
 
   include HawthorneCore::HasSiteId,
-          HawthorneCore::UserSite::DeleteAccountPinVerification,
-          HawthorneCore::UserSite::EmailAddressPinVerification,
-          HawthorneCore::UserSite::PhoneNumberPinVerification,
-          HawthorneCore::UserSite::SignInPinVerification
+          HawthorneCore::UserSite::DeleteAccountCodeVerification,
+          HawthorneCore::UserSite::EmailCodeVerification,
+          HawthorneCore::UserSite::PhoneNumberCodeVerification,
+          HawthorneCore::UserSite::SignInCodeVerification
 
 
   # -----------------------------------------------------------------------------
@@ -36,7 +36,7 @@ class HawthorneCore::UserSite < HawthorneCore::ActiveRecordBaseApp
   # ------------------------
 
   # log the user site sign-in
-  def self.log_site_sign_in(user_id, keep_signed_in)
+  def self.log_site_sign_in(user_id:, keep_signed_in:)
     signed_in_at = Time.current
     user_site = find_by(site_id: HawthorneCore::Site.this_site_id, user_id: user_id)
     user_site.first_signed_in_at = signed_in_at if user_site.first_sign_in?

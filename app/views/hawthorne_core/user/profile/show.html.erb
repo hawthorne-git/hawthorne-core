@@ -7,24 +7,24 @@
   full_name_value = @user.full_name
   full_name_url = account_profile_full_name_path
 
-  email_address_label = 'Email'
-  email_address_value = @user.email_address
-  email_address_url = account_profile_email_address_path
+  email_label = 'Email'
+  email_value = @user.email
+  email_url = account_profile_email_path
 
   phone_number_label = 'Phone number'
   phone_number_value = HawthorneCore::Helpers::PhoneNumber.us_format(phone_number: @user.phone_number)
   phone_number_url = account_profile_phone_number_path
 
-  sign_in_pin_default_delivery_label = 'Sign-In Code delivery'
-  sign_in_pin_default_delivery_value = @user.sign_in_pin_default_delivery_pretty_print
-  sign_in_pin_default_delivery_url = phone_number_value.present? ? account_profile_sign_in_code_default_delivery_path : nil
+  sign_in_code_default_delivery_label = 'Sign-In Code delivery'
+  sign_in_code_default_delivery_value = @user.sign_in_code_default_delivery_pretty_print
+  sign_in_code_default_delivery_url = phone_number_value.present? ? account_profile_sign_in_code_default_delivery_path : nil
 %>
 
 <%= render HawthorneCore::UI::User::Layout::ProfileComponent.new(user: @user, title: title) do %>
   <%= render HawthorneCore::UI::User::ProfileAttrComponent.new(label: full_name_label, value: full_name_value, url: full_name_url) %>
-  <%= render HawthorneCore::UI::User::ProfileAttrComponent.new(label: email_address_label, value: email_address_value, url: email_address_url) %>
+  <%= render HawthorneCore::UI::User::ProfileAttrComponent.new(label: email_label, value: email_value, url: email_url) %>
   <%= render HawthorneCore::UI::User::ProfileAttrComponent.new(label: phone_number_label, value: phone_number_value, url: phone_number_url) %>
-  <%= render HawthorneCore::UI::User::ProfileAttrComponent.new(label: sign_in_pin_default_delivery_label, value: sign_in_pin_default_delivery_value, url: sign_in_pin_default_delivery_url) %>
+  <%= render HawthorneCore::UI::User::ProfileAttrComponent.new(label: sign_in_code_default_delivery_label, value: sign_in_code_default_delivery_value, url: sign_in_code_default_delivery_url) %>
 
   <div class="mt-8 pt-6 border-t border-gray-100">
     <%= link_to 'Delete account',

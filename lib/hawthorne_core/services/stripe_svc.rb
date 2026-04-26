@@ -5,17 +5,17 @@ class HawthorneCore::Services::StripeSvc
   # ----------------------------------------------------------------
 
   # create a stripe customer, returning its stripe customer id
-  def self.create_customer(user_id, email_address)
+  def self.create_customer(user_id, email)
     customer = Stripe::Customer.create(
-      email: email_address,
+      email: email,
       metadata: {
         user_id: user_id
       }
     )
-    HawthorneCore::UserAction::Log.stripe_customer_created(user_id, { email_address: email_address, stripe_customer_id: customer.id })
+    HawthorneCore::UserAction::Log.stripe_customer_created(user_id, { email: email, stripe_customer_id: customer.id })
     customer.id
   rescue Stripe::StripeError => e
-    HawthorneCore::CapturedException.log('HawthorneCore::Services::StripeSvc.create_customer', { user_id: user_id, email_address: email_address }, e)
+    HawthorneCore::CapturedException.log('HawthorneCore::Services::StripeSvc.create_customer', { user_id: user_id, email: email }, e)
     nil
   end
 
@@ -51,12 +51,12 @@ class HawthorneCore::Services::StripeSvc
 
   # ----------------------------------------------------------------
 
-  # update the customers email address
-  def self.update_customer_email_address(user_id, new_email_address, customer_id)
-    Stripe::Customer.update(customer_id, { email: new_email_address })
-    HawthorneCore::UserAction::Log.stripe_customer_email_address_updated(user_id, { stripe_customer_id: customer_id, new_email_address: new_email_address })
+  # update the customers email
+  def self.update_customer_email(user_id, new_email, customer_id)
+    Stripe::Customer.update(customer_id, { email: new_email })
+    HawthorneCore::UserAction::Log.stripe_customer_email_updated(user_id, { stripe_customer_id: customer_id, new_email: new_email })
   rescue Stripe::StripeError => e
-    HawthorneCore::CapturedException.log('HawthorneCore::Services::StripeSvc.update_customer_email_address', { stripe_customer_id: customer_id, user_id: user_id, new_email_address: new_email_address }, e)
+    HawthorneCore::CapturedException.log('HawthorneCore::Services::StripeSvc.update_customer_email', { stripe_customer_id: customer_id, user_id: user_id, new_email: new_email }, e)
   end
 
   # ----------------------------------------------------------------

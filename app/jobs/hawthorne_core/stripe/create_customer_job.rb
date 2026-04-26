@@ -11,7 +11,7 @@ class HawthorneCore::Stripe::CreateCustomerJob < HawthorneCore::ApplicationJob
 
     # find the user by their id
     user = HawthorneCore::User.
-      select(:user_id, :email_address, :stripe_customer_id).
+      select(:user_id, :email, :stripe_customer_id).
       active.
       find_by(user_id: user_id)
 
@@ -20,7 +20,7 @@ class HawthorneCore::Stripe::CreateCustomerJob < HawthorneCore::ApplicationJob
 
     # create the customer, within stripe
     # attach the stripe customer id to the user
-    stripe_customer_id = HawthorneCore::Services::StripeSvc.create_customer(user.id, user.email_address)
+    stripe_customer_id = HawthorneCore::Services::StripeSvc.create_customer(user.id, user.email)
     user.update_columns(stripe_customer_id: stripe_customer_id)
 
   end

@@ -6,15 +6,15 @@ module HawthorneCore::UserAction::FailureReason
 
   REASONS =
     {
-      email_address_identical: 'EMAIL ADDRESS IDENTICAL',
-      email_address_syntax_error: 'EMAIL ADDRESS SYNTAX ERROR',
-      email_address_taken: 'EMAIL ADDRESS TAKEN',
+      code_expired: 'CODE EXPIRED',
+      code_max_failed_attempts_reached: 'CODE MAX FAILED ATTEMPTS REACHED',
+      code_not_match: 'CODE DOES NOT MATCH',
+      code_not_set: 'CODE NOT SET',
+      email_identical: 'EMAIL IDENTICAL',
+      email_syntax_error: 'EMAIL SYNTAX ERROR',
+      email_taken: 'EMAIL TAKEN',
       email_recently_sent: 'EMAIL RECENTLY SENT',
       exception_caught: 'EXCEPTION CAUGHT',
-      pin_expired: 'PIN EXPIRED',
-      pin_max_failed_attempts_reached: 'PIN MAX FAILED ATTEMPTS REACHED',
-      pin_not_match: 'PIN DOES NOT MATCH',
-      pin_not_set: 'PIN NOT SET',
       phone_number_identical: 'PHONE NUMBER IDENTICAL',
       phone_number_syntax_error: 'PHONE NUMBER SYNTAX ERROR',
       shipping_address_identical: 'SHIPPING ADDRESS IDENTICAL',

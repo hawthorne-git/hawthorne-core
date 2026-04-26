@@ -20,17 +20,17 @@ module HawthorneCore::User::PhoneNumber
     # -----------------------------------------------------------------------------
 
     # updates a users phone number
-    # if the phone number is present, update the sign-in pin delivery to text message, else via email
+    # if the phone number is present, update the sign-in code delivery to text message, else email
     # lastly, clear their new phone number attributes
     def update_phone_number(new_phone_number:)
-      new_sign_in_pin_default_delivery = (new_phone_number.present? ? HawthorneCore::User::PIN_VIA_PHONE : HawthorneCore::User::PIN_VIA_EMAIL)
-      update(phone_number: new_phone_number, sign_in_pin_default_delivery: new_sign_in_pin_default_delivery)
-      HawthorneCore::UserAction::Log.update_profile_phone_number(note: { old: phone_number_before_last_save, new: new_phone_number })
-      HawthorneCore::UserAction::Log.update_profile(note: { old_sign_in_pin_default_delivery: sign_in_pin_default_delivery_before_last_save, new_sign_in_pin_default_delivery: new_sign_in_pin_default_delivery }) if sign_in_pin_default_delivery_previously_changed?
+      new_sign_in_code_default_delivery = (new_phone_number.present? ? HawthorneCore::User::CODE_VIA_PHONE : HawthorneCore::User::CODE_VIA_EMAIL)
+      update(phone_number: new_phone_number, sign_in_code_default_delivery: new_sign_in_code_default_delivery)
+      HawthorneCore::UserAction::Log.update_profile(note: { old_phone_number: phone_number_before_last_save, new_phone_number: new_phone_number })
+      HawthorneCore::UserAction::Log.update_profile(note: { old_sign_in_code_default_delivery: sign_in_code_default_delivery_before_last_save, new_sign_in_code_default_delivery: new_sign_in_code_default_delivery }) if sign_in_code_default_delivery_previously_changed?
       clear_new_phone_number_attrs
     end
 
-    # removes a users phone number - which is just updating it to nil
+    # removes a users phone number - which is simply updating it to nil
     def remove_phone_number = update_phone_number(new_phone_number: nil)
 
     # -----------------------------------------------------------------------------

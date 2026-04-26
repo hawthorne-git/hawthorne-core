@@ -13,7 +13,7 @@ class HawthorneCore::CapturedException < HawthorneCore::ActiveRecordBaseLog
   # -----------------------------------------------------------------------------
 
   # log a captured exception ... in a job
-  def self.log(code_location:, note:, e:) = HawthorneCore::CaptureExceptionJob.perform_later(code_location: code_location, note: note, exception_class: e&.class, exception_message: e&.message)
+  def self.log(location:, note:, e:) = HawthorneCore::CaptureExceptionJob.perform_later(location:, note:, exception_class: e&.class, exception_message: e&.message)
 
   # -----------------------------------------------------------------------------
 

@@ -4,9 +4,9 @@ class HawthorneCore::InvalidEmailAddressDomain < HawthorneCore::ActiveRecordBase
 
   # -----------------------------------------------------------------------------
 
-  self.table_name = 'invalid_email_address_domains'
+  self.table_name = 'invalid_email_domains'
 
-  def id = invalid_email_address_domain_id
+  def id = invalid_email_domain_id
 
   # -----------------------------------------------------------------------------
 

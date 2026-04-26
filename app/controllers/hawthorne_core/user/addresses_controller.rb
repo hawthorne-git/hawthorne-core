@@ -8,7 +8,7 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
 
     # find the user
     @user = HawthorneCore::User.
-      select(:user_id, :email_address, :full_name).
+      select(:user_id, :email, :full_name).
       active.
       find_by(user_id: session[:user_id])
 
@@ -48,7 +48,7 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
 
     # find the user
     @user = HawthorneCore::User.
-      select(:user_id, :email_address, :full_name, :phone_number).
+      select(:user_id, :email, :full_name, :phone_number).
       active.
       find_by(user_id: session[:user_id])
 
@@ -159,7 +159,7 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
 
     # find the user
     @user = HawthorneCore::User.
-      select(:user_id, :email_address, :full_name).
+      select(:user_id, :email, :full_name).
       active.
       find_by(user_id: session[:user_id])
 
