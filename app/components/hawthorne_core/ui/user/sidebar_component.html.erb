@@ -2,9 +2,6 @@
 
 <%
 
-  # find the user, if not present
-  @user = @user.presence || HawthorneCore::User.select(:email_address, :full_name).active.find_by(user_id: session[:user_id])
-
   # create each navigation component
   addresses_navigation_component = { handle: 'Addresses', url: helpers.account_addresses_path, selected: (@selected_sidebar_navigation_item.downcase == 'addresses') }
   favorites_navigation_component = { handle: 'Favorites', url: helpers.account_favorites_path, selected: (@selected_sidebar_navigation_item.downcase == 'favorites') }

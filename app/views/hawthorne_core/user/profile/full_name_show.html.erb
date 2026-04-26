@@ -3,13 +3,13 @@
 <%
   form_url = account_profile_full_name_path
 
-  title = "#{@full_name.blank? ? 'Add' : 'Update'} full name"
+  title = "#{@user.full_name.blank? ? 'Add' : 'Update'} full name"
 
   full_name_label = 'First name and Last name'
-  full_name_value = @full_name
-  full_name_autofocus = @full_name.blank?
+  full_name_value = @user.full_name
+  full_name_autofocus = @user.full_name.blank?
 
-  submit_button_text =  "#{@full_name.blank? ? 'Add' : 'Update'} Full Name"
+  submit_button_text =  "#{@user.full_name.blank? ? 'Add' : 'Update'} Full Name"
 %>
 
 <%= render HawthorneCore::UI::User::Layout::ProfileComponent.new(user: @user, title: title) do %>

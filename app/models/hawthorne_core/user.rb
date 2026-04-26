@@ -5,9 +5,10 @@ class HawthorneCore::User < HawthorneCore::ActiveRecordBaseApp
   include HawthorneCore::CanBeSoftDeleted,
           HawthorneCore::HasToken,
           HawthorneCore::User::EmailVerification,
-          HawthorneCore::User::PhoneNumber,
-          HawthorneCore::User::PinVerification,
+          HawthorneCore::User::Name,
           HawthorneCore::User::PaymentMethods,
+          HawthorneCore::User::PhoneNumber,
+          HawthorneCore::User::Pin,
           HawthorneCore::User::SingleSignOn,
           HawthorneCore::User::SiteAccess
 
@@ -16,23 +17,6 @@ class HawthorneCore::User < HawthorneCore::ActiveRecordBaseApp
   self.table_name = 'users'
 
   def id = user_id
-
-  # -----------------------------------------------------------------------------
-
-  # get the first name of the user
-  def first_name = full_name.present? ? full_name.split(' ').first : ''
-
-  # determine if the user has a first name
-  def first_name? = full_name.present?
-
-  # -----------------------------------------------------------------------------
-
-  # get the sign in pin default delivery, in a prettier format then what is saved in the database
-  def sign_in_pin_default_delivery_pretty_print
-    return 'Email' if sign_in_pin_default_delivery_via_email?
-    return 'Text Message' if sign_in_pin_default_delivery_via_phone?
-    nil
-  end
 
   # -----------------------------------------------------------------------------
 

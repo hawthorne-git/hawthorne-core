@@ -1,13 +1,13 @@
 <%# v3.0 %>
 
 <%
-  form_url = account_profile_sign_in_pin_default_delivery_path
+  form_url = account_profile_sign_in_code_default_delivery_path
 
-  title = 'Update sign-in PIN default delivery'
+  title = 'Update sign-in code default delivery'
 
-  sign_in_pin_default_delivery_label = 'Preferred PIN delivery at sign-in'
+  sign_in_pin_default_delivery_label = 'Preferred code delivery at sign-in'
   sign_in_pin_default_delivery_options = [['Email', HawthorneCore::User::PIN_VIA_EMAIL], ['Text Message', HawthorneCore::User::PIN_VIA_PHONE]]
-  sign_in_pin_default_delivery_options_for_select  = options_for_select(sign_in_pin_default_delivery_options, @sign_in_pin_default_delivery)
+  sign_in_pin_default_delivery_options_for_select  = options_for_select(sign_in_pin_default_delivery_options, @user.sign_in_pin_default_delivery)
 
   submit_button_text = 'Update Sign-In Code Delivery'
 %>
