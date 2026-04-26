@@ -14,7 +14,7 @@ class HawthorneCore::Email::SendDeleteAccountCodeJob < HawthorneCore::Applicatio
 
     # find the user by their id
     user = HawthorneCore::User.
-      select(:user_id, :email, :full_name).
+      select(:user_id, :email, :name).
       active.
       find_by(user_id: user_id)
 

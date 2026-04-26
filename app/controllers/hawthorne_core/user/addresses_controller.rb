@@ -8,7 +8,7 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
 
     # find the user
     @user = HawthorneCore::User.
-      select(:user_id, :email, :full_name).
+      select(:user_id, :email, :name).
       active.
       find_by(user_id: session[:user_id])
 
@@ -16,7 +16,7 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
 
     # find the users shipping addresses
     @shipping_addresses = HawthorneCore::UserShippingAddress.
-      select(:token, :full_name, :street_address, :street_address_extended, :city, :state_province, :postal_code, :country_code_alpha2, :phone_number).
+      select(:token, :name, :street_address, :street_address_extended, :city, :state_province, :postal_code, :country_code_alpha2, :phone_number).
       active.
       where(user_id: @user.id).
       order(last_checkout_selected_at: :desc, created_at: :desc)
@@ -48,7 +48,7 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
 
     # find the user
     @user = HawthorneCore::User.
-      select(:user_id, :email, :full_name, :phone_number).
+      select(:user_id, :email, :name, :phone_number).
       active.
       find_by(user_id: session[:user_id])
 
@@ -56,7 +56,7 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
 
     # set the users shipping address defaults ... add in their name / phone number
     @shipping_address = HawthorneCore::UserShippingAddress.new
-    @shipping_address.full_name = @user.full_name
+    @shipping_address.name = @user.name
     @shipping_address.phone_number = HawthorneCore::Helpers::PhoneNumber.us_format(phone_number: @user.phone_number)
 
     # ----------------------
@@ -159,7 +159,7 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
 
     # find the user
     @user = HawthorneCore::User.
-      select(:user_id, :email, :full_name).
+      select(:user_id, :email, :name).
       active.
       find_by(user_id: session[:user_id])
 
@@ -170,7 +170,7 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
 
     # find the users shipping address to edit
     @shipping_address = HawthorneCore::UserShippingAddress.
-      select(:token, :full_name, :street_address, :street_address_extended, :city, :state_province, :postal_code, :country_code_alpha2, :phone_number).
+      select(:token, :name, :street_address, :street_address_extended, :city, :state_province, :postal_code, :country_code_alpha2, :phone_number).
       active.
       find_by(user_id: @user.id, token: token)
 
@@ -291,7 +291,7 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
     params.require(:user_shipping_address).
       permit(
         :token,
-        :full_name,
+        :name,
         :street_address,
         :street_address_extended,
         :city,
@@ -305,7 +305,7 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
   def normalized_address_params
     {
       token: address_params[:token],
-      full_name: address_params[:full_name].to_s.strip.squish,
+      name: address_params[:name].to_s.strip.squish,
       street_address: address_params[:street_address].to_s.strip.squish,
       street_address_extended: address_params[:street_address_extended].to_s.strip.squish,
       city: address_params[:city].to_s.strip.squish,

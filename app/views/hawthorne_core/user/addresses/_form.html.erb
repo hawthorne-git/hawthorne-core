@@ -14,8 +14,8 @@
   country_value = @selected_country.handle
   country_code_alpha2_value = @selected_country&.code_alpha2
 
-  full_name_label = 'Name'
-  full_name_value = @shipping_address.full_name
+  name_label = 'Name'
+  name_value = @shipping_address.name
 
   street_address_label = 'Street address'
   street_address_value = @shipping_address.street_address
@@ -54,7 +54,7 @@
         <%= render HawthorneCore::UI::Form::HiddenFieldComponent.new(form: f, attribute: :token, value: token_value, required: false) %>
         <%= render HawthorneCore::UI::Form::HiddenFieldComponent.new(form: f, attribute: :country_code_alpha2, value: country_code_alpha2_value, required: true) %>
         <%= render HawthorneCore::UI::Form::Attr::Address::AutocompleteAddressComponent.new(form: f, model: @shipping_address, selected_country: @selected_country) if add_action %>
-        <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :full_name, label: full_name_label, value: full_name_value, required: true) %>
+        <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :name, label: name_label, value: name_value, required: true) %>
         <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :street_address, label: street_address_label, value: street_address_value, required: true) %>
         <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :street_address_extended, label: street_address_extended_label, value: street_address_extended_value) %>
         <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :city, label: city_label, value: city_value, required: true) %>

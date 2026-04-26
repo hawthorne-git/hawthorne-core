@@ -14,7 +14,7 @@ class HawthorneCore::Email::SendEmailUpdateCodeJob < HawthorneCore::ApplicationJ
 
     # find the user by their id
     user = HawthorneCore::User.
-      select(:user_id, :full_name).
+      select(:user_id, :name).
       active.
       find_by(user_id: user_id)
 

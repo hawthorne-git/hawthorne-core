@@ -7,18 +7,18 @@ module HawthorneCore::User::Name
 
     # -----------------------------------------------------------------------------
 
-    # get the first name of the user
-    def first_name = full_name.present? ? full_name.split(' ').first : ''
-
     # determine if the user has a first name
-    def first_name? = full_name.present?
+    def first_name? = name.present?
+
+    # get the first name of the user
+    def first_name = first_name? ? name.split(' ').first : ''
 
     # -----------------------------------------------------------------------------
 
-    # updates a users full name
-    def update_full_name(full_name:)
-      update(full_name: full_name)
-      HawthorneCore::UserAction::Log.update_profile(note: { old_full_name: full_name_before_last_save, new_full_name: full_name })
+    # updates a users name
+    def update_name(name:)
+      update(name:)
+      HawthorneCore::UserAction::Log.update_profile(note: { old_name: name_before_last_save, new_name: name })
     end
 
     # -----------------------------------------------------------------------------

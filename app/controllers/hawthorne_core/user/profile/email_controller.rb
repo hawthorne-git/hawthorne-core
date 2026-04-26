@@ -9,7 +9,7 @@ class HawthorneCore::User::Profile::EmailController < HawthorneCore::AccountAppl
 
     # find the user
     @user = HawthorneCore::User.
-      select(:user_id, :email, :full_name).
+      select(:user_id, :email, :name).
       active.
       find_by(user_id: session[:user_id])
 
@@ -81,7 +81,7 @@ class HawthorneCore::User::Profile::EmailController < HawthorneCore::AccountAppl
 
     # find the user
     @user = HawthorneCore::User.
-      select(:user_id, :email, :full_name).
+      select(:user_id, :email, :name).
       active.
       find_by(user_id: session[:user_id])
 

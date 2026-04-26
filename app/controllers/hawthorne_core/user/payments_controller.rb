@@ -8,7 +8,7 @@ class HawthorneCore::User::PaymentsController < HawthorneCore::AccountApplicatio
 
     # find the user
     @user = HawthorneCore::User.
-      select(:user_id, :email, :full_name, :stripe_customer_id).
+      select(:user_id, :email, :name, :stripe_customer_id).
       active.
       find_by(user_id: session[:user_id])
 
@@ -31,7 +31,7 @@ class HawthorneCore::User::PaymentsController < HawthorneCore::AccountApplicatio
 
     # find the user
     @user = HawthorneCore::User.
-      select(:user_id, :email, :full_name, :stripe_customer_id).
+      select(:user_id, :email, :name, :stripe_customer_id).
       active.
       find_by(user_id: session[:user_id])
 

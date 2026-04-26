@@ -11,7 +11,7 @@ class HawthorneCore::User::CaptureSessionLocationJob < HawthorneCore::Applicatio
     return unless Rails.env.production?
 
     # find the user session
-    # return if the session is not found, or if the ip address is not set
+    # return if the session is not found, or if the ip is not set
     user_session = HawthorneCore::UserSession.find_by(user_session_id: user_session_id)
     return if user_session&.ip.blank?
 

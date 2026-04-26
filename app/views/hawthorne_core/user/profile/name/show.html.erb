@@ -1,0 +1,22 @@
+<%# v3.0 %>
+
+<%
+  form_url = account_profile_name_path
+
+  title = "#{@name.blank? ? 'Add' : 'Update'} name"
+
+  name_label = 'First name and Last name'
+  name_value = @name
+  name_autofocus = @name.blank?
+
+  submit_button_text =  "#{@name.blank? ? 'Add' : 'Update'} Name"
+%>
+
+<%= render HawthorneCore::UI::User::Layout::ProfileComponent.new(user: @user, title: title) do %>
+  <%= render HawthorneCore::UI::Form::FormWrapperComponent.new do %>
+    <%= form_with url: form_url, method: :post do |f| %>
+      <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :name, label: name_label, value: name_value, autofocus: name_autofocus) %>
+      <%= render HawthorneCore::UI::Form::SubmitButtonComponent.new(form: f, text: submit_button_text) %>
+    <% end %>
+  <% end %>
+<% end %>

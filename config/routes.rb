@@ -26,8 +26,8 @@ HawthorneCore::Engine.routes.draw do
   get 'account/profile', to: 'user/profile#show'
 
   # name
-  get 'account/profile/full-name', to: 'user/profile#full_name_show'
-  post 'account/profile/full-name', to: 'user/profile#full_name_update'
+  get 'account/profile/name', to: 'user/profile/name#show'
+  post 'account/profile/name', to: 'user/profile/name#update'
 
   # email
   get 'account/profile/email', to: 'user/profile/email#show'

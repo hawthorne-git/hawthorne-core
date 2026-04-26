@@ -4,12 +4,12 @@ class HawthorneCore::User::ProfileController < HawthorneCore::AccountApplication
 
   # -----------------------------------------------------------------------------
 
-  # show the profile page
+  # show the users profile page
   def show
 
     # find the user - used to welcome the user
     @user = HawthorneCore::User.
-      select(:user_id, :full_name, :email, :phone_number, :sign_in_code_default_delivery).
+      select(:user_id, :name, :email, :phone_number, :sign_in_code_default_delivery).
       active.
       find_by(user_id: session[:user_id])
 
@@ -20,46 +20,7 @@ class HawthorneCore::User::ProfileController < HawthorneCore::AccountApplication
   end
 
   # -----------------------------------------------------------------------------
-
-  # show the page for the user to add / update their full name
-  def full_name_show
-
-    # find the user - used to welcome the user
-    @user = HawthorneCore::User.
-      select(:user_id, :email, :full_name).
-      active.
-      find_by(user_id: session[:user_id])
-
-    # ----------------------
-
-    @html_title = 'Full Name | Profile'
-
-  end
-
-  # ----------------------
-
-  # add / update the users full name
-  def full_name_update
-
-    # get the request attributes
-    full_name = params[:full_name]
-
-    # ----------------------
-
-    # find the user - add / update their full name
-    HawthorneCore::User.
-      select(:user_id, :full_name).
-      active.
-      find_by(user_id: session[:user_id]).
-      update_full_name(full_name: full_name)
-
-    # ----------------------
-
-    # redirect the user to view their profile
-    redirect_to account_profile_path
-
-  end
-
+  # -----------------------------------------------------------------------------
   # -----------------------------------------------------------------------------
 
   # show the page for the user to update how their sign-in code is sent by default ... either via an email or text message
@@ -67,7 +28,7 @@ class HawthorneCore::User::ProfileController < HawthorneCore::AccountApplication
 
     # find the user - used to welcome the user
     @user = HawthorneCore::User.
-      select(:user_id, :email, :full_name, :sign_in_code_default_delivery).
+      select(:user_id, :email, :name, :sign_in_code_default_delivery).
       active.
       find_by(user_id: session[:user_id])
 

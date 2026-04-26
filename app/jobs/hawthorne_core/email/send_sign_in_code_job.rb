@@ -14,7 +14,7 @@ class HawthorneCore::Email::SendSignInCodeJob < HawthorneCore::ApplicationJob
 
     # find the user by their id
     user = HawthorneCore::User.
-      select(:user_id, :token, :email, :full_name).
+      select(:user_id, :token, :email, :name).
       active.
       find_by(user_id: user_id)
 

@@ -9,7 +9,7 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Accou
 
     # find the user
     @user = HawthorneCore::User.
-      select(:user_id, :email, :full_name, :phone_number).
+      select(:user_id, :email, :name, :phone_number).
       active.
       find_by(user_id: session[:user_id])
 
@@ -75,7 +75,7 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Accou
 
     # find the user
     @user = HawthorneCore::User.
-      select(:user_id, :email, :full_name, :phone_number).
+      select(:user_id, :email, :name, :phone_number).
       active.
       find_by(user_id: session[:user_id])
 
