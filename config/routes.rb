@@ -45,8 +45,8 @@ HawthorneCore::Engine.routes.draw do
   delete 'account/profile/remove-phone-number', to: 'user/profile/phone_number#delete'
 
   # sign-in code default delivery
-  get 'account/profile/sign-in-code-default-delivery', to: 'user/profile#sign_in_code_default_delivery_show'
-  post 'account/profile/sign-in-code-default-delivery', to: 'user/profile#sign_in_code_default_delivery_update'
+  get 'account/profile/sign-in-code-default-delivery', to: 'user/profile/sign_in_code_default_delivery#show'
+  post 'account/profile/sign-in-code-default-delivery', to: 'user/profile/sign_in_code_default_delivery#update'
 
   # delete account
   get 'account/profile/delete-account', to: 'user/profile/delete_account#show'

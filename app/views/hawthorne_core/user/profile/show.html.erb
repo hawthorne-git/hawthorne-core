@@ -20,16 +20,12 @@
   sign_in_code_default_delivery_url = phone_number_value.present? ? account_profile_sign_in_code_default_delivery_path : nil
 %>
 
-<%= render HawthorneCore::UI::User::Layout::ProfileComponent.new(user: @user, title: title) do %>
+<%= render HawthorneCore::UI::User::Layout::ProfileComponent.new(title: title) do %>
   <%= render HawthorneCore::UI::User::ProfileAttrComponent.new(label: name_label, value: name_value, url: name_url) %>
   <%= render HawthorneCore::UI::User::ProfileAttrComponent.new(label: email_label, value: email_value, url: email_url) %>
   <%= render HawthorneCore::UI::User::ProfileAttrComponent.new(label: phone_number_label, value: phone_number_value, url: phone_number_url) %>
   <%= render HawthorneCore::UI::User::ProfileAttrComponent.new(label: sign_in_code_default_delivery_label, value: sign_in_code_default_delivery_value, url: sign_in_code_default_delivery_url) %>
-
   <div class="mt-8 pt-6 border-t border-gray-100">
-    <%= link_to 'Delete account',
-                account_profile_delete_account_path,
-                class: "text-red-500 no-underline hover:underline text-sm" %>
+    <%= link_to 'Delete account', account_profile_delete_account_path, class: "text-red-500 no-underline hover:underline text-sm" %>
   </div>
-
 <% end %>

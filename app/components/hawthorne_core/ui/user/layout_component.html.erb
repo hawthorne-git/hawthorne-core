@@ -2,7 +2,7 @@
 
 
 <div class="flex min-h-screen">
-  <%= render HawthorneCore::UI::User::SidebarComponent.new(user: @user, selected_sidebar_navigation_item: @selected_sidebar_navigation_item) %>
+  <%= render HawthorneCore::UI::User::SidebarComponent.new(selected_sidebar_navigation_item: @selected_sidebar_navigation_item) %>
   <main class="flex-1 px-12 py-10 max-w-2xl">
     <%= render HawthorneCore::UI::User::BreadcrumbComponent.new(selected_sidebar_navigation_item: @selected_sidebar_navigation_item, title: @title) %>
     <%= render HawthorneCore::UI::User::TitleComponent.new(text: @title) %>

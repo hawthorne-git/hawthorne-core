@@ -92,7 +92,7 @@ module HawthorneCore::UserAction::Log
     success_admin(user_id, action(:sign_in_via_cookie), note)
   end
 
-  # ----------------------------------------------------------------------------- Sign-In Pin
+  # ----------------------------------------------------------------------------- Sign-In Code
 
   def self.sign_in_code_cleared(user_id)
     success_admin(user_id, action(:sign_in_code_cleared), nil)

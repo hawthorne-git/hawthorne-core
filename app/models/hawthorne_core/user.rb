@@ -8,7 +8,7 @@ class HawthorneCore::User < HawthorneCore::ActiveRecordBaseApp
           HawthorneCore::User::Name,
           HawthorneCore::User::PaymentMethods,
           HawthorneCore::User::PhoneNumber,
-          HawthorneCore::User::Pin,
+          HawthorneCore::User::Code,
           HawthorneCore::User::SingleSignOn,
           HawthorneCore::User::SiteAccess
 
