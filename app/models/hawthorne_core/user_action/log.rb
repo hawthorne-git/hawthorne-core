@@ -158,9 +158,7 @@ module HawthorneCore::UserAction::Log
     success_admin(user_id, action(:stripe_customer_created), note)
   end
 
-  def self.stripe_customer_email_updated(user_id, note)
-    success_admin(user_id, action(:stripe_customer_email_updated), note)
-  end
+  def self.stripe_customer_email_updated(**attrs) = success_admin(**attrs, action: action(:stripe_customer_email_updated))
 
   def self.stripe_setup_intent_created(user_id, note)
     success_admin(user_id, action(:stripe_setup_intent_created), note)
@@ -190,7 +188,7 @@ module HawthorneCore::UserAction::Log
 
   def self.success_failure_admin(failure_reason: nil, **attrs)
     user_id = HawthorneCore::RequestContext.get[:user_id].presence || attrs[:user_id]
-    log(**attrs, failure_reason:, user_id: user_id, ip: 'ADMIN', user_session_token: 'ADMIN')
+    log(**attrs, failure_reason:, user_id:, ip: 'ADMIN', user_session_token: 'ADMIN')
   end
 
   def self.success_admin(**attrs) = success_failure_admin(**attrs, success: true)

@@ -93,7 +93,7 @@ class HawthorneCore::Services::MailerSendSvc
 
   def self.mailer_send_personalization(email:, data:)
     {
-      email: email,
+      email:,
       data: data.merge(from_tagline: HawthorneCore::Site.this_site_email_from_tagline)
     }
   end
@@ -177,13 +177,13 @@ class HawthorneCore::Services::MailerSendSvc
 
     # log the email
     HawthorneCore::SentEmail.create!(
-      user_id: user_id,
+      user_id:,
       email_service: 'MAILER_SEND',
-      email_type: email_type,
+      email_type:,
       service_template_id: template_id,
       from_email: from_email,
       to_email: email,
-      subject: subject,
+      subject:,
       service_personalization: personalization,
       service_id: result[:message_id],
       exception_caught: !result[:success],
@@ -193,10 +193,10 @@ class HawthorneCore::Services::MailerSendSvc
 
     # log the user action / exception (if caught)
     if result[:success]
-      HawthorneCore::UserAction::Log.email_sent(user_id:, note: { email_type: email_type, email: email, personalization: personalization, mailer_send_message_id: result[:message_id] })
+      HawthorneCore::UserAction::Log.email_sent(user_id:, note: { email_type:, email:, personalization:, mailer_send_message_id: result[:message_id] })
     else
-      HawthorneCore::UserAction::Log.email_sent_failure(user_id:, failure_reason: HawthorneCore::UserAction::FailureReason.exception_caught, note: { type: email_type, email: email, personalization: personalization, exception_message: result[:exception_message] })
-      HawthorneCore::CapturedException.log(location: 'HawthorneCore::Services::MailerSendSvc.send_email', note: { email_type: email_type, user_id: user_id, email: email }, e: result[:exception])
+      HawthorneCore::UserAction::Log.email_sent_failure(user_id:, failure_reason: HawthorneCore::UserAction::FailureReason.exception_caught, note: { email_type:, email:, personalization:, exception_message: result[:exception_message] })
+      HawthorneCore::CapturedException.log(location: 'HawthorneCore::Services::MailerSendSvc.send_email', note: { email_type:, user_id:, email: }, e: result[:exception])
     end
 
   end
@@ -207,13 +207,13 @@ class HawthorneCore::Services::MailerSendSvc
   def self.mailer_send_email(email:, subject:, template_id:, personalization:)
 
     # this sends the email
-    email = Mailersend::Email.new(client)
-    email.add_from(email: from_email, name: from_email_name)
-    email.add_recipients(email: email)
-    email.add_subject(subject)
-    email.add_template_id(template_id)
-    email.add_personalization(personalization) if personalization.present?
-    response = email.send
+    ms_email = Mailersend::Email.new(client)
+    ms_email.add_from(email: from_email, name: from_email_name)
+    ms_email.add_recipients(email:)
+    ms_email.add_subject(subject)
+    ms_email.add_template_id(template_id)
+    ms_email.add_personalization(personalization) if personalization.present?
+    response = ms_email.send
 
     # return that the email was successfully sent (specifically 'queued') ... this does not mean delivered
     {
@@ -222,7 +222,7 @@ class HawthorneCore::Services::MailerSendSvc
     }
 
     # if an HTTP exception caught
-  rescue Faraday::Error => e
+  rescue HTTP::Error => e
     {
       success: false,
       exception_type: :network_error,

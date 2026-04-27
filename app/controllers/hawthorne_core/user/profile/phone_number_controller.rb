@@ -124,7 +124,7 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Accou
       (code_max_failed_attempts_reached = true; failure_reason = HawthorneCore::UserAction::FailureReason.code_max_failed_attempts_reached) if user_site.new_phone_number_code_max_failed_attempts_reached?
       HawthorneCore::UserAction::Log.update_profile_failure(failure_reason: failure_reason, note: { new_phone_number_code: user_site.new_phone_number_code, new_phone_number_code_created_at: user_site.new_phone_number_code_created_at, new_phone_number_code_failed_attempts_count: user_site.new_phone_number_code_failed_attempts_count })
       user_site.refresh_new_phone_number_code_attrs_then_send_it
-      render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/verify_code_failed', locals: { not_set: code_not_set, expired: code_expired, max_failed_attempts_reached: code_max_failed_attempts_reached }) and return
+      render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/verify_code_failed', locals: { code_not_set:, code_expired:, code_max_failed_attempts_reached: }) and return
     end
 
     # verify the code - it is set, not expired, and has not reached the max number of failed attempts
@@ -132,7 +132,7 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Accou
     # if the max number of failed attempts reached ... refresh the users code, resend
     # lastly, when the entered code does not match, return back and display an error message
     unless user_site.new_phone_number_code_match?(code_to_match: code)
-      HawthorneCore::UserAction::Log.update_profile_failure(failure_reason: HawthorneCore::UserAction::FailureReason.code_not_match, note: { action: 'VERIFY_PHONE_NUMBER', entered_code: code, code_to_match: user_site.new_phone_number_code })
+      HawthorneCore::UserAction::Log.update_profile_failure(failure_reason: HawthorneCore::UserAction::FailureReason.code_not_match, note: { action: 'UPDAATE_PHONE_NUMBER', code:, code_to_match: user_site.new_phone_number_code })
       user_site.add_new_phone_number_code_failed_attempt
       if user_site.new_phone_number_code_max_failed_attempts_reached?
         code_max_failed_attempts_reached = true
@@ -140,7 +140,7 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Accou
       else
         code_not_match = true
       end
-      render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/verify_code_failed', locals: { not_match: code_not_match, max_failed_attempts_reached: code_max_failed_attempts_reached }) and return
+      render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/verify_code_failed', locals: { code_not_match:, code_max_failed_attempts_reached: }) and return
     end
 
     # ----------------------

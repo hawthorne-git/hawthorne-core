@@ -7,11 +7,10 @@ class HawthorneCore::User::Profile::NameController < HawthorneCore::AccountAppli
   # show the page for the user to update their name
   def show
 
-    # find the user - load required attributes
-    @user = HawthorneCore::User.
-      select(:name).
-      active.
-      find_by(user_id: session[:user_id])
+    # find the users name
+    @name = HawthorneCore::User.
+      where(user_id: session[:user_id]).
+      pick(:name)
 
     # ----------------------
 
@@ -31,7 +30,6 @@ class HawthorneCore::User::Profile::NameController < HawthorneCore::AccountAppli
     # find the user, then update their name
     HawthorneCore::User.
       select(:user_id, :name).
-      active.
       find_by(user_id: session[:user_id]).
       update_name(name:)
 

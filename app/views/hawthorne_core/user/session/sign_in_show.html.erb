@@ -1,7 +1,7 @@
 <%# v3.0 %>
 
 <%
-  form_url = sign_in_path
+  url = sign_in_path
 
   title = 'Continue with email'
 
@@ -14,10 +14,10 @@
 %>
 
 <%= render HawthorneCore::UI::TitleComponent.new(text: title)  %>
-<%= render HawthorneCore::UI::Form::FormWrapperComponent.new(instruction_message: instruction_message) do %>
-  <%= form_with url: form_url do |f| %>
-    <%= render HawthorneCore::UI::Form::HiddenFieldComponent.new(form: f, attribute: :keep_signed_in, value: 1, required: true) %>
-    <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :email, label: email_label, value: email_value, required: true, maxlength: 320) %>
-    <%= render HawthorneCore::UI::Form::SubmitButtonComponent.new(form: f, text: submit_button_text) %>
+<%= render HawthorneCore::UI::Form::FormWrapperComponent.new(instruction_message:) do %>
+  <%= form_with url: do |form| %>
+    <%= render HawthorneCore::UI::Form::HiddenFieldComponent.new(form:, attribute: :keep_signed_in, value: 1, required: true) %>
+    <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form:, attribute: :email, label: email_label, value: email_value, required: true, maxlength: 320) %>
+    <%= render HawthorneCore::UI::Form::SubmitButtonComponent.new(form:, submit_button_text:) %>
   <% end %>
 <% end %>

@@ -1,7 +1,7 @@
 <%# v3.0 %>
 
 <%
-  form_url = account_profile_delete_account_verify_path
+  url = account_profile_delete_account_verify_path
 
   title = 'Delete your account'
 
@@ -10,10 +10,10 @@
   submit_button_text = 'Send Verification Code'
 %>
 
-<%= render HawthorneCore::UI::User::Layout::ProfileComponent.new(user: @user, title: title) do %>
-  <%= render HawthorneCore::UI::Form::FormWrapperComponent.new(instruction_message: instruction_message) do %>
-    <%= form_with url: form_url do |f| %>
-      <%= render HawthorneCore::UI::Form::SubmitButtonComponent.new(form: f, text: submit_button_text) %>
+<%= render HawthorneCore::UI::User::Layout::ProfileComponent.new(title:) do %>
+  <%= render HawthorneCore::UI::Form::FormWrapperComponent.new(instruction_message:) do %>
+    <%= form_with url: do |form| %>
+      <%= render HawthorneCore::UI::Form::SubmitButtonComponent.new(form:, submit_button_text:) %>
     <% end %>
   <% end %>
 <% end %>

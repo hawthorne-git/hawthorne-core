@@ -26,28 +26,28 @@ class HawthorneCore::UserPaymentMethod < HawthorneCore::ActiveRecordBaseApp
   # -----------------------------------------------------------------------------
 
   # get the number of active credit cards for a user
-  def self.nbr_active_credit_cards(user_id) = active.where(user_id: user_id, payment_method_type: 'CREDIT_CARD').count
+  def self.nbr_active_credit_cards(user_id) = active.where(user_id:, payment_method_type: 'CREDIT_CARD').count
 
   # determine if the user has exactly one active credit card
   def self.one_active_credit_card?(user_id) = (nbr_active_credit_cards(user_id) == 1)
 
-  def self.only_active_credit_card(user_id) = one_active_credit_card?(user_id) ? active.where(user_id: user_id).first : nil
+  def self.only_active_credit_card(user_id) = one_active_credit_card?(user_id) ? active.where(user_id:).first : nil
 
   # -----------------------------------------------------------------------------
 
   # determine if the user has a defaulted payment method
-  def self.defaulted_payment_method_exists?(user_id) = active.exists?(user_id: user_id, default: true)
+  def self.defaulted_payment_method_exists?(user_id) = active.exists?(user_id:, default: true)
 
   # set all the user payment methods to not be defaulted
-  def self.set_all_payment_methods_to_not_defaulted(user_id) = where(user_id: user_id).update_all(default: false)
+  def self.set_all_payment_methods_to_not_defaulted(user_id) = where(user_id:).update_all(default: false)
 
   # -----------------------------------------------------------------------------
 
   # clean up a users defaulted payment methods
   # if the user has more than 1 defaulted - which should not happen, set all as not defaulted
   def self.clean_defaulted(user_id)
-    return if where(user_id: user_id, default: true).count <= 1
-    where(user_id: user_id).update_all(default: false)
+    return if where(user_id:, default: true).count <= 1
+    where(user_id:).update_all(default: false)
   end
 
   # -----------------------------------------------------------------------------
@@ -62,7 +62,7 @@ class HawthorneCore::UserPaymentMethod < HawthorneCore::ActiveRecordBaseApp
     # find the users active stripe credit card payment methods (in our database)
     payment_methods = select(:user_payment_method_id, :token, :stripe_payment_method_id, :default).
       active.
-      where(user_id: user_id, payment_method_type: 'CREDIT_CARD').
+      where(user_id:, payment_method_type: 'CREDIT_CARD').
       where.not(stripe_payment_method_id: nil)
 
     # find the users credit cards (in stripe)

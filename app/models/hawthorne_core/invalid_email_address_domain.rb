@@ -11,7 +11,7 @@ class HawthorneCore::InvalidEmailAddressDomain < HawthorneCore::ActiveRecordBase
   # -----------------------------------------------------------------------------
 
   # determine if the domain is included in our internal list of invalid domains
-  def self.invalid?(domain) = domain.present? && exists?(handle: domain.downcase)
+  def self.invalid?(domain:) = domain.present? && exists?(handle: domain.downcase)
 
   # -----------------------------------------------------------------------------
 

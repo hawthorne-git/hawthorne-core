@@ -16,7 +16,7 @@ class HawthorneCore::UserSession < HawthorneCore::ActiveRecordBaseLog
   def self.create_record(user_id, request)
     create!(
       token: SecureRandom.alphanumeric(30),
-      user_id: user_id,
+      user_id:,
       ip: request.remote_ip,
       http_referer: request.env['HTTP_REFERER'],
       http_user_agent: request.env['HTTP_USER_AGENT'],

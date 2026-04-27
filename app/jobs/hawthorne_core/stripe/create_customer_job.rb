@@ -13,7 +13,7 @@ class HawthorneCore::Stripe::CreateCustomerJob < HawthorneCore::ApplicationJob
     user = HawthorneCore::User.
       select(:user_id, :email, :stripe_customer_id).
       active.
-      find_by(user_id: user_id)
+      find_by(user_id:)
 
     # exit in the unexpected case where the user already has a stripe customer account
     return if user.stripe_customer?

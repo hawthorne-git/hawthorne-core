@@ -9,14 +9,17 @@ class HawthorneCore::Stripe::UpdateCustomerEmailJob < HawthorneCore::Application
 
   def perform(user_id:)
 
-    # find the user by their id
-    user = HawthorneCore::User.
-      select(:user_id, :email, :stripe_customer_id).
-      active.
-      find_by(user_id: user_id)
+    # find the required user attributes
+    user_id, email, stripe_customer_id = HawthorneCore::User.
+      where(user_id:).
+      pick(:user_id, :email, :stripe_customer_id)
 
     # update the customers email, within stripe
-    HawthorneCore::Services::StripeSvc.update_customer_email(user.id, user.email, user.stripe_customer_id)
+    HawthorneCore::Services::StripeSvc.update_customer_email(
+      user_id:,
+      email:,
+      customer_id: stripe_customer_id
+    )
 
   end
 

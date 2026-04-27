@@ -1,0 +1,24 @@
+<%# v3.0 %>
+
+<%
+  url = account_profile_verify_email_path
+
+  title = 'Update email'
+
+  current_email_label = 'Current email'
+  current_email_value = @email
+
+  email_label = 'New email'
+
+  submit_button_text = 'Send Verification Code'
+%>
+
+<%= render HawthorneCore::UI::User::Layout::ProfileComponent.new(title:) do %>
+  <%= render HawthorneCore::UI::Form::FormWrapperComponent.new do %>
+    <%= form_with url: do |form| %>
+      <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form:, attribute: :current_email, label: current_email_label, value: current_email_value, disabled: true) %>
+      <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form:, attribute: :email, label: email_label, required: true, maxlength: 320, autofocus: true) %>
+      <%= render HawthorneCore::UI::Form::SubmitButtonComponent.new(form:, submit_button_text:) %>
+    <% end %>
+  <% end %>
+<% end %>

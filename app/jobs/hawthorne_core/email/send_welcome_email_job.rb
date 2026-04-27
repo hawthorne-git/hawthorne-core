@@ -13,7 +13,7 @@ class HawthorneCore::Email::SendWelcomeEmailJob < HawthorneCore::ApplicationJob
     user = HawthorneCore::User.
       select(:user_id, :email, :name).
       active.
-      find_by(user_id: user_id)
+      find_by(user_id:)
 
     # send the email
     HawthorneCore::Services::MailerSendSvc.send_welcome_email(user.id, user.email, user.first_name)

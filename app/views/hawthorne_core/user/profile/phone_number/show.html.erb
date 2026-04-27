@@ -1,7 +1,7 @@
 <%# v3.0 %>
 
 <%
-  form_url = account_profile_verify_phone_number_path
+  url = account_profile_verify_phone_number_path
 
   title = "#{@user.phone_number.blank? ? 'Add' : 'Update'} phone number"
 
@@ -17,12 +17,12 @@
   us_only_message = "Currently, we only support US phone numbers. International support is coming soon."
 %>
 
-<%= render HawthorneCore::UI::User::Layout::ProfileComponent.new(user: @user, title: title) do %>
-  <%= render HawthorneCore::UI::Form::FormWrapperComponent.new(instruction_message: instruction_message) do %>
-    <%= form_with url: form_url do |f| %>
-      <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :current_phone_number, label: current_phone_number_label, value: current_phone_number_value, disabled: true, required: true) if @user.phone_number.present? %>
-      <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form: f, attribute: :new_phone_number, label: new_phone_number_label, required: true, autofocus: true) %>
-      <%= render HawthorneCore::UI::Form::SubmitButtonComponent.new(form: f, text: submit_button_text) %>
+<%= render HawthorneCore::UI::User::Layout::ProfileComponent.new(title:) do %>
+  <%= render HawthorneCore::UI::Form::FormWrapperComponent.new(instruction_message:) do %>
+    <%= form_with url: do |form| %>
+      <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form:, attribute: :current_phone_number, label: current_phone_number_label, value: current_phone_number_value, disabled: true, required: true) if @user.phone_number.present? %>
+      <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form:, attribute: :new_phone_number, label: new_phone_number_label, required: true, autofocus: true) %>
+      <%= render HawthorneCore::UI::Form::SubmitButtonComponent.new(form:, submit_button_text:) %>
     <% end %>
     <%= render HawthorneCore::UI::Form::SupportMessageComponent.new(message: us_only_message) %>
   <% end %>

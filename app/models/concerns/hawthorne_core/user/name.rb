@@ -18,7 +18,7 @@ module HawthorneCore::User::Name
     # updates a users name
     def update_name(name:)
       update(name:)
-      HawthorneCore::UserAction::Log.update_profile(note: { old_name: name_before_last_save, new_name: name })
+      HawthorneCore::UserAction::Log.update_profile(note: { old_name: name_before_last_save, name: })
     end
 
     # -----------------------------------------------------------------------------

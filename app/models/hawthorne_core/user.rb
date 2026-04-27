@@ -21,7 +21,7 @@ class HawthorneCore::User < HawthorneCore::ActiveRecordBaseApp
   # -----------------------------------------------------------------------------
 
   # determine if a specific user id is deleted
-  def self.deleted?(user_id:) = exists?(user_id: user_id, deleted: true)
+  def self.deleted?(user_id:) = exists?(user_id:, deleted: true)
 
   # -----------------------------------------------------------------------------
 

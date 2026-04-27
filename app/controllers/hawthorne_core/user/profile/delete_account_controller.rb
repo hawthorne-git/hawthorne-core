@@ -108,7 +108,7 @@ class HawthorneCore::User::Profile::DeleteAccountController < HawthorneCore::Acc
       (code_max_failed_attempts_reached = true; failure_reason = HawthorneCore::UserAction::FailureReason.code_max_failed_attempts_reached) if user_site.delete_account_code_max_failed_attempts_reached?
       HawthorneCore::UserAction::Log.delete_account_failure(user.id, failure_reason, { delete_account_code: user_site.delete_account_code, delete_account_code_created_at: user_site.delete_account_code_created_at, delete_account_code_failed_attempts_count: user_site.delete_account_code_failed_attempts_count })
       user_site.refresh_delete_account_code_attrs_then_send_it
-      render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/verify_code_failed', locals: { not_set: code_not_set, expired: code_expired, max_failed_attempts_reached: code_max_failed_attempts_reached }) and return
+      render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/verify_code_failed', locals: { code_not_set:, code_expired:, code_max_failed_attempts_reached: }) and return
     end
 
     # verify the code - it is set, not expired, and has not reached the max number of failed attempts
@@ -116,7 +116,7 @@ class HawthorneCore::User::Profile::DeleteAccountController < HawthorneCore::Acc
     # if the max number of failed attempts reached ... refresh the users code, resend
     # lastly, when the entered code does not match, return back and display an error message
     unless user_site.delete_account_code_match?(code)
-      HawthorneCore::UserAction::Log.delete_account_failure(user.id, HawthorneCore::UserAction::FailureReason.code_not_match, { entered_code: code, code_to_match: user_site.delete_account_code })
+      HawthorneCore::UserAction::Log.delete_account_failure(user.id, HawthorneCore::UserAction::FailureReason.code_not_match, { code:, code_to_match: user_site.delete_account_code })
       user_site.add_delete_account_code_failed_attempt
       if user_site.delete_account_code_max_failed_attempts_reached?
         code_max_failed_attempts_reached = true
@@ -124,7 +124,7 @@ class HawthorneCore::User::Profile::DeleteAccountController < HawthorneCore::Acc
       else
         code_not_match = true
       end
-      render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/verify_code_failed', locals: { not_match: code_not_match, max_failed_attempts_reached: code_max_failed_attempts_reached }) and return
+      render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/verify_code_failed', locals: { code_not_match:, code_max_failed_attempts_reached: }) and return
     end
 
     # ----------------------

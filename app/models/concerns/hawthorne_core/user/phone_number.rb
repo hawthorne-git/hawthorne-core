@@ -8,14 +8,14 @@ module HawthorneCore::User::PhoneNumber
     # -----------------------------------------------------------------------------
 
     # clear the users new phone number attributes, which is site specific
-    def clear_new_phone_number_attrs = HawthorneCore::UserSite.select(:user_site_id).find_by(user_id: id, site_id: HawthorneCore::Site.this_site_id).clear_new_phone_number_attrs
+    def clear_new_phone_number_attrs = HawthorneCore::UserSite.select(:user_site_id).find_by(user_id:, site_id: HawthorneCore::Site.this_site_id).clear_new_phone_number_attrs
 
     # set the users new phone number attributes, which is site specific
-    def set_new_phone_number_attrs(new_phone_number:) = HawthorneCore::UserSite.select(:user_site_id).find_by(user_id: id, site_id: HawthorneCore::Site.this_site_id).set_new_phone_number_attrs(new_phone_number:)
+    def set_new_phone_number_attrs(new_phone_number:) = HawthorneCore::UserSite.select(:user_site_id).find_by(user_id:, site_id: HawthorneCore::Site.this_site_id).set_new_phone_number_attrs(new_phone_number:)
 
     # -----------------------------------------------------------------------------
 
-    def new_phone_number_attr = HawthorneCore::UserSite.where(user_id: id, site_id: HawthorneCore::Site.this_site_id).pick(:new_phone_number)
+    def new_phone_number_attr = HawthorneCore::UserSite.where(user_id:, site_id: HawthorneCore::Site.this_site_id).pick(:new_phone_number)
 
     # -----------------------------------------------------------------------------
 

@@ -11,7 +11,7 @@ module HawthorneCore::User::SiteAccess
 
     def log_site_access_for_known_user = HawthorneCore::UserSite.log_site_access_for_known_user(id)
 
-    def log_site_sign_in(keep_signed_in:) = HawthorneCore::UserSite.log_site_sign_in(user_id: id, keep_signed_in:)
+    def log_site_sign_in(keep_signed_in:) = HawthorneCore::UserSite.log_site_sign_in(user_id:, keep_signed_in:)
 
     # -----------------------------------------------------------------------------
 

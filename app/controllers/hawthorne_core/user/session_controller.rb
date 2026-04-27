@@ -33,7 +33,7 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
     # verify that the email does not have a syntax error
     # if invalid - log it, return back and display an error message
     unless HawthorneCore::Helpers::Email.syntax_valid?(email)
-      HawthorneCore::UserAction::Log.sign_in_failure(HawthorneCore::UserAction::FailureReason.email_syntax_error, { email: email }, request.remote_ip, cookies[:user_session_token])
+      HawthorneCore::UserAction::Log.sign_in_failure(HawthorneCore::UserAction::FailureReason.email_syntax_error, { email: }, request.remote_ip, cookies[:user_session_token])
       render turbo_stream: turbo_stream.update('form_errors', partial: 'sign_in_failed', locals: { syntax_error: true }) and return
     end
 
@@ -45,16 +45,16 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
     user = HawthorneCore::User.
       select(:user_id, :token, :email, :phone_number, :sign_in_code_default_delivery).
       active.
-      find_by(email: email, site_sharing_scope: HawthorneCore::Site.this_site_sharing_scope)
+      find_by(email:, site_sharing_scope: HawthorneCore::Site.this_site_sharing_scope)
 
     # if the user exists, log that the user has accessed the site
     # else, create the user then log that the user has accessed the site (as a new user) - log that an account was created
     if user
       user.log_site_access_for_known_user
     else
-      user = HawthorneCore::User.create!(email: email, site_sharing_scope: HawthorneCore::Site.this_site_sharing_scope)
+      user = HawthorneCore::User.create!(email:, site_sharing_scope: HawthorneCore::Site.this_site_sharing_scope)
       user.log_site_access_for_new_user
-      HawthorneCore::UserAction::Log.account_created(user.id, { email: email, site_sharing_scope: HawthorneCore::Site.this_site_sharing_scope }, request.remote_ip, cookies[:user_session_token])
+      HawthorneCore::UserAction::Log.account_created(user.id, { email:, site_sharing_scope: HawthorneCore::Site.this_site_sharing_scope }, request.remote_ip, cookies[:user_session_token])
     end
 
     # find the users site record ... the sign-in code is specific to each site
@@ -218,7 +218,7 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
       HawthorneCore::UserAction::Log.sign_in_code_verified_failure(user.id, failure_reason, { sign_in_code: user_site.sign_in_code, sign_in_code_created_at: user_site.sign_in_code_created_at, sign_in_code_failed_attempts_count: user_site.sign_in_code_failed_attempts_count }, request.remote_ip, cookies[:user_session_token])
       user_site.refresh_sign_in_code_then_send_it(code_delivery_method, keep_signed_in)
       redirect_to verify_sign_in_code_path(token: user.token, code_delivery_method: code_delivery_method, keep_signed_in: keep_signed_in, error_message: error_message) and return if from_magic_link
-      render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/verify_code_failed', locals: { not_set: code_not_set, expired: code_expired, max_failed_attempts_reached: code_max_failed_attempts_reached }) and return
+      render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/verify_code_failed', locals: { code_not_set:, code_expired:, code_max_failed_attempts_reached: }) and return
     end
 
     # verify the code - it is set, not expired, and has not reached the max number of failed attempts
@@ -226,7 +226,7 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
     # if the max number of failed attempts reached ... refresh the users code, resend
     # lastly, when the entered code does not match, return back and display an error message
     unless user_site.sign_in_code_match?(code)
-      HawthorneCore::UserAction::Log.sign_in_code_verified_failure(user.id, HawthorneCore::UserAction::FailureReason.code_not_match, { entered_code: code, code_to_match: user_site.sign_in_code }, request.remote_ip, cookies[:user_session_token])
+      HawthorneCore::UserAction::Log.sign_in_code_verified_failure(user.id, HawthorneCore::UserAction::FailureReason.code_not_match, { code:, code_to_match: user_site.sign_in_code }, request.remote_ip, cookies[:user_session_token])
       user_site.add_sign_in_code_failed_attempt
       if user_site.sign_in_code_max_failed_attempts_reached?
         code_max_failed_attempts_reached = true; error_message = 'CODE_MAX_FAILED_ATTEMPTS_REACHED'
@@ -235,7 +235,7 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
         code_not_match = true; error_message = 'CODE_NOT_MATCH'
       end
       redirect_to verify_sign_in_code_path(token: user.token, code_delivery_method: code_delivery_method, keep_signed_in: keep_signed_in, error_message: error_message) and return if from_magic_link
-      render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/verify_code_failed', locals: { not_match: code_not_match, max_failed_attempts_reached: code_max_failed_attempts_reached }) and return
+      render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/verify_code_failed', locals: { code_not_match:, code_max_failed_attempts_reached: }) and return
     end
 
     # ----------------------

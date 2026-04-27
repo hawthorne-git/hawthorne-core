@@ -5,7 +5,7 @@ module HawthorneCore::Helpers::Email
   # -----------------------------------------------------------------------------
 
   # determine if the email is used, with the site sharing scope
-  def self.taken?(email:) = HawthorneCore::User.exists?(email: email, site_sharing_scope: HawthorneCore::Site.this_site_sharing_scope)
+  def self.taken?(email:) = HawthorneCore::User.exists?(email:, site_sharing_scope: HawthorneCore::Site.this_site_sharing_scope)
 
   # -----------------------------------------------------------------------------
 
@@ -20,7 +20,7 @@ module HawthorneCore::Helpers::Email
     # return false if the domain is included on our internal list, of invalid domains
     domain = email.split('@').last
     return false if domain.blank?
-    return false if HawthorneCore::InvalidEmailAddressDomain.invalid?(domain)
+    return false if HawthorneCore::InvalidEmailAddressDomain.invalid?(domain:)
 
     # all validation passed, return true
     true

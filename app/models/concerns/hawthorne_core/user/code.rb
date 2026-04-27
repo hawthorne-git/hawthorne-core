@@ -43,7 +43,7 @@ module HawthorneCore::User::Code
     # updates a users sign-in code default delivery method
     def update_sign_in_code_default_delivery(sign_in_code_default_delivery:)
       update(sign_in_code_default_delivery:)
-      HawthorneCore::UserAction::Log.update_profile(note: { old_sign_in_code_default_delivery: sign_in_code_default_delivery_before_last_save, new_sign_in_code_default_delivery: sign_in_code_default_delivery })
+      HawthorneCore::UserAction::Log.update_profile(note: { old_sign_in_code_default_delivery: sign_in_code_default_delivery_before_last_save, sign_in_code_default_delivery: })
     end
 
     # -----------------------------------------------------------------------------

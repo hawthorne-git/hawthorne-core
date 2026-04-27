@@ -5,7 +5,7 @@ module HawthorneCore
     extend self
 
     def set(user_id:, ip:, user_session_token:)
-      Thread.current[:hawthorne_request_context] = { user_id: user_id, ip: ip, user_session_token: user_session_token }
+      Thread.current[:hawthorne_request_context] = { user_id:, ip: ip, user_session_token: user_session_token }
     end
 
     def get

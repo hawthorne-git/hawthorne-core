@@ -16,7 +16,7 @@ class HawthorneCore::Email::SendSignInCodeJob < HawthorneCore::ApplicationJob
     user = HawthorneCore::User.
       select(:user_id, :token, :email, :name).
       active.
-      find_by(user_id: user_id)
+      find_by(user_id:)
 
     # find the users site record ... the code is specific to the site
     user_site = HawthorneCore::UserSite.

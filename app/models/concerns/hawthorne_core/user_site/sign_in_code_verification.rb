@@ -56,7 +56,7 @@ module HawthorneCore::UserSite::SignInCodeVerification
       HawthorneCore::UserAction.
         where(
           site_id: HawthorneCore::Site.this_site_id,
-          user_id: user_id,
+          user_id:,
           action: HawthorneCore::UserAction::Action::ACTIONS.fetch(:email_sent),
           success: true
         ).
@@ -71,7 +71,7 @@ module HawthorneCore::UserSite::SignInCodeVerification
       HawthorneCore::UserAction.
         where(
           site_id: HawthorneCore::Site.this_site_id,
-          user_id: user_id,
+          user_id:,
           action: HawthorneCore::UserAction::Action::ACTIONS.fetch(:text_message_sent),
           success: true
         ).

@@ -1,0 +1,25 @@
+<%# v3.0 %>
+
+<%
+  url = account_profile_verify_email_code_path
+
+  title = 'Verify your email'
+
+  instruction_message = "Enter the code we sent to #{@new_email}"
+
+  submit_button_text = 'Verify and Update Email'
+
+  message = "Didn't get the code? #{link_to 'Resend it', account_profile_resend_email_code_path, data: { turbo: :false }}"
+%>
+
+<%= render HawthorneCore::UI::User::Layout::ProfileComponent.new(title:) do %>
+  <%= render HawthorneCore::UI::Form::FormWrapperComponent.new(instruction_message:) do %>
+    <%= form_with url: do |form| %>
+      <%= render HawthorneCore::UI::Form::Attr::CodeTextFieldComponent.new(form:) %>
+      <%= render HawthorneCore::UI::Form::SubmitButtonComponent.new(form:, submit_button_text:) %>
+    <% end %>
+    <%= render HawthorneCore::UI::Form::SupportMessageComponent.new(message:) %>
+  <% end %>
+<% end %>
+
+<%= render '/hawthorne_core/user/verify_code_auto_submit_js' %>

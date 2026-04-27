@@ -15,7 +15,7 @@ class HawthorneCore::Services::TwilioTextSvc
   def self.send_phone_number_update_code(user_id:, phone_number:, code_formatted:)
     send_text_message(
       text_message_type: PHONE_NUMBER_UPDATE_CODE,
-      user_id: user_id,
+      user_id:,
       phone_number: phone_number,
       message: code_message(code: code_formatted)
     )
@@ -25,7 +25,7 @@ class HawthorneCore::Services::TwilioTextSvc
   def self.send_sign_in_code(user_id:, phone_number:, code_formatted:)
     send_text_message(
       text_message_type: SIGN_IN_CODE,
-      user_id: user_id,
+      user_id:,
       phone_number: phone_number,
       message: sign_in_code_message(code: code_formatted)
     )
@@ -86,7 +86,7 @@ class HawthorneCore::Services::TwilioTextSvc
       HawthorneCore::UserAction::Log.text_message_sent(user_id:, note: { text_message_type: text_message_type, phone_number: phone_number, message: message, twilio_message_id: result[:sid] })
     else
       HawthorneCore::UserAction::Log.text_message_sent_failure(user_id:, failure_reason: HawthorneCore::UserAction::FailureReason.exception_caught, note: { type: text_message_type, phone_number: phone_number, message: message, exception_message: result[:exception_message] })
-      HawthorneCore::CapturedException.log(location: 'HawthorneCore::Services::TwilioTextSvc.send_text_message', note: { type: text_message_type, user_id: user_id, phone_number: phone_number, message: message }, e: result[:exception])
+      HawthorneCore::CapturedException.log(location: 'HawthorneCore::Services::TwilioTextSvc.send_text_message', note: { type: text_message_type, user_id:, phone_number: phone_number, message: message }, e: result[:exception])
     end
 
   end

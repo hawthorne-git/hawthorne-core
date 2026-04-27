@@ -17,7 +17,7 @@ module HawthorneCore::UserSite::EmailCodeVerification
 
     def new_email_code_max_failed_attempts_reached? = (new_email_code_failed_attempts_count >= HawthorneCore::User::CODE_MAX_FAILED_ATTEMPTS_ALLOWED)
 
-    def new_email_code_match?(code_to_match) = (new_email_code == code_to_match.gsub(/\D/, ''))
+    def new_email_code_match?(code:) = (new_email_code == code.gsub(/\D/, ''))
 
     # ------------------------
 
@@ -31,7 +31,7 @@ module HawthorneCore::UserSite::EmailCodeVerification
 
     # set the new email attributes - log it
     def set_new_email_attrs(new_email:)
-      attrs = { new_email: new_email, new_email_code: SecureRandom.random_number(HawthorneCore::User::CODE_RANGE), new_email_code_created_at: Time.current, new_email_code_failed_attempts_count: 0 }
+      attrs = { new_email:, new_email_code: SecureRandom.random_number(HawthorneCore::User::CODE_RANGE), new_email_code_created_at: Time.current, new_email_code_failed_attempts_count: 0 }
       update_columns(attrs)
       HawthorneCore::UserAction::Log.new_email_attrs_set(note: attrs)
     end
@@ -43,14 +43,14 @@ module HawthorneCore::UserSite::EmailCodeVerification
       unless new_email_code_active?
         attrs = { new_email_code: SecureRandom.random_number(HawthorneCore::User::CODE_RANGE), new_email_code_created_at: Time.current, new_email_code_failed_attempts_count: 0 }
         update_columns(attrs)
-        HawthorneCore::UserAction::Log.new_email_attrs_refreshed(user_id: user_id, note: attrs)
+        HawthorneCore::UserAction::Log.new_email_attrs_refreshed(user_id:, note: attrs)
       end
     end
 
     # refresh the users new email code attributes, then send it via email
     def refresh_new_email_code_attrs_then_send_it
       refresh_new_email_code_attrs
-      HawthorneCore::Email::SendEmailUpdateCodeJob.perform_later(user_id)
+      HawthorneCore::Email::SendEmailUpdateCodeJob.perform_later(user_id:)
     end
 
     # ------------------------
@@ -65,7 +65,7 @@ module HawthorneCore::UserSite::EmailCodeVerification
       HawthorneCore::UserAction.
         where(
           site_id: HawthorneCore::Site.this_site_id,
-          user_id: user_id,
+          user_id:,
           action: HawthorneCore::UserAction::Action::ACTIONS.fetch(:email_sent),
           success: true
         ).

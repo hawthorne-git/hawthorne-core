@@ -43,14 +43,14 @@ module HawthorneCore::UserSite::PhoneNumberCodeVerification
       unless new_phone_number_code_active?
         attrs = { new_phone_number_code: SecureRandom.random_number(HawthorneCore::User::CODE_RANGE), new_phone_number_code_created_at: Time.current, new_phone_number_code_failed_attempts_count: 0 }
         update_columns(attrs)
-        HawthorneCore::UserAction::Log.new_phone_number_attrs_refreshed(user_id: user_id, note: attrs)
+        HawthorneCore::UserAction::Log.new_phone_number_attrs_refreshed(user_id:, note: attrs)
       end
     end
 
     # refresh the users new phone number code attributes, then send it via text message
     def refresh_new_phone_number_code_attrs_then_send_it
       refresh_new_phone_number_code_attrs
-      HawthorneCore::Text::SendPhoneNumberUpdateCodeJob.perform_later(user_id: user_id)
+      HawthorneCore::Text::SendPhoneNumberUpdateCodeJob.perform_later(user_id:)
     end
 
     # ------------------------
@@ -65,7 +65,7 @@ module HawthorneCore::UserSite::PhoneNumberCodeVerification
       HawthorneCore::UserAction.
         where(
           site_id: HawthorneCore::Site.this_site_id,
-          user_id: user_id,
+          user_id:,
           action: HawthorneCore::UserAction::Action::ACTIONS.fetch(:text_message_sent),
           success: true
         ).

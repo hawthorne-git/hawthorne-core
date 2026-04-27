@@ -16,7 +16,7 @@ class HawthorneCore::Text::SendSignInCodeJob < HawthorneCore::ApplicationJob
     user = HawthorneCore::User.
       select(:user_id, :phone_number).
       active.
-      find_by(user_id: user_id)
+      find_by(user_id:)
 
     # find the users site record ... the code is specific to the site
     user_site = HawthorneCore::UserSite.
@@ -28,7 +28,7 @@ class HawthorneCore::Text::SendSignInCodeJob < HawthorneCore::ApplicationJob
 
     # exit if a text message with this code was recently sent to the user
     if user_site.sign_in_code_recently_sent_via_text_message?
-      HawthorneCore::UserAction::Log.text_message_sent_failure(user.id, HawthorneCore::UserAction::FailureReason.text_message_recently_sent, { type: type, sign_in_code: user_site.sign_in_code })
+      HawthorneCore::UserAction::Log.text_message_sent_failure(user.id, HawthorneCore::UserAction::FailureReason.text_message_recently_sent, { type:, sign_in_code: user_site.sign_in_code })
       return
     end
 
