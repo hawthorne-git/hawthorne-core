@@ -6,7 +6,7 @@
 
 <script src="https://js.stripe.com/v3/"></script>
 
-<%= render HawthorneCore::UI::User::Layout::PaymentsComponent.new(user: @user, title: title) do %>
+<%= render HawthorneCore::UI::User::Layout::PaymentsComponent.new(title:) do %>
 
   <div data-controller="stripe-card"
        data-stripe-card-publishable-key-value="<%= HawthorneCore::AppConfig.stripe_publishable_key %>"

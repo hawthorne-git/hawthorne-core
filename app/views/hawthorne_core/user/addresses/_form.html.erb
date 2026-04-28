@@ -38,7 +38,7 @@
   submit_button_text = "#{action.capitalize} Shipping Address"
 %>
 
-<%= render HawthorneCore::UI::User::Layout::AddressesComponent.new(user: @user, title: title) do %>
+<%= render HawthorneCore::UI::User::Layout::AddressesComponent.new(title:) do %>
   <%= render HawthorneCore::UI::Form::FormWrapperComponent.new do %>
 
     <%= form_with url: select_country_form_url do |form| %>
