@@ -30,8 +30,10 @@ module HawthorneCore
       HawthorneCore::AppConfig.smarty_embedded_key
       HawthorneCore::AppConfig.stripe_publishable_key
       HawthorneCore::AppConfig.stripe_secret_key
+      HawthorneCore::AppConfig.twilio_callback_url
       HawthorneCore::AppConfig.twilio_password
       HawthorneCore::AppConfig.twilio_username
+      HawthorneCore::AppConfig.twilio_us_phone_number
     end
 
   end

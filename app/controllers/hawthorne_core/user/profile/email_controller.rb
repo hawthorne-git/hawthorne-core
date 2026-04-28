@@ -66,6 +66,7 @@ class HawthorneCore::User::Profile::EmailController < HawthorneCore::AccountAppl
 
     # ----------------------
 
+    # redirect the user to verify their code, sent via email
     redirect_to account_profile_verify_email_code_path
 
   end

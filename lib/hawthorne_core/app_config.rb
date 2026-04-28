@@ -32,9 +32,13 @@ module HawthorneCore
 
     def self.stripe_secret_key = fetch_env_attr('STRIPE_SECRET_KEY')
 
+    def self.twilio_callback_url = fetch_env_attr('TWILIO_CALLBACK_URL')
+
     def self.twilio_password = fetch_env_attr('TWILIO_PASSWORD')
 
     def self.twilio_username = fetch_env_attr('TWILIO_USERNAME')
+
+    def self.twilio_us_phone_number = fetch_env_attr('TWILIO_US_PHONE_NUMBER')
 
     # ----------------------------------------------------------------------------- Site Names
 

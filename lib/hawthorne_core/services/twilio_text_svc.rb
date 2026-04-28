@@ -43,7 +43,7 @@ class HawthorneCore::Services::TwilioTextSvc
   end
 
   # define the phone number to use when sending the text message
-  def self.twilio_phone_number = '18452534739'.freeze
+  def self.from_phone_number = HawthorneCore::AppConfig.twilio_us_phone_number
 
   # ----------------------------------------------------------------
 
@@ -60,7 +60,7 @@ class HawthorneCore::Services::TwilioTextSvc
 
     # send the text message, via twilio
     result = send_twilio_text_message(
-      from: twilio_phone_number,
+      from: from_phone_number,
       to: phone_number,
       body: message
     )
@@ -70,7 +70,7 @@ class HawthorneCore::Services::TwilioTextSvc
       user_id:,
       text_message_service: 'TWILIO',
       text_message_type:,
-      from_phone_number: twilio_phone_number,
+      from_phone_number:,
       to_phone_number: phone_number,
       message:,
       service_id: result[:sid],
@@ -101,43 +101,20 @@ class HawthorneCore::Services::TwilioTextSvc
       from:,
       to:,
       body:,
-      status_callback: 'https://www.hawthonreadmin.com/callback_twilio_xklgyhzfnvro'
+      status_callback: HawthorneCore::AppConfig.twilio_callback_url
     )
 
     # return that the text message was successfully sent (specifically 'queued') ... this does not mean delivered
-    {
-      success: true,
-      sid: message.sid,
-      status: message.status
-    }
+    { success: true, sid: message.sid, status: message.status }
 
-    # if a twilio execution caught ...
   rescue Twilio::REST::RestError => e
-    {
-      success: false,
-      exception_type: :twilio_error,
-      exception: e,
-      exception_code: e.code,
-      exception_message: e.message
-    }
+    { success: false, exception_type: :twilio_error, exception: e, exception_code: e.code, exception_message: e.message }
 
-    # if an HTTP exception caught
   rescue Faraday::Error => e
-    {
-      success: false,
-      exception_type: :network_error,
-      exception: e,
-      exception_message: e.message
-    }
+    { success: false, exception_type: :network_error, exception: e, exception_message: e.message }
 
-    # catch all other exceptions
   rescue => e
-    {
-      success: false,
-      exception_type: :unknown_error,
-      exception: e,
-      exception_message: e.message
-    }
+    { success: false, exception_type: :unknown_error, exception: e, exception_message: e.message }
 
   end
 

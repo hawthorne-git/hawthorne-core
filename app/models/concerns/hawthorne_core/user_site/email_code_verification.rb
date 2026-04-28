@@ -7,7 +7,7 @@ module HawthorneCore::UserSite::EmailCodeVerification
 
     # -----------------------------------------------------------------------------
 
-    def new_email_code_formatted = "#{new_email_code[0,3]}-#{new_email_code[3,3]}"
+    def new_email_code_formatted = "#{new_email_code[0, 3]}-#{new_email_code[3, 3]}"
 
     def new_email_code_active? = new_email_code_set? && !new_email_code_expired? && !new_email_code_max_failed_attempts_reached?
 
@@ -40,11 +40,10 @@ module HawthorneCore::UserSite::EmailCodeVerification
 
     # refresh the users new email code / code created at / failed attempts
     def refresh_new_email_code_attrs
-      unless new_email_code_active?
-        attrs = { new_email_code: SecureRandom.random_number(HawthorneCore::User::CODE_RANGE), new_email_code_created_at: Time.current, new_email_code_failed_attempts_count: 0 }
-        update_columns(attrs)
-        HawthorneCore::UserAction::Log.new_email_attrs_refreshed(user_id:, note: attrs)
-      end
+      attrs = { new_email_code: SecureRandom.random_number(HawthorneCore::User::CODE_RANGE), new_email_code_created_at: Time.current, new_email_code_failed_attempts_count: 0 }
+      update_columns(attrs)
+      HawthorneCore::UserAction::Log.new_email_attrs_refreshed(user_id:, note: attrs)
+      self
     end
 
     # refresh the users new email code attributes, then send it via email

@@ -26,10 +26,10 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Accou
 
   # -----------------------------------------------------------------------------
 
-  # verify the users new phone number
+  # verify the users phone number
   def verify
 
-    phone_number = params[:new_phone_number].to_s.strip
+    phone_number = params[:new_phone_number].to_s.squish
 
     # ----------------------
 
@@ -60,6 +60,7 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Accou
 
     # ----------------------
 
+    # redirect the user to verify their code, sent via text message
     redirect_to account_profile_verify_phone_number_code_path
 
   end
@@ -141,7 +142,10 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Accou
     # the code is verified!
 
     # update the users phone number
-    user.update_phone_number(new_phone_number: user_site.new_phone_number)
+    HawthorneCore::User.
+      select(:user_id, :phone_number, :sign_in_code_default_delivery).
+      find_by(user_id: session[:user_id]).
+      update_phone_number(phone_number: user_site.new_phone_number)
 
     # ----------------------
 

@@ -7,7 +7,7 @@ module HawthorneCore::UserSite::PhoneNumberCodeVerification
 
     # -----------------------------------------------------------------------------
 
-    def new_phone_number_code_formatted = "#{new_phone_number_code[0,3]}-#{new_phone_number_code[3,3]}"
+    def new_phone_number_code_formatted = "#{new_phone_number_code[0, 3]}-#{new_phone_number_code[3, 3]}"
 
     def new_phone_number_code_active? = new_phone_number_code_set? && !new_phone_number_code_expired? && !new_phone_number_code_max_failed_attempts_reached?
 
@@ -40,11 +40,10 @@ module HawthorneCore::UserSite::PhoneNumberCodeVerification
 
     # refresh the users new phone number code / code created at / failed attempts
     def refresh_new_phone_number_code_attrs
-      unless new_phone_number_code_active?
-        attrs = { new_phone_number_code: SecureRandom.random_number(HawthorneCore::User::CODE_RANGE), new_phone_number_code_created_at: Time.current, new_phone_number_code_failed_attempts_count: 0 }
-        update_columns(attrs)
-        HawthorneCore::UserAction::Log.new_phone_number_attrs_refreshed(user_id:, note: attrs)
-      end
+      attrs = { new_phone_number_code: SecureRandom.random_number(HawthorneCore::User::CODE_RANGE), new_phone_number_code_created_at: Time.current, new_phone_number_code_failed_attempts_count: 0 }
+      update_columns(attrs)
+      HawthorneCore::UserAction::Log.new_phone_number_attrs_refreshed(user_id:, note: attrs)
+      self
     end
 
     # refresh the users new phone number code attributes, then send it via text message
