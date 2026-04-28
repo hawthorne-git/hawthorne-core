@@ -7,18 +7,20 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Accou
   # show the page for the user to update their phone number
   def show
 
-    # find the user
-    @user = HawthorneCore::User.
-      select(:user_id, :email, :name, :phone_number).
-      active.
-      find_by(user_id: session[:user_id])
+    # find the users phone number
+    @phone_number = HawthorneCore::User.
+      where(user_id: session[:user_id]).
+      pick(:phone_number)
 
     # clear the users new phone number attributes
-    @user.clear_new_phone_number_attrs
+    HawthorneCore::User.
+      select(:user_id).
+      find_by(user_id: session[:user_id]).
+      clear_new_phone_number_attrs
 
     # ----------------------
 
-    @html_title = "#{@user.phone_number.blank? ? 'Add' : 'Update'} Phone Number | Profile"
+    @html_title = "#{@phone_number.blank? ? 'Add' : 'Update'} Phone Number | Profile"
 
   end
 
@@ -27,29 +29,20 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Accou
   # verify the users new phone number
   def verify
 
-    # get the request attributes
-    new_phone_number = params[:new_phone_number].to_s.strip
+    phone_number = params[:new_phone_number].to_s.strip
 
     # ----------------------
 
-    # find the user
-    user = HawthorneCore::User.
-      select(:user_id, :phone_number).
-      active.
-      find_by(user_id: session[:user_id])
-
-    # ----------------------
-
-    # verify that the new phone number does not have a syntax error
-    unless HawthorneCore::Helpers::PhoneNumber.us_syntax_valid?(phone_number: new_phone_number)
-      HawthorneCore::UserAction::Log.update_profile_failure(failure_reason: HawthorneCore::UserAction::FailureReason.phone_number_syntax_error, note: { new_phone_number: new_phone_number })
-      render turbo_stream: turbo_stream.update('form_errors', partial: 'new_phone_number_failed', locals: { syntax_error: true }) and return
+    # verify that the phone number does not have a syntax error
+    unless HawthorneCore::Helpers::PhoneNumber.us_syntax_valid?(phone_number:)
+      HawthorneCore::UserAction::Log.update_profile_failure(failure_reason: HawthorneCore::UserAction::FailureReason.phone_number_syntax_error, note: { phone_number: })
+      render turbo_stream: turbo_stream.update('form_errors', partial: 'failed', locals: { syntax_error: true }) and return
     end
 
-    # verify that the new phone number does not match the current phone number
-    if HawthorneCore::Helpers::PhoneNumber.match?(phone_number: user.phone_number, phone_number_to_match: new_phone_number)
-      HawthorneCore::UserAction::Log.update_profile_failure(failure_reason: HawthorneCore::UserAction::FailureReason.phone_number_identical, note: { current_phone_number: user.phone_number, new_phone_number: new_phone_number })
-      render turbo_stream: turbo_stream.update('form_errors', partial: 'new_phone_number_failed', locals: { identical: true }) and return
+    # verify that the phone number does not match the current phone number
+    if HawthorneCore::Helpers::PhoneNumber.match?(phone_number:, phone_number_to_match: HawthorneCore::User.where(user_id: session[:user_id]).pick(:phone_number))
+      HawthorneCore::UserAction::Log.update_profile_failure(failure_reason: HawthorneCore::UserAction::FailureReason.phone_number_identical, note: { phone_number: })
+      render turbo_stream: turbo_stream.update('form_errors', partial: 'failed', locals: { identical: true }) and return
     end
 
     # ----------------------
@@ -57,10 +50,13 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Accou
     # the new phone number is valid!
 
     # set the users new phone number attributes
-    user.set_new_phone_number_attrs(new_phone_number:)
+    HawthorneCore::User.
+      select(:user_id).
+      find_by(user_id: session[:user_id]).
+      set_new_phone_number_attrs(phone_number:)
 
     # send the user a text message with a code to verify their new phone number
-    HawthorneCore::Text::SendPhoneNumberUpdateCodeJob.perform_later(user_id: user.id)
+    HawthorneCore::Text::SendPhoneNumberUpdateCodeJob.perform_later(user_id: session[:user_id])
 
     # ----------------------
 
@@ -73,15 +69,19 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Accou
   # show the page for the user to verify their code, to update their phone number
   def verify_code_show
 
-    # find the user
-    @user = HawthorneCore::User.
-      select(:user_id, :email, :name, :phone_number).
-      active.
-      find_by(user_id: session[:user_id])
+    # find the users current phone number
+    @current_phone_number = HawthorneCore::User.
+      where(user_id: session[:user_id]).
+      pick(:phone_number)
+
+    # find the users new phone number
+    @new_phone_number = HawthorneCore::UserSite.
+      where(user_id: session[:user_id], site_id: HawthorneCore::Site.this_site_id).
+      pick(:new_phone_number)
 
     # ----------------------
 
-    @html_title = "#{@user.phone_number.blank? ? 'Add' : 'Update'} Phone Number | Profile"
+    @html_title = "#{@current_phone_number.blank? ? 'Add' : 'Update'} Phone Number | Profile"
 
   end
 
@@ -98,21 +98,14 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Accou
   # verify the users code, to update their phone number
   def verify_code
 
-    # get the request attributes
     code = params[:code]
 
     # ----------------------
 
-    # find the user
-    user = HawthorneCore::User.
-      select(:user_id, :phone_number, :sign_in_code_default_delivery).
-      active.
-      find_by(user_id: session[:user_id])
-
     # find the users site record ... the new phone number attributes are specific to each site
     user_site = HawthorneCore::UserSite.
       select(:user_site_id, :user_id, :new_phone_number, :new_phone_number_code, :new_phone_number_code_created_at, :new_phone_number_code_failed_attempts_count).
-      find_by(user_id: user.id, site_id: HawthorneCore::Site.this_site_id)
+      find_by(user_id: session[:user_id], site_id: HawthorneCore::Site.this_site_id)
 
     # ----------------------
 

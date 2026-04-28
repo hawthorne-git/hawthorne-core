@@ -11,7 +11,7 @@ module HawthorneCore::User::Name
     def first_name? = name.present?
 
     # get the first name of the user
-    def first_name = first_name? ? name.split(' ').first : ''
+    def first_name = first_name? ? name.split(' ').first : nil
 
     # -----------------------------------------------------------------------------
 

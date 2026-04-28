@@ -7,4 +7,4 @@
   message = 'We couldn’t verify that code, so we sent you a new one' if local_assigns[:code_not_set]
 %>
 
-<%= render HawthorneCore::UI::Form::ErrorMessageComponent.new(message: message) %>
+<%= render HawthorneCore::UI::Form::ErrorMessageComponent.new(message:) %>

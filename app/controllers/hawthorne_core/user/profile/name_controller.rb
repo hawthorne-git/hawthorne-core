@@ -23,7 +23,7 @@ class HawthorneCore::User::Profile::NameController < HawthorneCore::AccountAppli
   # add / update the users name
   def update
 
-    name = params[:name]
+    name = params[:name].to_s.squish
 
     # ----------------------
 

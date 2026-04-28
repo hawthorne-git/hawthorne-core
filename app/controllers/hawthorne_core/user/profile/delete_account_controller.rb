@@ -96,7 +96,7 @@ class HawthorneCore::User::Profile::DeleteAccountController < HawthorneCore::Acc
     # find the users site record ... the new delete account attributes are specific to each site
     user_site = HawthorneCore::UserSite.
       select(:user_site_id, :user_id, :delete_account_code, :delete_account_code_created_at, :delete_account_code_failed_attempts_count).
-      find_by(user_id: user.id, site_id: HawthorneCore::Site.this_site_id)
+      find_by(user_id:, site_id: HawthorneCore::Site.this_site_id)
 
     # ----------------------
 

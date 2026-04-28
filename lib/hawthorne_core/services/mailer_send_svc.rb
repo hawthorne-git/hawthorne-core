@@ -7,10 +7,16 @@ class HawthorneCore::Services::MailerSendSvc
   # ----------------------------------------------------------------
 
   DELETE_ACCOUNT_CODE = 'DELETE ACCOUNT CODE'.freeze
+  DELETE_ACCOUNT_CODE_SUBJECT = 'Delete your account'.freeze
+  DELETE_ACCOUNT_CODE_TEMPLATE = 'jy7zpl971w3g5vx6'.freeze
 
   EMAIL_UPDATE_CODE = 'EMAIL UPDATE CODE'.freeze
+  EMAIL_UPDATE_CODE_SUBJECT = 'Verify your new email'.freeze
+  EMAIL_UPDATE_CODE_TEMPLATE = '3z0vklooo7xl7qrx'.freeze
 
   SIGN_IN_CODE = 'SIGN-IN CODE'.freeze
+  SIGN_IN_CODE_SUBJECT = 'Your sign-in link and code'.freeze
+  SIGN_IN_CODE_TEMPLATE = '0r83ql3vnkmgzw1j'.freeze
 
   WELCOME_EMAIL = 'WELCOME EMAIL'.freeze
 
@@ -22,8 +28,8 @@ class HawthorneCore::Services::MailerSendSvc
       email_type: DELETE_ACCOUNT_CODE,
       user_id:,
       email:,
-      subject: delete_account_code_subject,
-      template_id: delete_account_code_template,
+      subject: DELETE_ACCOUNT_CODE_SUBJECT,
+      template_id: DELETE_ACCOUNT_CODE_TEMPLATE,
       personalization: delete_account_code_personalization(email:, first_name:, code:, code_formatted:)
     )
 
@@ -37,8 +43,8 @@ class HawthorneCore::Services::MailerSendSvc
       email_type: EMAIL_UPDATE_CODE,
       user_id:,
       email:,
-      subject: email_update_code_subject,
-      template_id: email_update_code_template,
+      subject: EMAIL_UPDATE_CODE_SUBJECT,
+      template_id: EMAIL_UPDATE_CODE_TEMPLATE,
       personalization: email_update_code_personalization(email:, first_name:, code:, code_formatted:)
     )
   end
@@ -47,13 +53,13 @@ class HawthorneCore::Services::MailerSendSvc
 
   # send sign-in code
   def self.send_sign_in_code(user_id:, user_token:, email:, first_name:, code:, code_formatted:, keep_signed_in:)
-    magic_link_url = HawthorneCore::AppConfig.site_base_url + '/verify-sign-in-code-via-magic-link?token=' + user_token + '&code=' + sign_in_code.to_s + '&keep_signed_in=' + keep_signed_in.to_s
+    magic_link_url = HawthorneCore::AppConfig.site_base_url + '/verify-sign-in-code-via-magic-link?token=' + user_token + '&code=' + code.to_s + '&keep_signed_in=' + keep_signed_in.to_s
     send_email(
       email_type: SIGN_IN_CODE,
       user_id:,
       email:,
-      subject: sign_in_code_subject,
-      template_id: sign_in_code_template,
+      subject: SIGN_IN_CODE_SUBJECT,
+      template_id: SIGN_IN_CODE_TEMPLATE,
       personalization: sign_in_code_personalization(email:, first_name:, magic_link_url:, code:, code_formatted:)
     )
   end
@@ -66,8 +72,8 @@ class HawthorneCore::Services::MailerSendSvc
       email_type: WELCOME_EMAIL,
       user_id:,
       email:,
-      subject: welcome_email_subject,
-      template_id: welcome_email_template,
+      subject: "Welcome to #{HawthorneCore::Site.this_site_name}",
+      template_id: HawthorneCore::Site.this_site_mailer_send_welcome_email_template_id,
       personalization: welcome_personalization(email:, first_name:)
     )
   end
@@ -85,86 +91,56 @@ class HawthorneCore::Services::MailerSendSvc
 
   # ----------------------------------------------------------------
 
+  # get the from email for the site, ex: hello@hawthorneprintco.com
   def self.from_email = HawthorneCore::Site.this_site_contact_email
 
+  # get the from name for the site, ex: Hawthorne Print Co
   def self.from_email_name = HawthorneCore::Site.this_site_name
+
+  # get the from tagline for the site, ex: Lindsay, Charlie, and your friends at Hawthorne Print Co
+  def self.from_tagline = HawthorneCore::Site.this_site_email_from_tagline
 
   # ----------------------------------------------------------------
 
-  def self.mailer_send_personalization(email:, data:)
-    {
-      email:,
-      data: data.merge(from_tagline: HawthorneCore::Site.this_site_email_from_tagline)
-    }
-  end
-
+  # define the personalization data element for first name ... if not present, return 'there'
   def self.first_name_personalization(first_name:) = first_name.presence || 'there'
 
-  # ----------------------
-
-  def self.delete_account_code_subject = 'Delete your account'.freeze
-
-  def self.delete_account_code_template = 'jy7zpl971w3g5vx6'.freeze
-
-  def self.delete_account_code_personalization(email:, first_name:, code:, code_formatted:)
-    mailer_send_personalization(
-      email:,
-      data: {
-        first_name: first_name_personalization(first_name:),
-        code:,
-        code_formatted:
-      }
-    )
-  end
-
-  # ----------------------
-
-  def self.email_update_code_subject = 'Verify your new email'.freeze
-
-  def self.email_update_code_template = '3z0vklooo7xl7qrx'.freeze
-
-  def self.email_update_code_personalization(email:, first_name:, code:, code_formatted:)
-    mailer_send_personalization(
-      email:,
-      data: {
-        first_name: first_name_personalization(first_name:),
-        code:,
-        code_formatted:
-      }
-    )
-  end
-
-  # ----------------------
-
-  def self.sign_in_code_subject = 'Your sign-in link and code'.freeze
-
-  def self.sign_in_code_template = '0r83ql3vnkmgzw1j'.freeze
-
-  def self.sign_in_code_personalization(email:, first_name:, magic_link_url:, code:, code_formatted:)
-    mailer_send_personalization(
+  # define the personalization data for sending a code email
+  def self.code_personalization(email:, first_name:, magic_link_url: nil, code:, code_formatted:)
+    {
       email:,
       data: {
         first_name: first_name_personalization(first_name:),
         magic_link_url:,
         code:,
-        code_formatted:
+        code_formatted:,
+        from_tagline:
       }
-    )
+    }
   end
 
   # ----------------------
 
-  def self.welcome_email_subject = 'Welcome to ' + HawthorneCore::Site.this_site_name
+  # define the personalization data for sending the delete account code email
+  def self.delete_account_code_personalization(email:, first_name:, code:, code_formatted:) = code_personalization(email:, first_name:, code:, code_formatted:)
 
-  def self.welcome_email_template = HawthorneCore::Site.this_site_mailer_send_welcome_email_template_id
+  # define the personalization data for sending the email update code email
+  def self.email_update_code_personalization(email:, first_name:, code:, code_formatted:) = code_personalization(email:, first_name:, code:, code_formatted:)
 
+  # define the personalization data for sending the sign-in code email
+  def self.sign_in_code_personalization(email:, first_name:, magic_link_url:, code:, code_formatted:) = code_personalization(email:, first_name:, magic_link_url:, code:, code_formatted:)
+
+  # ----------------------
+
+  # define the personalization data for sending the welcome email
   def self.welcome_personalization(email:, first_name:)
-    mailer_send_personalization(
+    {
       email:,
       data: {
-        first_name: first_name_personalization(first_name:)
+        first_name: first_name_personalization(first_name:),
+        from_tagline:
       }
-    )
+    }
   end
 
   # ----------------------------------------------------------------
@@ -181,7 +157,7 @@ class HawthorneCore::Services::MailerSendSvc
       email_service: 'MAILER_SEND',
       email_type:,
       service_template_id: template_id,
-      from_email: from_email,
+      from_email:,
       to_email: email,
       subject:,
       service_personalization: personalization,

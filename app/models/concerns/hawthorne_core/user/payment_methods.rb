@@ -16,7 +16,7 @@ module HawthorneCore::User::PaymentMethods
     # determine if the user has exactly one active credit card
     def one_active_credit_card? = HawthorneCore::UserPaymentMethod.one_active_credit_card?(id)
 
-    def active_credit_card = HawthorneCore::UserPaymentMethod.active.where(user_id: user.id).first
+    def active_credit_card = HawthorneCore::UserPaymentMethod.active.where(user_id:).first
 
     # set all the user payment methods to not be defaulted
     def set_all_payment_methods_to_not_defaulted = HawthorneCore::UserPaymentMethod.set_all_payment_methods_to_not_defaulted(id)

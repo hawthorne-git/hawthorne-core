@@ -9,9 +9,6 @@ class HawthorneCore::Email::SendEmailUpdateCodeJob < HawthorneCore::ApplicationJ
 
   def perform(user_id:)
 
-    # for user action logs, set the email type
-    type = HawthorneCore::Services::MailerSendSvc::EMAIL_UPDATE_CODE
-
     # find the user by their id
     user = HawthorneCore::User.
       select(:name).
@@ -22,12 +19,12 @@ class HawthorneCore::Email::SendEmailUpdateCodeJob < HawthorneCore::ApplicationJ
       select(:user_site_id, :user_id, :new_email, :new_email_code, :new_email_code_created_at, :new_email_code_failed_attempts_count).
       find_by(user_id:, site_id: HawthorneCore::Site.this_site_id)
 
-    # if the code is inactive, refresh
-    user_site.refresh_new_email_code_attrs unless user_site.new_email_code_active?
+    # if the code is inactive, refresh and reload the model
+    user_site.refresh_new_email_code_attrs.reload unless user_site.new_email_code_active?
 
     # exit if an email with this code was recently sent to the user
     if user_site.new_email_code_recently_sent?
-      HawthorneCore::UserAction::Log.email_sent_failure(user_id:, failure_reason: HawthorneCore::UserAction::FailureReason.email_recently_sent, note: { type:, new_email: user_site.new_email, new_email_code: user_site.new_email_code })
+      HawthorneCore::UserAction::Log.email_sent_failure(user_id:, failure_reason: HawthorneCore::UserAction::FailureReason.email_recently_sent, note: { type: HawthorneCore::Services::MailerSendSvc::EMAIL_UPDATE_CODE, new_email: user_site.new_email, new_email_code: user_site.new_email_code })
       return
     end
 

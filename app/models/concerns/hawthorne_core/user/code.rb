@@ -7,13 +7,13 @@ module HawthorneCore::User::Code
 
     # -----------------------------------------------------------------------------
 
-    CODE_RANGE = 100_000..999_999.freeze
+    CODE_RANGE = (100_000..999_999).freeze
 
-    CODE_EXPIRATION_IN_MINUTES = 10.freeze
+    CODE_EXPIRATION_IN_MINUTES = 10
 
-    CODE_MAX_FAILED_ATTEMPTS_ALLOWED = 5.freeze
+    CODE_MAX_FAILED_ATTEMPTS_ALLOWED = 5
 
-    CODE_RECENTLY_SENT_IN_SECONDS = 30.freeze
+    CODE_RECENTLY_SENT_IN_SECONDS = 30
 
     CODE_VIA_EMAIL = 'EMAIL'.freeze
 
@@ -23,20 +23,18 @@ module HawthorneCore::User::Code
 
     SIGN_IN_CODE_DELIVERY_METHODS = [CODE_VIA_EMAIL, CODE_VIA_PHONE].freeze
 
+    SIGN_IN_CODE_DELIVERY_LABELS = { CODE_VIA_EMAIL => 'Email', CODE_VIA_PHONE => 'Text Message' }.freeze
+
     # -----------------------------------------------------------------------------
 
+    # determine if the sign-in code default delivery is via email
     def sign_in_code_default_delivery_via_email? = (sign_in_code_default_delivery == CODE_VIA_EMAIL)
 
+    # determine if the sign-in code default delivery is via text message
     def sign_in_code_default_delivery_via_phone? = (sign_in_code_default_delivery == CODE_VIA_PHONE)
 
-    # -----------------------------------------------------------------------------
-
     # get the sign in code default delivery, in a prettier format then what is saved in the database
-    def sign_in_code_default_delivery_pretty_print
-      return 'Email' if sign_in_code_default_delivery_via_email?
-      return 'Text Message' if sign_in_code_default_delivery_via_phone?
-      nil
-    end
+    def sign_in_code_default_delivery_pretty_print = SIGN_IN_CODE_DELIVERY_LABELS[sign_in_code_default_delivery]
 
     # -----------------------------------------------------------------------------
 

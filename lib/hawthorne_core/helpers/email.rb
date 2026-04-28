@@ -18,7 +18,7 @@ module HawthorneCore::Helpers::Email
     # get the domain of the email - ex: charlieprezzano@gmail.com, domain: gmail.com
     # return false if the domain is blank
     # return false if the domain is included on our internal list, of invalid domains
-    domain = email.split('@').last
+    domain = Mail::Address.new(email).domain
     return false if domain.blank?
     return false if HawthorneCore::InvalidEmailAddressDomain.invalid?(domain:)
 

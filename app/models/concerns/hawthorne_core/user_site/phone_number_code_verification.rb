@@ -21,7 +21,7 @@ module HawthorneCore::UserSite::PhoneNumberCodeVerification
 
     # ------------------------
 
-    # clear the new phone number attributes - log it
+    # clear the new phone number attributes
     def clear_new_phone_number_attrs
       update_columns(new_phone_number: nil, new_phone_number_code: nil, new_phone_number_code_created_at: nil, new_phone_number_code_failed_attempts_count: nil)
       HawthorneCore::UserAction::Log.new_phone_number_attrs_cleared
@@ -29,7 +29,7 @@ module HawthorneCore::UserSite::PhoneNumberCodeVerification
 
     # ------------------------
 
-    # set the new phone number attributes - log it
+    # set the new phone number attributes
     def set_new_phone_number_attrs(new_phone_number:)
       attrs = { new_phone_number: Phonelib.parse(new_phone_number, 'US').e164, new_phone_number_code: SecureRandom.random_number(HawthorneCore::User::CODE_RANGE), new_phone_number_code_created_at: Time.current, new_phone_number_code_failed_attempts_count: 0 }
       update_columns(attrs)

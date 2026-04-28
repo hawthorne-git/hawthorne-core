@@ -75,7 +75,7 @@ class HawthorneCore::User::PaymentsController < HawthorneCore::AccountApplicatio
     # create the user payment method
     # set as  default, if the user does not have an existing defaulted payment method
     HawthorneCore::UserPaymentMethod.create!(
-      user_id: user.id,
+      user_id:,
       payment_method_type: 'CREDIT_CARD',
       stripe_payment_method_id: stripe_payment_method_id,
       default: !user.defaulted_payment_method_exists?
@@ -113,7 +113,7 @@ class HawthorneCore::User::PaymentsController < HawthorneCore::AccountApplicatio
     payment_method = HawthorneCore::UserPaymentMethod.
       select(:user_payment_method_id, :stripe_payment_method_id, :default).
       active.
-      find_by(user_id: user.id, token: token)
+      find_by(user_id:, token: token)
 
     # in the unexpected case where the payment method is not found
     # redirect the user to view their payment methods
@@ -134,7 +134,7 @@ class HawthorneCore::User::PaymentsController < HawthorneCore::AccountApplicatio
 
     # if this user has one active credit card - set this card as the default
     if user.one_active_credit_card?
-      payment_method_to_default = HawthorneCore::UserPaymentMethod.active.where(user_id: user.id).first
+      payment_method_to_default = HawthorneCore::UserPaymentMethod.active.where(user_id:).first
       payment_method_to_default.update_columns(default: true)
     end
 
@@ -166,7 +166,7 @@ class HawthorneCore::User::PaymentsController < HawthorneCore::AccountApplicatio
     payment_method = HawthorneCore::UserPaymentMethod.
       select(:user_payment_method_id).
       active.
-      find_by(user_id: user.id, token: token)
+      find_by(user_id:, token: token)
 
     # in the unexpected case where the payment method is not found
     # redirect the user to view their payment methods

@@ -60,7 +60,7 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
     # find the users site record ... the sign-in code is specific to each site
     user_site = HawthorneCore::UserSite.
       select(:user_site_id, :site_id, :user_id, :sign_in_code, :sign_in_code_created_at, :sign_in_code_failed_attempts_count).
-      find_by(user_id: user.id, site_id: HawthorneCore::Site.this_site_id)
+      find_by(user_id:, site_id: HawthorneCore::Site.this_site_id)
 
     # refresh the users sign-in code (for site)
     user_site.refresh_sign_in_code
@@ -197,7 +197,7 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
     # find the users site record ... the sign-in code is specific to each site
     user_site = HawthorneCore::UserSite.
       select(:user_site_id, :site_id, :user_id, :sign_in_code, :sign_in_code_created_at, :sign_in_code_failed_attempts_count, :sign_in_count).
-      find_by(user_id: user.id, site_id: HawthorneCore::Site.this_site_id)
+      find_by(user_id:, site_id: HawthorneCore::Site.this_site_id)
 
     # ----------------------
 
@@ -250,7 +250,7 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
     HawthorneCore::UserAction::Log.sign_in(user.id)
 
     # attach the user to their session
-    HawthorneCore::UserSession.find_by(token: cookies[:user_session_token])&.update_columns(user_id: user.id)
+    HawthorneCore::UserSession.find_by(token: cookies[:user_session_token])&.update_columns(user_id:)
 
     # verify the users email (if the code was sent via email)
     user.verify_email if code_delivery_method == HawthorneCore::User::CODE_VIA_EMAIL

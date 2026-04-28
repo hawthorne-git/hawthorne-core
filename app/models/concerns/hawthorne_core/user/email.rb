@@ -20,10 +20,10 @@ module HawthorneCore::User::Email
     # -----------------------------------------------------------------------------
 
     # clear the users new email attributes, which is site specific
-    def clear_new_email_attrs = HawthorneCore::UserSite.select(:user_site_id).find_by(user_id:, site_id: HawthorneCore::Site.this_site_id).clear_new_email_attrs
+    def clear_new_email_attrs = user_site.clear_new_email_attrs
 
     # set the users new email attributes, which is site specific
-    def set_new_email_attrs(email:) = HawthorneCore::UserSite.select(:user_site_id).find_by(user_id:, site_id: HawthorneCore::Site.this_site_id).set_new_email_attrs(new_email: email)
+    def set_new_email_attrs(email:) = user_site.set_new_email_attrs(new_email: email)
 
     # -----------------------------------------------------------------------------
 

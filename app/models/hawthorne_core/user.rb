@@ -20,6 +20,11 @@ class HawthorneCore::User < HawthorneCore::ActiveRecordBaseApp
 
   # -----------------------------------------------------------------------------
 
+  # find the users site record
+  def user_site = HawthorneCore::UserSite.select(:user_site_id).find_by(user_id:, site_id: HawthorneCore::Site.this_site_id)
+
+  # -----------------------------------------------------------------------------
+
   # determine if a specific user id is deleted
   def self.deleted?(user_id:) = exists?(user_id:, deleted: true)
 

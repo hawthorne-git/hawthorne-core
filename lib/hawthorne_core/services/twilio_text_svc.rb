@@ -11,22 +11,22 @@ class HawthorneCore::Services::TwilioTextSvc
 
   # ----------------------------------------------------------------
 
-  # send update phone number code
+  # send a code, for updating a phone number
   def self.send_phone_number_update_code(user_id:, phone_number:, code_formatted:)
     send_text_message(
       text_message_type: PHONE_NUMBER_UPDATE_CODE,
       user_id:,
-      phone_number: phone_number,
+      phone_number:,
       message: code_message(code: code_formatted)
     )
   end
 
-  # send sign-in code
+  # send a code, for sign-in
   def self.send_sign_in_code(user_id:, phone_number:, code_formatted:)
     send_text_message(
       text_message_type: SIGN_IN_CODE,
       user_id:,
-      phone_number: phone_number,
+      phone_number:,
       message: sign_in_code_message(code: code_formatted)
     )
   end
@@ -60,8 +60,8 @@ class HawthorneCore::Services::TwilioTextSvc
 
     # send the text message, via twilio
     result = send_twilio_text_message(
-      from_phone_number: twilio_phone_number,
-      to_phone_number: phone_number,
+      from: twilio_phone_number,
+      to: phone_number,
       body: message
     )
 
@@ -69,10 +69,10 @@ class HawthorneCore::Services::TwilioTextSvc
     HawthorneCore::SentTextMessage.create!(
       user_id:,
       text_message_service: 'TWILIO',
-      text_message_type: text_message_type,
+      text_message_type:,
       from_phone_number: twilio_phone_number,
       to_phone_number: phone_number,
-      message: message,
+      message:,
       service_id: result[:sid],
       service_status: result[:status],
       exception_caught: !result[:success],
@@ -83,10 +83,10 @@ class HawthorneCore::Services::TwilioTextSvc
 
     # log the user action / exception (if caught)
     if result[:success]
-      HawthorneCore::UserAction::Log.text_message_sent(user_id:, note: { text_message_type: text_message_type, phone_number: phone_number, message: message, twilio_message_id: result[:sid] })
+      HawthorneCore::UserAction::Log.text_message_sent(user_id:, note: { text_message_type:, phone_number:, message:, twilio_message_id: result[:sid] })
     else
-      HawthorneCore::UserAction::Log.text_message_sent_failure(user_id:, failure_reason: HawthorneCore::UserAction::FailureReason.exception_caught, note: { type: text_message_type, phone_number: phone_number, message: message, exception_message: result[:exception_message] })
-      HawthorneCore::CapturedException.log(location: 'HawthorneCore::Services::TwilioTextSvc.send_text_message', note: { type: text_message_type, user_id:, phone_number: phone_number, message: message }, e: result[:exception])
+      HawthorneCore::UserAction::Log.text_message_sent_failure(user_id:, failure_reason: HawthorneCore::UserAction::FailureReason.exception_caught, note: { text_message_type:, phone_number:, message:, exception_message: result[:exception_message] })
+      HawthorneCore::CapturedException.log(location: 'HawthorneCore::Services::TwilioTextSvc.send_text_message', note: { text_message_type:, user_id:, phone_number:, message: }, e: result[:exception])
     end
 
   end
@@ -94,13 +94,13 @@ class HawthorneCore::Services::TwilioTextSvc
   # ----------------------------------------------------------------
 
   # send the twilio text message
-  def self.send_twilio_text_message(from_phone_number:, to_phone_number:, body:)
+  def self.send_twilio_text_message(from:, to:, body:)
 
     # this sends the text message
     message = client.messages.create(
-      from: from_phone_number,
-      to: to_phone_number,
-      body: body,
+      from:,
+      to:,
+      body:,
       status_callback: 'https://www.hawthonreadmin.com/callback_twilio_xklgyhzfnvro'
     )
 
