@@ -137,7 +137,7 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
 
     # ----------------------
 
-    # add the users shipping address - log it
+    # add the users shipping address
     shipping_address = HawthorneCore::UserShippingAddress.create!(attrs)
     HawthorneCore::UserAction::Log.add_shipping_address(session[:user_id], attrs.merge(user_shipping_address_id: shipping_address.id), request.remote_ip, cookies[:user_session_token])
 
@@ -237,7 +237,7 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
 
     # ----------------------
 
-    # update the users shipping address - log it
+    # update the users shipping address
     shipping_address.update!(attrs)
     HawthorneCore::UserAction::Log.update_shipping_address(session[:user_id], attrs.merge(user_shipping_address_id: shipping_address.id), request.remote_ip, cookies[:user_session_token])
 

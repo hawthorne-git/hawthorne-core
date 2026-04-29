@@ -1,6 +1,6 @@
 # v3.0
 
-module HawthorneCore::UserSite::EmailCodeVerification
+module HawthorneCore::UserSite::Email
   extend ActiveSupport::Concern
 
   included do

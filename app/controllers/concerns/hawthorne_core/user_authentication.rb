@@ -26,7 +26,7 @@ module HawthorneCore::UserAuthentication
 
       # if the user is present (and not deleted) ... and if the user opted to keep as signed in
       # set the user as signed in and reset the cookie expiration
-      if user_id.present? & !HawthorneCore::User.deleted?(user_id)
+      if user_id.present? & !HawthorneCore::User.deleted?(user_id:)
         keep_signed_in = HawthorneCore::UserSite.where(site_id: HawthorneCore::Site.this_site_id, user_id:).pick(:keep_signed_in)
         if keep_signed_in
           session[:user_id] = user_id

@@ -5,11 +5,11 @@
 
   title = 'Delete your account1'
 
-  instruction_message = "<b>This action is permanent</b>. Your account will be permanently deleted and cannot be recovered.<br><br>Enter the code we sent to #{@user.email} to delete your account."
+  instruction_message = "<b>This action is permanent</b>. Your account will be permanently deleted and cannot be recovered.<br><br>Enter the code we sent to #{@email} to delete your account."
 
   submit_button_text = 'Delete Account'
 
-  resend_code_message = "Didn't get the code? #{link_to 'Resend it', account_profile_delete_account_resend_code_path, data: { turbo: :false }}"
+  message = "Didn't get the code? #{link_to 'Resend it', account_profile_delete_account_resend_code_path, data: { turbo: :false }}"
 %>
 
 <%= render HawthorneCore::UI::User::Layout::ProfileComponent.new(title:) do %>
@@ -18,6 +18,6 @@
       <%= render HawthorneCore::UI::Form::Attr::CodeTextFieldComponent.new(form:) %>
       <%= render HawthorneCore::UI::Form::SubmitButtonComponent.new(form:, submit_button_text:) %>
     <% end %>
-    <%= render HawthorneCore::UI::Form::SupportMessageComponent.new(message: resend_code_message) %>
+    <%= render HawthorneCore::UI::Form::SupportMessageComponent.new(message:) %>
   <% end %>
 <% end %>

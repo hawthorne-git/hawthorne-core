@@ -31,7 +31,7 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
     # ----------------------
 
     # verify that the email does not have a syntax error
-    # if invalid - log it, return back and display an error message
+    # if invalid, return back and display an error message
     unless HawthorneCore::Helpers::Email.syntax_valid?(email)
       HawthorneCore::UserAction::Log.sign_in_failure(HawthorneCore::UserAction::FailureReason.email_syntax_error, { email: }, request.remote_ip, cookies[:user_session_token])
       render turbo_stream: turbo_stream.update('form_errors', partial: 'sign_in_failed', locals: { syntax_error: true }) and return
@@ -87,7 +87,7 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
 
     # ----------------------
 
-    # in the unexpected case where the users token is not present - log it, return back to the sign-in page
+    # in the unexpected case where the users token is not present, return back to the sign-in page
     unless @user_token.present?
       HawthorneCore::UserAction::Log.sign_in_code_verified_failure(nil, HawthorneCore::UserAction::FailureReason.unexpected_state, { controller_action: 'verify_code_show', message: 'Token not present' }, request.remote_ip, cookies[:user_session_token])
       redirect_to sign_in_path and return
@@ -99,7 +99,7 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
       active.
       find_by(token: @user_token)
 
-    # in the unexpected case where the user is not found - log it, return back to the sign-in page
+    # in the unexpected case where the user is not found, return back to the sign-in page
     unless @user
       HawthorneCore::UserAction::Log.sign_in_code_verified_failure(nil, HawthorneCore::UserAction::FailureReason.unexpected_state, { controller_action: 'verify_code_show', message: 'User not found with token', token: @user_token }, request.remote_ip, cookies[:user_session_token])
       redirect_to sign_in_path and return
@@ -176,7 +176,7 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
 
     # ----------------------
 
-    # in the unexpected case where the users token is not present - log it, return back to the sign-in page
+    # in the unexpected case where the users token is not present, return back to the sign-in page
     unless user_token.present?
       HawthorneCore::UserAction::Log.sign_in_code_verified_failure(nil, HawthorneCore::UserAction::FailureReason.unexpected_state, { controller_action: 'verify_code', message: 'Token not present' }, request.remote_ip, cookies[:user_session_token])
       redirect_to sign_in_path and return
@@ -188,7 +188,7 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
       active.
       find_by(token: user_token)
 
-    # in the unexpected case where the user is not found (by their token) - log it, return back to the sign-in page
+    # in the unexpected case where the user is not found (by their token), return back to the sign-in page
     unless user
       HawthorneCore::UserAction::Log.sign_in_code_verified_failure(nil, HawthorneCore::UserAction::FailureReason.unexpected_state, { controller_action: 'verify_code', message: 'Site User not found with token', token: user_token }, request.remote_ip, cookies[:user_session_token])
       redirect_to sign_in_path and return
@@ -201,7 +201,7 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
 
     # ----------------------
 
-    # in the unexpected case where the code delivery method is not an expected value - log it, return back to the sign-in page
+    # in the unexpected case where the code delivery method is not an expected value, return back to the sign-in page
     unless HawthorneCore::User::SIGN_IN_CODE_DELIVERY_METHODS.include?(code_delivery_method)
       HawthorneCore::UserAction::Log.sign_in_code_verified_failure(user.id, HawthorneCore::UserAction::FailureReason.unexpected_state, { controller_action: 'verify_code', message: 'Unexpected code delivery method', code_delivery_method: code_delivery_method }, request.remote_ip, cookies[:user_session_token])
       redirect_to sign_in_path and return
@@ -222,7 +222,7 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
     end
 
     # verify the code - it is set, not expired, and has not reached the max number of failed attempts
-    # if the entered code does not match - log it, increment the number of failed attempts
+    # if the entered code does not match, increment the number of failed attempts
     # if the max number of failed attempts reached ... refresh the users code, resend
     # lastly, when the entered code does not match, return back and display an error message
     unless user_site.sign_in_code_match?(code)
@@ -240,12 +240,12 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
 
     # ----------------------
 
-    # the code is verified - log it
+    # the code is verified
     # clear the sign-in code - it is one time use only
     HawthorneCore::UserAction::Log.sign_in_code_verified(user.id, request.remote_ip, cookies[:user_session_token])
     user_site.clear_sign_in_code
 
-    # sign-in the user - log it
+    # sign-in the user
     session[:user_id] = user.id
     HawthorneCore::UserAction::Log.sign_in(user.id)
 

@@ -123,7 +123,7 @@ class HawthorneCore::User::Profile::EmailController < HawthorneCore::AccountAppl
     end
 
     # verify the code - it is set, not expired, and has not reached the max number of failed attempts
-    # if the entered code does not match - log it, increment the number of failed attempts
+    # if the entered code does not match, increment the number of failed attempts
     # if the max number of failed attempts reached ... refresh the users code, resend
     # lastly, when the entered code does not match, return back and display an error message
     unless user_site.new_email_code_match?(code:)

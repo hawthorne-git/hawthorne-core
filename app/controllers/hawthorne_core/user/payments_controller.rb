@@ -64,7 +64,7 @@ class HawthorneCore::User::PaymentsController < HawthorneCore::AccountApplicatio
     # ----------------------
 
     # verify that the stripe payment method id is present and is starts with 'pm_'
-    # if invalid - log it, return back and display all payment methods
+    # if invalid, return back and display all payment methods
     if stripe_payment_method_id.blank? || !stripe_payment_method_id.start_with?('pm_')
       HawthorneCore::UserAction::Log.add_credit_card_failure(user.id, HawthorneCore::UserAction::FailureReason.stripe_payment_method_id_invalid, { stripe_payment_method_id: stripe_payment_method_id }, request.remote_ip, cookies[:user_session_token])
       redirect_to account_new_payment_path and return

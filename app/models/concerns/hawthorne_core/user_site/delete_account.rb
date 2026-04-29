@@ -1,13 +1,13 @@
 # v3.0
 
-module HawthorneCore::UserSite::DeleteAccountCodeVerification
+module HawthorneCore::UserSite::DeleteAccount
   extend ActiveSupport::Concern
 
   included do
 
     # -----------------------------------------------------------------------------
 
-    def delete_account_code_formatted = "#{delete_account_code[0,3]}-#{delete_account_code[3,3]}"
+    def delete_account_code_formatted = "#{delete_account_code[0, 3]}-#{delete_account_code[3, 3]}"
 
     def delete_account_code_active? = delete_account_code_set? && !delete_account_code_expired? && !delete_account_code_max_failed_attempts_reached?
 
@@ -21,36 +21,35 @@ module HawthorneCore::UserSite::DeleteAccountCodeVerification
 
     # ------------------------
 
-    # clear the delete account attributes - log it
+    # clear the delete account attributes
     def clear_delete_account_attrs
       update_columns(delete_account_code: nil, delete_account_code_created_at: nil, delete_account_code_failed_attempts_count: nil)
-      HawthorneCore::UserAction::Log.delete_account_attrs_cleared(user_id)
+      HawthorneCore::UserAction::Log.delete_account_attrs_cleared
     end
 
     # ------------------------
 
-    # set the delete account attributes - log it
-    def set_delete_account_attr
+    # set the delete account attributes
+    def set_delete_account_attrs
       attrs = { delete_account_code: SecureRandom.random_number(HawthorneCore::User::CODE_RANGE), delete_account_code_created_at: Time.current, delete_account_code_failed_attempts_count: 0 }
       update_columns(attrs)
-      HawthorneCore::UserAction::Log.delete_account_attrs_set(user_id, attrs)
+      HawthorneCore::UserAction::Log.delete_account_attrs_set(note: attrs)
     end
 
     # ------------------------
 
     # refresh the users delete account code / code created at / failed attempts
     def refresh_delete_account_code_attrs
-      unless delete_account_code_active?
-        attrs = { delete_account_code: SecureRandom.random_number(HawthorneCore::User::CODE_RANGE), delete_account_code_created_at: Time.current, delete_account_code_failed_attempts_count: 0 }
-        update_columns(attrs)
-        HawthorneCore::UserAction::Log.delete_account_attrs_refreshed(user_id, attrs)
-      end
+      attrs = { delete_account_code: SecureRandom.random_number(HawthorneCore::User::CODE_RANGE), delete_account_code_created_at: Time.current, delete_account_code_failed_attempts_count: 0 }
+      update_columns(attrs)
+      HawthorneCore::UserAction::Log.delete_account_attrs_refreshed(user_id:, note: attrs)
+      self
     end
 
     # refresh the users delete account code attributes, then send it via email
     def refresh_delete_account_code_attrs_then_send_it
       refresh_delete_account_code_attrs
-      HawthorneCore::Email::SendDeleteAccountCodeJob.perform_later(user_id)
+      HawthorneCore::Email::SendDeleteAccountCodeJob.perform_later(user_id:)
     end
 
     # ------------------------

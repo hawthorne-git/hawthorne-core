@@ -3,10 +3,10 @@
 class HawthorneCore::UserSite < HawthorneCore::ActiveRecordBaseApp
 
   include HawthorneCore::HasSiteId,
-          HawthorneCore::UserSite::DeleteAccountCodeVerification,
-          HawthorneCore::UserSite::EmailCodeVerification,
-          HawthorneCore::UserSite::PhoneNumberCodeVerification,
-          HawthorneCore::UserSite::SignInCodeVerification
+          HawthorneCore::UserSite::DeleteAccount,
+          HawthorneCore::UserSite::Email,
+          HawthorneCore::UserSite::PhoneNumber,
+          HawthorneCore::UserSite::SignIn
 
 
   # -----------------------------------------------------------------------------

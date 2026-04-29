@@ -7,15 +7,11 @@ class HawthorneCore::Email::SendDeleteAccountCodeJob < HawthorneCore::Applicatio
 
   # ----------------------------------------------------------------
 
-  def perform(user_id)
-
-    # for user action logs, set the email type
-    type = HawthorneCore::Services::MailerSendSvc::DELETE_ACCOUNT_CODE
+  def perform(user_id:)
 
     # find the user by their id
     user = HawthorneCore::User.
-      select(:user_id, :email, :name).
-      active.
+      select(:email, :name).
       find_by(user_id:)
 
     # find the users site record ... the delete account code is specific to each site
@@ -24,18 +20,24 @@ class HawthorneCore::Email::SendDeleteAccountCodeJob < HawthorneCore::Applicatio
       find_by(user_id:, site_id: HawthorneCore::Site.this_site_id)
 
     # if the code is inactive, refresh
-    user_site.refresh_delete_account_code_attrs unless user_site.delete_account_code_active?
+    user_site.refresh_delete_account_code_attrs.reload unless user_site.delete_account_code_active?
 
     # exit if an email with this code was recently sent to the user
     if user_site.delete_account_code_recently_sent?
-      HawthorneCore::UserAction::Log.email_sent_failure(user_site.user_id, HawthorneCore::UserAction::FailureReason.email_recently_sent, { type:, delete_account_code: user_site.delete_account_code })
+      HawthorneCore::UserAction::Log.email_sent_failure(user_id:, failure_reason: HawthorneCore::UserAction::FailureReason.email_recently_sent,note: { type: HawthorneCore::Services::MailerSendSvc::DELETE_ACCOUNT_CODE, delete_account_code: user_site.delete_account_code })
       return
     end
 
     # the code was not recently sent, send the email
-    HawthorneCore::Services::MailerSendSvc.send_delete_account_code(user_site.user_id, user.email, user.first_name, user_site.delete_account_code,  user_site.delete_account_code_formatted)
+    HawthorneCore::Services::MailerSendSvc.send_delete_account_code(
+      user_id:,
+      email: user.email,
+      first_name: user.first_name,
+      code: user_site.delete_account_code,
+      code_formatted: user_site.delete_account_code_formatted
+    )
 
-  end
+    end
 
   # ----------------------------------------------------------------
 

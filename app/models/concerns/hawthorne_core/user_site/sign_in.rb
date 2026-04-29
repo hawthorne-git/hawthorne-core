@@ -1,6 +1,6 @@
 # v3.0
 
-module HawthorneCore::UserSite::SignInCodeVerification
+module HawthorneCore::UserSite::SignIn
   extend ActiveSupport::Concern
 
   included do
@@ -21,7 +21,7 @@ module HawthorneCore::UserSite::SignInCodeVerification
 
     # ------------------------
 
-    # clear the users sign-in code - log it
+    # clear the users sign-in code
     def clear_sign_in_code
       update_columns(sign_in_code: nil, sign_in_code_created_at: nil, sign_in_code_failed_attempts_count: nil)
       HawthorneCore::UserAction::Log.sign_in_code_cleared(user_id)
@@ -29,7 +29,7 @@ module HawthorneCore::UserSite::SignInCodeVerification
 
     # ------------------------
 
-    # refresh the users sign-in code (for site) - log it ... only do so if the code is inactive
+    # refresh the users sign-in code (for site) ... only do so if the code is inactive
     def refresh_sign_in_code
       unless sign_in_code_active?
         update_columns(sign_in_code: SecureRandom.random_number(HawthorneCore::User::CODE_RANGE), sign_in_code_created_at: Time.current, sign_in_code_failed_attempts_count: 0)

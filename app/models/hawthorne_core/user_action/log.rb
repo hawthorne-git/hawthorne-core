@@ -4,33 +4,33 @@ module HawthorneCore::UserAction::Log
 
   # ----------------------------------------------------------------------------- Account
 
-  def self.account_created(user_id, note)
-    success(user_id, action(:account_created), note)
-  end
+  def self.account_created(**attrs) = success(**attrs, action: action(:account_created))
 
-  # ----------------------------------------------------------------------------- Account (Delete)
+  def self.account_deleted(**attrs) = success(**attrs, action: action(:account_deleted))
 
-  def self.delete_account_attrs_cleared(user_id)
-    success_admin(user_id, action(:delete_account_attrs_cleared), nil)
-  end
+  # ----------------------------------------------------------------------------- Code Attrs - Delete Account
 
-  def self.delete_account_attrs_refreshed(user_id, note)
-    success_admin(user_id, action(:delete_account_attrs_refreshed), note)
-  end
+  def self.delete_account_attrs_cleared(**attrs) = success_admin(**attrs, action: action(:delete_account_attrs_cleared))
 
-  def self.delete_account_attrs_set(user_id, note)
-    success_admin(user_id, action(:delete_account_attrs_set), note)
-  end
+  def self.delete_account_attrs_refreshed(**attrs) = success_admin(**attrs, action: action(:delete_account_attrs_refreshed))
 
-  # ------------------------
+  def self.delete_account_attrs_set(**attrs) = success_admin(**attrs, action: action(:delete_account_attrs_set))
 
-  def self.delete_account(user_id)
-    success(user_id, action(:account_deleted), nil)
-  end
+  # ----------------------------------------------------------------------------- Code Attrs - Update Email
 
-  def self.delete_account_failure(user_id, failure_reason, note)
-    failure(user_id, action(:account_deleted), failure_reason, note)
-  end
+  def self.new_email_attrs_cleared(**attrs) = success_admin(**attrs, action: action(:email_update_attrs_cleared))
+
+  def self.new_email_attrs_refreshed(**attrs) = success_admin(**attrs, action: action(:email_update_attrs_refreshed))
+
+  def self.new_email_attrs_set(**attrs) = success_admin(**attrs, action: action(:email_update_attrs_set))
+
+  # ----------------------------------------------------------------------------- Code Attrs - Update Phone Number
+
+  def self.new_phone_number_attrs_cleared(**attrs) = success_admin(**attrs, action: action(:phone_number_update_attrs_cleared))
+
+  def self.new_phone_number_attrs_refreshed(**attrs) = success_admin(**attrs, action: action(:phone_number_update_attrs_refreshed))
+
+  def self.new_phone_number_attrs_set(**attrs) = success_admin(**attrs, action: action(:phone_number_update_attrs_set))
 
   # ----------------------------------------------------------------------------- Credit Card
 
@@ -51,22 +51,6 @@ module HawthorneCore::UserAction::Log
   def self.email_sent(**attrs) = success_admin(**attrs, action: action(:email_sent))
 
   def self.email_sent_failure(**attrs) = failure_admin(**attrs, action: action(:email_sent))
-
-  # ----------------------------------------------------------------------------- New Email Attrs
-
-  def self.new_email_attrs_cleared(**attrs) = success_admin(**attrs, action: action(:email_update_attrs_cleared))
-
-  def self.new_email_attrs_refreshed(**attrs) = success_admin(**attrs, action: action(:email_update_attrs_refreshed))
-
-  def self.new_email_attrs_set(**attrs) = success_admin(**attrs, action: action(:email_update_attrs_set))
-
-  # ----------------------------------------------------------------------------- New Phone Number Attrs
-
-  def self.new_phone_number_attrs_cleared(**attrs) = success_admin(**attrs, action: action(:phone_number_update_attrs_cleared))
-
-  def self.new_phone_number_attrs_refreshed(**attrs) = success_admin(**attrs, action: action(:phone_number_update_attrs_refreshed))
-
-  def self.new_phone_number_attrs_set(**attrs) = success_admin(**attrs, action: action(:phone_number_update_attrs_set))
 
   # ----------------------------------------------------------------------------- Profile
 
