@@ -17,21 +17,8 @@ class HawthorneCore::UserSite < HawthorneCore::ActiveRecordBaseApp
 
   # -----------------------------------------------------------------------------
 
-  def self.user_access_exist?(user_id) = exists?(site_id: HawthorneCore::Site.this_site_id, user_id:)
 
   def first_sign_in? = sign_in_count.zero?
-
-  # -----------------------------------------------------------------------------
-
-  # create a user site access record, for a new user
-  def self.log_site_access_for_new_user(user_id)
-    create!(user_id:, user_created_on_site: true)
-  end
-
-  # create a user site access record, for a known user, if the user has never accessed this site
-  def self.log_site_access_for_known_user(user_id)
-    create!(user_id:) unless user_access_exist?(user_id)
-  end
 
   # ------------------------
 

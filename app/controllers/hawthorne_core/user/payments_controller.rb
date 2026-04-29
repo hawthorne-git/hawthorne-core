@@ -66,7 +66,7 @@ class HawthorneCore::User::PaymentsController < HawthorneCore::AccountApplicatio
     # verify that the stripe payment method id is present and is starts with 'pm_'
     # if invalid, return back and display all payment methods
     if stripe_payment_method_id.blank? || !stripe_payment_method_id.start_with?('pm_')
-      HawthorneCore::UserAction::Log.add_credit_card_failure(user.id, HawthorneCore::UserAction::FailureReason.stripe_payment_method_id_invalid, { stripe_payment_method_id: stripe_payment_method_id }, request.remote_ip, cookies[:user_session_token])
+      HawthorneCore::UserAction::Log.add_credit_card_failure(user.id, HawthorneCore::UserAction::FailureReason.stripe_payment_method_id_invalid, { stripe_payment_method_id: stripe_payment_method_id })
       redirect_to account_new_payment_path and return
     end
 
@@ -82,7 +82,7 @@ class HawthorneCore::User::PaymentsController < HawthorneCore::AccountApplicatio
     )
 
     # log it
-    HawthorneCore::UserAction::Log.add_credit_card(user.id, { stripe_payment_method_id: stripe_payment_method_id }, request.remote_ip, cookies[:user_session_token])
+    HawthorneCore::UserAction::Log.add_credit_card(user.id, { stripe_payment_method_id: stripe_payment_method_id })
 
     # ----------------------
 
@@ -128,7 +128,7 @@ class HawthorneCore::User::PaymentsController < HawthorneCore::AccountApplicatio
     payment_method.soft_delete
 
     # log it
-    HawthorneCore::UserAction::Log.remove_credit_card(user.id, { token: token }, request.remote_ip, cookies[:user_session_token])
+    HawthorneCore::UserAction::Log.remove_credit_card(user.id, { token: token })
 
     # ----------------------
 

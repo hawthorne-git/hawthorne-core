@@ -20,7 +20,7 @@ class HawthorneCore::Email::SendEmailUpdateCodeJob < HawthorneCore::ApplicationJ
       find_by(user_id:, site_id: HawthorneCore::Site.this_site_id)
 
     # if the code is inactive, refresh and reload the model
-    user_site.refresh_new_email_code_attrs.reload unless user_site.new_email_code_active?
+    user_site.refresh_new_email_attrs.reload unless user_site.new_email_code_active?
 
     # exit if an email with this code was recently sent to the user
     if user_site.new_email_code_recently_sent?

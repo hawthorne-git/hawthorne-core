@@ -16,6 +16,14 @@ module HawthorneCore::UserAction::Log
 
   def self.delete_account_attrs_set(**attrs) = success_admin(**attrs, action: action(:delete_account_attrs_set))
 
+  # ----------------------------------------------------------------------------- Code Attrs - Sign-In
+
+  def self.sign_in_attrs_cleared(**attrs) = success_admin(**attrs, action: action(:sign_in_attrs_cleared))
+
+  def self.sign_in_attrs_refreshed(**attrs) = success_admin(**attrs, action: action(:sign_in_attrs_refreshed))
+
+  def self.sign_in_attrs_set(**attrs) = success_admin(**attrs, action: action(:sign_in_attrs_set))
+
   # ----------------------------------------------------------------------------- Code Attrs - Update Email
 
   def self.new_email_attrs_cleared(**attrs) = success_admin(**attrs, action: action(:email_update_attrs_cleared))
@@ -66,9 +74,7 @@ module HawthorneCore::UserAction::Log
     success_admin(user_id, action(:sign_in), nil)
   end
 
-  def self.sign_in_failure(failure_reason, note)
-    failure(nil, action(:sign_in), failure_reason, note)
-  end
+  def self.sign_in_failure(**attrs) = failure(**attrs, action: action(:sign_in))
 
   # ------------------------
 
@@ -78,15 +84,6 @@ module HawthorneCore::UserAction::Log
 
   # ----------------------------------------------------------------------------- Sign-In Code
 
-  def self.sign_in_code_cleared(user_id)
-    success_admin(user_id, action(:sign_in_code_cleared), nil)
-  end
-
-  # ------------------------
-
-  def self.sign_in_code_created(user_id, note)
-    success_admin(user_id, action(:sign_in_code_created), note)
-  end
 
   # ------------------------
 

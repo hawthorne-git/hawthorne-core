@@ -7,16 +7,22 @@ module HawthorneCore::UserSite::Email
 
     # -----------------------------------------------------------------------------
 
+    # format the code, ex: '123456' formatted is '123-456'
     def new_email_code_formatted = "#{new_email_code[0, 3]}-#{new_email_code[3, 3]}"
 
+    # determine if the code is active - this is true when it is set, not expired, and the max number of attempts have not been reached
     def new_email_code_active? = new_email_code_set? && !new_email_code_expired? && !new_email_code_max_failed_attempts_reached?
 
+    # determine if the code is set - this is true when the code is present, along with when it was created
     def new_email_code_set? = new_email_code.present? && new_email_code_created_at.present?
 
+    # determine if the code is expired
     def new_email_code_expired? = new_email_code_created_at.nil? || (new_email_code_created_at < HawthorneCore::User::CODE_EXPIRATION_IN_MINUTES.minutes.ago)
 
+    # determine if the max number of attempts have been reached
     def new_email_code_max_failed_attempts_reached? = (new_email_code_failed_attempts_count >= HawthorneCore::User::CODE_MAX_FAILED_ATTEMPTS_ALLOWED)
 
+    # determine if the code matches
     def new_email_code_match?(code:) = (new_email_code == code.gsub(/\D/, ''))
 
     # ------------------------
@@ -38,17 +44,17 @@ module HawthorneCore::UserSite::Email
 
     # ------------------------
 
-    # refresh the users new email code / code created at / failed attempts
-    def refresh_new_email_code_attrs
+    # refresh the new email attributes
+    def refresh_new_email_attrs
       attrs = { new_email_code: SecureRandom.random_number(HawthorneCore::User::CODE_RANGE), new_email_code_created_at: Time.current, new_email_code_failed_attempts_count: 0 }
       update_columns(attrs)
       HawthorneCore::UserAction::Log.new_email_attrs_refreshed(user_id:, note: attrs)
       self
     end
 
-    # refresh the users new email code attributes, then send it via email
-    def refresh_new_email_code_attrs_then_send_it
-      refresh_new_email_code_attrs
+    # refresh the new email attributes, then send it via email
+    def refresh_new_email_attrs_then_send_it
+      refresh_new_email_attrs
       HawthorneCore::Email::SendEmailUpdateCodeJob.perform_later(user_id:)
     end
 

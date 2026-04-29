@@ -118,7 +118,7 @@ class HawthorneCore::User::Profile::EmailController < HawthorneCore::AccountAppl
       (code_expired = true; failure_reason = HawthorneCore::UserAction::FailureReason.code_expired) if user_site.new_email_code_expired?
       (code_max_failed_attempts_reached = true; failure_reason = HawthorneCore::UserAction::FailureReason.code_max_failed_attempts_reached) if user_site.new_email_code_max_failed_attempts_reached?
       HawthorneCore::UserAction::Log.update_profile_failure(failure_reason:, note: { new_email_code: user_site.new_email_code, new_email_code_created_at: user_site.new_email_code_created_at, new_email_code_failed_attempts_count: user_site.new_email_code_failed_attempts_count })
-      user_site.refresh_new_email_code_attrs_then_send_it
+      user_site.refresh_new_email_attrs_then_send_it
       render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/verify_code_failed', locals: { code_not_set:, code_expired:, code_max_failed_attempts_reached: }) and return
     end
 
@@ -131,7 +131,7 @@ class HawthorneCore::User::Profile::EmailController < HawthorneCore::AccountAppl
       user_site.add_new_email_code_failed_attempt
       if user_site.new_email_code_max_failed_attempts_reached?
         code_max_failed_attempts_reached = true
-        user_site.refresh_new_email_code_attrs_then_send_it
+        user_site.refresh_new_email_attrs_then_send_it
       else
         code_not_match = true
       end

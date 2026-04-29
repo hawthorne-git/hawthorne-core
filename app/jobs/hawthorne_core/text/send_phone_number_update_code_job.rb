@@ -15,7 +15,7 @@ class HawthorneCore::Text::SendPhoneNumberUpdateCodeJob < HawthorneCore::Applica
       find_by(user_id:, site_id: HawthorneCore::Site.this_site_id)
 
     # if the code is inactive, refresh and reload the model
-    user_site.refresh_new_phone_number_code_attrs.reload unless user_site.new_phone_number_code_active?
+    user_site.refresh_new_phone_number_attrs.reload unless user_site.new_phone_number_code_active?
 
     # exit if a text message with this code was recently sent to the user
     if user_site.new_phone_number_code_recently_sent?

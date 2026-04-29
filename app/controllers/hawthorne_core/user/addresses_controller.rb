@@ -80,7 +80,7 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
       # in the unexpected case where the cloudflare country code is not found within our list,
       # log it and default it to select US
       unless HawthorneCore::Country.code_alpha2_exists?(cloudflare_country_code_alpha2)
-        HawthorneCore::UserAction::Log.shipping_address_failure(@user.id, HawthorneCore::UserAction::FailureReason.unexpected_state, { message: 'Country not found with Cloudflare country code', cloudflare_country_code: cloudflare_country_code_alpha2 }, request.remote_ip, cookies[:user_session_token])
+        HawthorneCore::UserAction::Log.shipping_address_failure(@user.id, HawthorneCore::UserAction::FailureReason.unexpected_state, { message: 'Country not found with Cloudflare country code', cloudflare_country_code: cloudflare_country_code_alpha2 })
         cloudflare_country_code_alpha2 = 'US'
       end
 
@@ -131,7 +131,7 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
     # if the shipping address matches a current,
     # log it, and display an error message
     if HawthorneCore::UserShippingAddress.identical?(attrs)
-      HawthorneCore::UserAction::Log.shipping_address_failure(session[:user_id], HawthorneCore::UserAction::FailureReason.shipping_address_identical, { action: 'CREATE', attrs: attrs }, request.remote_ip, cookies[:user_session_token])
+      HawthorneCore::UserAction::Log.shipping_address_failure(session[:user_id], HawthorneCore::UserAction::FailureReason.shipping_address_identical, { action: 'CREATE', attrs: attrs })
       render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/shipping_address_failed', locals: { shipping_address_identical: true }) and return
     end
 
@@ -139,7 +139,7 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
 
     # add the users shipping address
     shipping_address = HawthorneCore::UserShippingAddress.create!(attrs)
-    HawthorneCore::UserAction::Log.add_shipping_address(session[:user_id], attrs.merge(user_shipping_address_id: shipping_address.id), request.remote_ip, cookies[:user_session_token])
+    HawthorneCore::UserAction::Log.add_shipping_address(session[:user_id], attrs.merge(user_shipping_address_id: shipping_address.id))
 
     # ----------------------
 
@@ -177,7 +177,7 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
     # in the unexpected case where the users shipping address is not found
     # log it, and redirect the user to view their shipping addresses
     unless @shipping_address
-      HawthorneCore::UserAction::Log.shipping_address_failure(@user.id, HawthorneCore::UserAction::FailureReason.unexpected_state, { message: 'Users shipping address not found', token: token }, request.remote_ip, cookies[:user_session_token])
+      HawthorneCore::UserAction::Log.shipping_address_failure(@user.id, HawthorneCore::UserAction::FailureReason.unexpected_state, { message: 'Users shipping address not found', token: token })
       redirect_to account_addresses_path and return
     end
 
@@ -218,7 +218,7 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
     # in the unexpected case where the users shipping address is not found
     # log it, and redirect the user to view their shipping addresses
     unless shipping_address
-      HawthorneCore::UserAction::Log.shipping_address_failure(session[:user_id], HawthorneCore::UserAction::FailureReason.unexpected_state, { message: 'Users shipping address not found', token: attrs[:token] }, request.remote_ip, cookies[:user_session_token])
+      HawthorneCore::UserAction::Log.shipping_address_failure(session[:user_id], HawthorneCore::UserAction::FailureReason.unexpected_state, { message: 'Users shipping address not found', token: attrs[:token] })
       redirect_to account_addresses_path and return
     end
 
@@ -231,7 +231,7 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
     # if the shipping address matches a current,
     # log it, and display an error message
     if HawthorneCore::UserShippingAddress.identical?(attrs)
-      HawthorneCore::UserAction::Log.shipping_address_failure(session[:user_id], HawthorneCore::UserAction::FailureReason.shipping_address_identical, { action: 'UPDATE', attrs: attrs }, request.remote_ip, cookies[:user_session_token])
+      HawthorneCore::UserAction::Log.shipping_address_failure(session[:user_id], HawthorneCore::UserAction::FailureReason.shipping_address_identical, { action: 'UPDATE', attrs: attrs })
       render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/shipping_address_failed', locals: { shipping_address_identical: true }) and return
     end
 
@@ -239,7 +239,7 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
 
     # update the users shipping address
     shipping_address.update!(attrs)
-    HawthorneCore::UserAction::Log.update_shipping_address(session[:user_id], attrs.merge(user_shipping_address_id: shipping_address.id), request.remote_ip, cookies[:user_session_token])
+    HawthorneCore::UserAction::Log.update_shipping_address(session[:user_id], attrs.merge(user_shipping_address_id: shipping_address.id))
 
     # ----------------------
 
@@ -266,7 +266,7 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
     # in the unexpected case where the users shipping address is not found
     # log it, and redirect the user to view their shipping addresses
     unless shipping_address
-      HawthorneCore::UserAction::Log.shipping_address_failure(session[:user_id], HawthorneCore::UserAction::FailureReason.unexpected_state, { message: 'Users shipping address not found', token: token }, request.remote_ip, cookies[:user_session_token])
+      HawthorneCore::UserAction::Log.shipping_address_failure(session[:user_id], HawthorneCore::UserAction::FailureReason.unexpected_state, { message: 'Users shipping address not found', token: token })
       redirect_to account_addresses_path and return
     end
 
@@ -274,7 +274,7 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
     shipping_address.soft_delete
 
     # log it
-    HawthorneCore::UserAction::Log.remove_shipping_address(session[:user_id], { user_shipping_address_id: shipping_address.id }, request.remote_ip, cookies[:user_session_token])
+    HawthorneCore::UserAction::Log.remove_shipping_address(session[:user_id], { user_shipping_address_id: shipping_address.id })
 
     # ----------------------
 

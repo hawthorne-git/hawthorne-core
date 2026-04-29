@@ -20,7 +20,7 @@ class HawthorneCore::Email::SendDeleteAccountCodeJob < HawthorneCore::Applicatio
       find_by(user_id:, site_id: HawthorneCore::Site.this_site_id)
 
     # if the code is inactive, refresh
-    user_site.refresh_delete_account_code_attrs.reload unless user_site.delete_account_code_active?
+    user_site.refresh_delete_account_attrs.reload unless user_site.delete_account_code_active?
 
     # exit if an email with this code was recently sent to the user
     if user_site.delete_account_code_recently_sent?
