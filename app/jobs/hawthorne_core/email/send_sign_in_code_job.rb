@@ -25,7 +25,7 @@ class HawthorneCore::Email::SendSignInCodeJob < HawthorneCore::ApplicationJob
 
     # exit if an email with this code was recently sent to the user
     if user_site.sign_in_code_recently_sent_via_email?
-      HawthorneCore::UserAction::Log.email_sent_failure(user_id:, failure_reason: HawthorneCore::UserAction::FailureReason.email_recently_sent, note: { type: HawthorneCore::Services::MailerSendSvc::SIGN_IN_CODE, sign_in_code: user_site.sign_in_code })
+      HawthorneCore::UserAction::Log.email_sent_failure(user_id:, failure_reason: HawthorneCore::UserAction::FailureReason.email_recently_sent, note: { message_type: HawthorneCore::Services::MailerSendSvc::SIGN_IN_CODE, sign_in_code: user_site.sign_in_code })
       return
     end
 

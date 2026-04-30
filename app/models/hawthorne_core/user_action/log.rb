@@ -82,18 +82,9 @@ module HawthorneCore::UserAction::Log
     success_admin(user_id, action(:sign_in_via_cookie), note)
   end
 
-  # ----------------------------------------------------------------------------- Sign-In Code
 
 
-  # ------------------------
 
-  def self.sign_in_code_verified(user_id)
-    success(user_id, action(:sign_in_code_verified), nil)
-  end
-
-  def self.sign_in_code_verified_failure(user_id, failure_reason, note)
-    failure(user_id, action(:sign_in_code_verified), failure_reason, note)
-  end
 
   # ----------------------------------------------------------------------------- Sign-Out
 

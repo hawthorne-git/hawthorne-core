@@ -15,16 +15,8 @@ module HawthorneCore::User::SignIn
 
     # -----------------------------------------------------------------------------
 
-    # determine if the sign-in code default delivery is via email
-    def sign_in_code_default_delivery_via_email? = (sign_in_code_default_delivery == HawthorneCore::User::CODE_VIA_EMAIL)
-
-    # determine if the sign-in code default delivery is via text message
-    def sign_in_code_default_delivery_via_phone? = (sign_in_code_default_delivery == HawthorneCore::User::CODE_VIA_PHONE)
-
     # get the sign in code default delivery, in a prettier format then what is saved in the database
     def sign_in_code_default_delivery_pretty_print = sign_in_code_delivery_labels[sign_in_code_default_delivery]
-
-    # -----------------------------------------------------------------------------
 
     # updates a users sign-in code default delivery method
     def update_sign_in_code_default_delivery(sign_in_code_default_delivery:)

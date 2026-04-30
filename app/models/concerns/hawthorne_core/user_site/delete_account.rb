@@ -74,7 +74,7 @@ module HawthorneCore::UserSite::DeleteAccount
           action: HawthorneCore::UserAction::Action::ACTIONS.fetch(:email_sent),
           success: true
         ).
-        where("note->>'email_type' = ?", HawthorneCore::Services::MailerSendSvc::DELETE_ACCOUNT_CODE).
+        where("note->>'message_type' = ?", HawthorneCore::Services::MailerSendSvc::DELETE_ACCOUNT_CODE).
         where("note->'personalization'->'data'->>'code' = ?", delete_account_code).
         where('created_at >= ?', HawthorneCore::User::CODE_RECENTLY_SENT_IN_SECONDS.seconds.ago).
         exists?

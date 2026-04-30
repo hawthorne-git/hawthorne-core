@@ -19,7 +19,7 @@ class HawthorneCore::Text::SendPhoneNumberUpdateCodeJob < HawthorneCore::Applica
 
     # exit if a text message with this code was recently sent to the user
     if user_site.new_phone_number_code_recently_sent?
-      HawthorneCore::UserAction::Log.text_message_sent_failure(user_id:, failure_reason: HawthorneCore::UserAction::FailureReason.text_message_recently_sent, note: { type: HawthorneCore::Services::TwilioTextSvc::PHONE_NUMBER_UPDATE_CODE, new_phone_number: user_site.new_phone_number, new_phone_number_code: user_site.new_phone_number_code })
+      HawthorneCore::UserAction::Log.text_message_sent_failure(user_id:, failure_reason: HawthorneCore::UserAction::FailureReason.text_message_recently_sent, note: { message_type: HawthorneCore::Services::TwilioTextSvc::PHONE_NUMBER_UPDATE_CODE, new_phone_number: user_site.new_phone_number, new_phone_number_code: user_site.new_phone_number_code })
       return
     end
 

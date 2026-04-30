@@ -22,7 +22,7 @@ class HawthorneCore::Text::SendSignInCodeJob < HawthorneCore::ApplicationJob
 
     # exit if a text message with this code was recently sent to the user
     if user_site.sign_in_code_recently_sent_via_text_message?
-      HawthorneCore::UserAction::Log.text_message_sent_failure(user_id:, failure_reason: HawthorneCore::UserAction::FailureReason.text_message_recently_sent, note: { type: HawthorneCore::Services::TwilioTextSvc::SIGN_IN_CODE, sign_in_code: user_site.sign_in_code })
+      HawthorneCore::UserAction::Log.text_message_sent_failure(user_id:, failure_reason: HawthorneCore::UserAction::FailureReason.text_message_recently_sent, note: { message_type: HawthorneCore::Services::TwilioTextSvc::SIGN_IN_CODE, sign_in_code: user_site.sign_in_code })
       return
     end
 

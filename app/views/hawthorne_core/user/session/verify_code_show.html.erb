@@ -1,0 +1,43 @@
+<%# v3.0 %>
+
+<%
+  delivery_method_via_email = (@delivery_method == HawthorneCore::User::CODE_VIA_EMAIL)
+  delivery_method_via_phone = (@delivery_method == HawthorneCore::User::CODE_VIA_PHONE)
+
+  url = verify_sign_in_code_path
+
+  title = 'Verify your sign-in code'
+
+  instruction_message = "Enter the 6-digit code we sent to #{@email}" if delivery_method_via_email
+  instruction_message = "Enter the 6-digit code we sent to #{HawthorneCore::Helpers::PhoneNumber.masked(phone_number: @phone_number)}" if delivery_method_via_phone
+
+  token_value = token = @token
+
+  delivery_method_value = delivery_method = @delivery_method
+
+  keep_signed_in_value = keep_signed_in = @keep_signed_in
+
+  submit_button_text = 'Verify Code'
+
+  resend_code_message = "Didn't get the code? #{link_to 'Resend it', resend_sign_in_code_path(token:, delivery_method:, keep_signed_in:), data: { turbo: :false }}"
+  send_code_via_email_message = "Send code by email instead? #{link_to 'Send email', resend_sign_in_code_via_email_path(token:, delivery_method:, keep_signed_in:), data: { turbo: :false }}"
+  send_code_via_phone_message = "Send code by text message instead? #{link_to 'Send text', resend_sign_in_code_via_text_path(token:, delivery_method:, keep_signed_in:), data: { turbo: :false }}"
+  start_over_message = "Need to change your email? #{link_to 'Start over', sign_in_path, data: { turbo: :false }}"
+%>
+
+<%= render HawthorneCore::UI::TitleComponent.new(title:) %>
+<%= render HawthorneCore::UI::Form::FormWrapperComponent.new(instruction_message:) do %>
+  <%= form_with url: do |form| %>
+    <%= render HawthorneCore::UI::Form::HiddenFieldComponent.new(form:, attribute: :token, value: token_value, required: true) %>
+    <%= render HawthorneCore::UI::Form::HiddenFieldComponent.new(form:, attribute: :delivery_method, value: delivery_method_value, required: true) %>
+    <%= render HawthorneCore::UI::Form::HiddenFieldComponent.new(form:, attribute: :keep_signed_in, value: keep_signed_in_value) %>
+    <%= render HawthorneCore::UI::Form::Attr::CodeTextFieldComponent.new(form:) %>
+    <%= render HawthorneCore::UI::Form::SubmitButtonComponent.new(form:, submit_button_text:) %>
+  <% end %>
+  <%= render HawthorneCore::UI::Form::SupportMessageComponent.new(message: resend_code_message) %>
+  <%= render HawthorneCore::UI::Form::SupportMessageComponent.new(message: send_code_via_email_message) if delivery_method_via_phone %>
+  <%= render HawthorneCore::UI::Form::SupportMessageComponent.new(message: send_code_via_phone_message) if delivery_method_via_email && @phone_number.present? %>
+  <%= render HawthorneCore::UI::Form::SupportMessageComponent.new(message: start_over_message) if delivery_method_via_email %>
+<% end %>
+
+<%= render '/hawthorne_core/user/verify_code_auto_submit_js' %>

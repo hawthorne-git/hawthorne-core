@@ -25,7 +25,7 @@ class HawthorneCore::Services::MailerSendSvc
   # send delete account code
   def self.send_delete_account_code(user_id:, email:, first_name:, code:, code_formatted:)
     send_email(
-      email_type: DELETE_ACCOUNT_CODE,
+      message_type: DELETE_ACCOUNT_CODE,
       user_id:,
       email:,
       subject: DELETE_ACCOUNT_CODE_SUBJECT,
@@ -40,7 +40,7 @@ class HawthorneCore::Services::MailerSendSvc
   # send update email code
   def self.send_email_update_code(user_id:, email:, first_name:, code:, code_formatted:)
     send_email(
-      email_type: EMAIL_UPDATE_CODE,
+      message_type: EMAIL_UPDATE_CODE,
       user_id:,
       email:,
       subject: EMAIL_UPDATE_CODE_SUBJECT,
@@ -55,7 +55,7 @@ class HawthorneCore::Services::MailerSendSvc
   def self.send_sign_in_code(user_id:, user_token:, email:, first_name:, code:, code_formatted:, keep_signed_in:)
     magic_link_url = HawthorneCore::AppConfig.site_base_url + '/verify-sign-in-code-via-magic-link?token=' + user_token + '&code=' + code.to_s + '&keep_signed_in=' + keep_signed_in.to_s
     send_email(
-      email_type: SIGN_IN_CODE,
+      message_type: SIGN_IN_CODE,
       user_id:,
       email:,
       subject: SIGN_IN_CODE_SUBJECT,
@@ -69,7 +69,7 @@ class HawthorneCore::Services::MailerSendSvc
   # send welcome email
   def self.send_welcome_email(user_id:, email:, first_name:)
     send_email(
-      email_type: WELCOME_EMAIL,
+      message_type: WELCOME_EMAIL,
       user_id:,
       email:,
       subject: "Welcome to #{HawthorneCore::Site.this_site_name}",
@@ -146,7 +146,7 @@ class HawthorneCore::Services::MailerSendSvc
   # ----------------------------------------------------------------
 
   # send an email
-  def self.send_email(email_type:, user_id:, email:, subject:, template_id:, personalization:)
+  def self.send_email(message_type:, user_id:, email:, subject:, template_id:, personalization:)
 
     # send the email, via mailer send
     result = mailer_send_email(email:, subject:, template_id:, personalization:)
@@ -154,8 +154,8 @@ class HawthorneCore::Services::MailerSendSvc
     # log the email
     HawthorneCore::SentEmail.create!(
       user_id:,
-      email_service: 'MAILER_SEND',
-      email_type:,
+      service: 'MAILER_SEND',
+      message_type:,
       service_template_id: template_id,
       from_email:,
       to_email: email,
@@ -169,10 +169,10 @@ class HawthorneCore::Services::MailerSendSvc
 
     # log the user action / exception (if caught)
     if result[:success]
-      HawthorneCore::UserAction::Log.email_sent(user_id:, note: { email_type:, email:, personalization:, mailer_send_message_id: result[:message_id] })
+      HawthorneCore::UserAction::Log.email_sent(user_id:, note: { message_type:, email:, personalization:, mailer_send_message_id: result[:message_id] })
     else
-      HawthorneCore::UserAction::Log.email_sent_failure(user_id:, failure_reason: HawthorneCore::UserAction::FailureReason.exception_caught, note: { email_type:, email:, personalization:, exception_message: result[:exception_message] })
-      HawthorneCore::CapturedException.log(location: 'HawthorneCore::Services::MailerSendSvc.send_email', note: { email_type:, user_id:, email: }, e: result[:exception])
+      HawthorneCore::UserAction::Log.email_sent_failure(user_id:, failure_reason: HawthorneCore::UserAction::FailureReason.exception_caught, note: { message_type:, email:, personalization:, exception_message: result[:exception_message] })
+      HawthorneCore::CapturedException.log(location: 'HawthorneCore::Services::MailerSendSvc.send_email', note: { message_type:, user_id:, email: }, e: result[:exception])
     end
 
   end
@@ -197,7 +197,6 @@ class HawthorneCore::Services::MailerSendSvc
       message_id: response.headers['x-message-id']
     }
 
-    # if an HTTP exception caught
   rescue HTTP::Error => e
     {
       success: false,
@@ -206,7 +205,6 @@ class HawthorneCore::Services::MailerSendSvc
       exception_message: e.message
     }
 
-    # catch all other exceptions
   rescue => e
     {
       success: false,

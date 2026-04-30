@@ -28,8 +28,14 @@ class HawthorneCore::User < HawthorneCore::ActiveRecordBaseApp
   # determine if a user exists with email for site sharing scope
   def self.exists_with_email?(email:) = active.exists?(email:, site_sharing_scope: HawthorneCore::Site.this_site_sharing_scope)
 
+  # determine if a user exists with token
+  def self.exists_with_token?(token:) = active.exists?(token:)
+
   # get the users id for an email with the site sharing scope
-  def self.user_id_for_email(email:) = where(email:, site_sharing_scope: HawthorneCore::Site.this_site_sharing_scope).pick(:user_id)
+  def self.user_id_for_email(email:) = active.where(email:, site_sharing_scope: HawthorneCore::Site.this_site_sharing_scope).pick(:user_id)
+
+  # get the users id for a token
+  def self.user_id_for_token(token:) = where(token:).pick(:user_id)
 
   # -----------------------------------------------------------------------------
 

@@ -7,12 +7,12 @@ HawthorneCore::Engine.routes.draw do
   post 'sign-in', to: 'user/session#sign_in'
 
   # sign-in code
-  get 'verify-sign-in-code', to: 'user/session#verify_sign_in_code_show'
-  get 'verify-sign-in-code-via-magic-link', to: 'user/session#verify_sign_in_code',  defaults: { code_delivery_method: HawthorneCore::User::CODE_VIA_EMAIL, from_magic_link: true }
-  post 'verify-sign-in-code', to: 'user/session#verify_sign_in_code'
-  get 'resend-sign-in-code', to: 'user/session#resend_sign_in_code'
-  get 'resend-sign-in-code-via-email', to: 'user/session#resend_sign_in_code_via_email'
-  get 'resend-sign-in-code-via-text', to: 'user/session#resend_sign_in_code_via_phone'
+  get 'verify-sign-in-code', to: 'user/session#verify_code_show'
+  get 'verify-sign-in-code-via-magic-link', to: 'user/session#verify_code',  defaults: { code_delivery_method: HawthorneCore::User::CODE_VIA_EMAIL, from_magic_link: true }
+  post 'verify-sign-in-code', to: 'user/session#verify_code'
+  get 'resend-sign-in-code', to: 'user/session#resend_code'
+  get 'resend-sign-in-code-via-email', to: 'user/session#resend_code_via_email'
+  get 'resend-sign-in-code-via-text', to: 'user/session#resend_code_via_phone'
 
   # sign-out
   get 'sign-out', to: 'user/session#sign_out'

@@ -80,7 +80,7 @@ module HawthorneCore::UserSite::SignIn
           action: HawthorneCore::UserAction::Action::ACTIONS.fetch(:email_sent),
           success: true
         ).
-        where("note->>'email_type' = ?", HawthorneCore::Services::MailerSendSvc::SIGN_IN_CODE).
+        where("note->>'message_type' = ?", HawthorneCore::Services::MailerSendSvc::SIGN_IN_CODE).
         where("note->'personalization'->'data'->>'code' = ?", sign_in_code).
         where('created_at >= ?', HawthorneCore::User::CODE_RECENTLY_SENT_IN_SECONDS.seconds.ago).
         exists?
@@ -95,8 +95,8 @@ module HawthorneCore::UserSite::SignIn
           action: HawthorneCore::UserAction::Action::ACTIONS.fetch(:text_message_sent),
           success: true
         ).
-        where("note->>'text_message_type' = ?", HawthorneCore::Services::TwilioTextSvc::SIGN_IN_CODE).
-        where("note->>'message' LIKE ?", "%#{sign_in_code}%").
+        where("note->>'message_type' = ?", HawthorneCore::Services::TwilioTextSvc::SIGN_IN_CODE).
+        where("note->>'message' LIKE ?", "%#{sign_in_code_formatted}%").
         where('created_at >= ?', HawthorneCore::User::CODE_RECENTLY_SENT_IN_SECONDS.seconds.ago).
         exists?
     end

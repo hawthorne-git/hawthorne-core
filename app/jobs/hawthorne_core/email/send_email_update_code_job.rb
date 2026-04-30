@@ -24,7 +24,7 @@ class HawthorneCore::Email::SendEmailUpdateCodeJob < HawthorneCore::ApplicationJ
 
     # exit if an email with this code was recently sent to the user
     if user_site.new_email_code_recently_sent?
-      HawthorneCore::UserAction::Log.email_sent_failure(user_id:, failure_reason: HawthorneCore::UserAction::FailureReason.email_recently_sent, note: { type: HawthorneCore::Services::MailerSendSvc::EMAIL_UPDATE_CODE, new_email: user_site.new_email, new_email_code: user_site.new_email_code })
+      HawthorneCore::UserAction::Log.email_sent_failure(user_id:, failure_reason: HawthorneCore::UserAction::FailureReason.email_recently_sent, note: { message_type: HawthorneCore::Services::MailerSendSvc::EMAIL_UPDATE_CODE, new_email: user_site.new_email, new_email_code: user_site.new_email_code })
       return
     end
 

@@ -24,7 +24,7 @@ class HawthorneCore::Email::SendDeleteAccountCodeJob < HawthorneCore::Applicatio
 
     # exit if an email with this code was recently sent to the user
     if user_site.delete_account_code_recently_sent?
-      HawthorneCore::UserAction::Log.email_sent_failure(user_id:, failure_reason: HawthorneCore::UserAction::FailureReason.email_recently_sent,note: { type: HawthorneCore::Services::MailerSendSvc::DELETE_ACCOUNT_CODE, delete_account_code: user_site.delete_account_code })
+      HawthorneCore::UserAction::Log.email_sent_failure(user_id:, failure_reason: HawthorneCore::UserAction::FailureReason.email_recently_sent,note: { message_type: HawthorneCore::Services::MailerSendSvc::DELETE_ACCOUNT_CODE, delete_account_code: user_site.delete_account_code })
       return
     end
 

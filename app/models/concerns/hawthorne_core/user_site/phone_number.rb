@@ -74,7 +74,7 @@ module HawthorneCore::UserSite::PhoneNumber
           action: HawthorneCore::UserAction::Action::ACTIONS.fetch(:text_message_sent),
           success: true
         ).
-        where("note->>'text_message_type' = ?", HawthorneCore::Services::TwilioTextSvc::PHONE_NUMBER_UPDATE_CODE).
+        where("note->>'message_type' = ?", HawthorneCore::Services::TwilioTextSvc::PHONE_NUMBER_UPDATE_CODE).
         where("note->>'message' LIKE ?", "%#{new_phone_number_code_formatted}%").
         where('created_at >= ?', HawthorneCore::User::CODE_RECENTLY_SENT_IN_SECONDS.seconds.ago).
         exists?
