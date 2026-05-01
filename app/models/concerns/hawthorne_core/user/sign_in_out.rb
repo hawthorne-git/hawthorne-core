@@ -8,7 +8,7 @@ module HawthorneCore::User::SignInOut
     # -----------------------------------------------------------------------------
 
     # define the allowed sign-in code delivery methods
-    def sign_in_code_delivery_methods = [HawthorneCore::User::CODE_VIA_EMAIL, HawthorneCore::User::CODE_VIA_PHONE]
+    def self.sign_in_code_delivery_methods = [HawthorneCore::User::CODE_VIA_EMAIL, HawthorneCore::User::CODE_VIA_PHONE]
 
     # define the labels for each sign-in code delivery methods
     def sign_in_code_delivery_labels = { HawthorneCore::User::CODE_VIA_EMAIL => 'Email', HawthorneCore::User::CODE_VIA_PHONE => 'Text Message' }

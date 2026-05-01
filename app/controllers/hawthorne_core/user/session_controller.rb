@@ -119,8 +119,8 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
 
     token = params[:token]
     code = params[:code]
-    delivery_method = params[:delivery_method]
     from_magic_link = params[:from_magic_link]
+    delivery_method = from_magic_link.present? ? HawthorneCore::User::CODE_VIA_EMAIL : params[:delivery_method]
     keep_signed_in = params[:keep_signed_in].to_i
 
     # ----------------------
@@ -142,8 +142,8 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
     # ----------------------
 
     # verify that the code is active, and matches
-    return render_code_inactive_error(user_site:, delivery_method:, keep_signed_in:) unless user_site.sign_in_code_active?
-    return render_code_not_match_error(user_site:, code:, delivery_method:, keep_signed_in:) unless user_site.sign_in_code_match?(code:)
+    return render_code_inactive_error(user_site:, delivery_method:, keep_signed_in:, from_magic_link:) unless user_site.sign_in_code_active?
+    return render_code_not_match_error(user_site:, code:, delivery_method:, keep_signed_in:, from_magic_link:) unless user_site.sign_in_code_match?(code:)
 
     # ----------------------
 
@@ -217,24 +217,39 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
   # ------------------------
 
   # render an error message that the code is inactive
-  def render_code_inactive_error(user_site:, delivery_method:, keep_signed_in:)
+  def render_code_inactive_error(user_site:, delivery_method:, keep_signed_in:, from_magic_link:)
     (code_not_set = true; failure_reason = HawthorneCore::UserAction::FailureReason.code_not_set) unless user_site.sign_in_code_set?
     (code_expired = true; failure_reason = HawthorneCore::UserAction::FailureReason.code_expired) if user_site.sign_in_code_expired?
     (code_max_failed_attempts_reached = true; failure_reason = HawthorneCore::UserAction::FailureReason.code_max_failed_attempts_reached) if user_site.sign_in_code_max_failed_attempts_reached?
     HawthorneCore::UserAction::Log.sign_in_failure(user_id: user_site.user_id, failure_reason:, note: { sign_in_code: user_site.sign_in_code, sign_in_code_created_at: user_site.sign_in_code_created_at, sign_in_code_failed_attempts_count: user_site.sign_in_code_failed_attempts_count })
     user_site.refresh_sign_in_attrs_then_send_it(delivery_method:, keep_signed_in:)
-    render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/verify_code_failed', locals: { code_not_set:, code_expired:, code_max_failed_attempts_reached: })
+    if from_magic_link
+      token = HawthorneCore::User.token_for_user_id(user_id: user_site.user_id)
+      redirect_to verify_sign_in_code_path(token:, delivery_method:, keep_signed_in:, from_magic_link:, code_not_set:, code_expired:, code_max_failed_attempts_reached:)
+    else
+      render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/verify_code_failed', locals: { code_not_set:, code_expired:, code_max_failed_attempts_reached: })
+    end
   end
 
   # render an error message that the code does not match
-  def render_code_not_match_error(user_site:, code:, delivery_method:, keep_signed_in:)
+  def render_code_not_match_error(user_site:, code:, delivery_method:, keep_signed_in:, from_magic_link:)
     HawthorneCore::UserAction::Log.sign_in_failure(user_id: user_site.user_id, failure_reason: HawthorneCore::UserAction::FailureReason.code_not_match, note: { code:, code_to_match: user_site.sign_in_code })
     user_site.add_sign_in_code_failed_attempt
     if user_site.sign_in_code_max_failed_attempts_reached?
       user_site.refresh_sign_in_attrs_then_send_it(delivery_method:, keep_signed_in:)
-      render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/verify_code_failed', locals: { code_max_failed_attempts_reached: true })
+      if from_magic_link
+        token = HawthorneCore::User.token_for_user_id(user_id: user_site.user_id)
+        redirect_to verify_sign_in_code_path(token:, delivery_method:, keep_signed_in:, from_magic_link:, code_max_failed_attempts_reached: true)
+      else
+        render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/verify_code_failed', locals: { code_max_failed_attempts_reached: true })
+      end
     else
-      render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/verify_code_failed', locals: { code_not_match: true })
+      if from_magic_link
+        token = HawthorneCore::User.token_for_user_id(user_id: user_site.user_id)
+        redirect_to verify_sign_in_code_path(token:, delivery_method:, keep_signed_in:, from_magic_link:, code_not_match: true)
+      else
+        render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/verify_code_failed', locals: { code_not_match: true })
+      end
     end
   end
 

@@ -55,7 +55,7 @@ module HawthorneCore::UserSite::SignInOut
     def sign_in_code_expired? = sign_in_code_created_at.nil? || (sign_in_code_created_at < HawthorneCore::User::CODE_EXPIRATION_IN_MINUTES.minutes.ago)
 
     # determine if the max number of attempts have been reached
-    def sign_in_code_max_failed_attempts_reached? = (sign_in_code_failed_attempts_count >= HawthorneCore::User::CODE_MAX_FAILED_ATTEMPTS_ALLOWED)
+    def sign_in_code_max_failed_attempts_reached? = sign_in_code_failed_attempts_count.present? && (sign_in_code_failed_attempts_count >= HawthorneCore::User::CODE_MAX_FAILED_ATTEMPTS_ALLOWED)
 
     # determine if the code matches
     def sign_in_code_match?(code:) = (sign_in_code == code.gsub(/\D/, ''))

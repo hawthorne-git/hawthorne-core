@@ -1,6 +1,12 @@
 <%# v3.0 %>
 
 <%
+  from_magic_link = params[:from_magic_link]
+  code_not_set = params[:code_not_set]
+  code_expired = params[:code_expired]
+  code_max_failed_attempts_reached = params[:code_max_failed_attempts_reached]
+  code_not_match = params[:code_not_match]
+
   delivery_method_via_email = (@delivery_method == HawthorneCore::User::CODE_VIA_EMAIL)
   delivery_method_via_phone = (@delivery_method == HawthorneCore::User::CODE_VIA_PHONE)
 
@@ -27,6 +33,7 @@
 
 <%= render HawthorneCore::UI::TitleComponent.new(title:) %>
 <%= render HawthorneCore::UI::Form::FormWrapperComponent.new(instruction_message:) do %>
+  <%= render partial: '/hawthorne_core/user/verify_code_failed', locals: { code_not_set:, code_expired:, code_max_failed_attempts_reached:, code_not_match: } if from_magic_link %>
   <%= form_with url: do |form| %>
     <%= render HawthorneCore::UI::Form::HiddenFieldComponent.new(form:, attribute: :token, value: token_value, required: true) %>
     <%= render HawthorneCore::UI::Form::HiddenFieldComponent.new(form:, attribute: :delivery_method, value: delivery_method_value, required: true) %>
