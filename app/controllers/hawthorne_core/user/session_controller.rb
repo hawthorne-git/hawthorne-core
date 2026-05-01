@@ -233,9 +233,9 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
     if user_site.sign_in_code_max_failed_attempts_reached?
       user_site.refresh_sign_in_attrs_then_send_it(delivery_method:, keep_signed_in:)
       render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/verify_code_failed', locals: { code_max_failed_attempts_reached: true })
-      return
+    else
+      render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/verify_code_failed', locals: { code_not_match: true })
     end
-    render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/verify_code_failed', locals: { code_not_match: true })
   end
 
   # render an error message that the email has a syntax error

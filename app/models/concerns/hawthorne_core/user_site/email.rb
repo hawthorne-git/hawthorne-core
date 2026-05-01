@@ -42,6 +42,12 @@ module HawthorneCore::UserSite::Email
       HawthorneCore::UserAction::Log.new_email_attrs_set(note: attrs)
     end
 
+    # set the new email attributes, then send the code via email
+    def set_new_email_attrs_then_send_it(new_email:)
+      set_new_email_attrs(new_email:)
+      HawthorneCore::Email::SendEmailUpdateCodeJob.perform_later(user_id:)
+    end
+
     # ------------------------
 
     # refresh the new email attributes
@@ -52,7 +58,7 @@ module HawthorneCore::UserSite::Email
       self
     end
 
-    # refresh the new email attributes, then send it via email
+    # refresh the new email attributes, then send the code it via email
     def refresh_new_email_attrs_then_send_it
       refresh_new_email_attrs
       HawthorneCore::Email::SendEmailUpdateCodeJob.perform_later(user_id:)

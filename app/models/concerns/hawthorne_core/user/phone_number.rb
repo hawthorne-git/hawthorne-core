@@ -10,8 +10,8 @@ module HawthorneCore::User::PhoneNumber
     # clear the users new phone number attributes, which is site specific
     def clear_new_phone_number_attrs = user_site.clear_new_phone_number_attrs
 
-    # set the users new phone number attributes, which is site specific
-    def set_new_phone_number_attrs(phone_number:) = user_site.set_new_phone_number_attrs(new_phone_number: phone_number)
+    # set the users new phone number attributes, which is site specific, then send the code via text message
+    def set_new_phone_number_attrs_then_send_it(phone_number:) = user_site.set_new_phone_number_attrs_then_send_it(new_phone_number: phone_number)
 
     # -----------------------------------------------------------------------------
 

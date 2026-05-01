@@ -33,36 +33,21 @@ class HawthorneCore::User::Profile::EmailController < HawthorneCore::AccountAppl
 
     # ----------------------
 
-    # verify that the email does not have a syntax error
-    unless HawthorneCore::Helpers::Email.syntax_valid?(email:)
-      HawthorneCore::UserAction::Log.update_profile_failure(failure_reason: HawthorneCore::UserAction::FailureReason.email_syntax_error, note: { email: })
-      render turbo_stream: turbo_stream.update('form_errors', partial: 'failed', locals: { syntax_error: true }) and return
-    end
-
-    # verify that the email does not match the current email
-    if email == HawthorneCore::User.where(user_id: session[:user_id]).pick(:email)
-      HawthorneCore::UserAction::Log.update_profile_failure(failure_reason: HawthorneCore::UserAction::FailureReason.email_identical, note: { email: })
-      render turbo_stream: turbo_stream.update('form_errors', partial: 'failed', locals: { identical: true }) and return
-    end
-
-    # verify that the email is not taken
-    if HawthorneCore::Helpers::Email.taken?(email:)
-      HawthorneCore::UserAction::Log.update_profile_failure(failure_reason: HawthorneCore::UserAction::FailureReason.email_taken, note: { email: })
-      render turbo_stream: turbo_stream.update('form_errors', partial: 'failed', locals: { taken: true }) and return
-    end
+    # verify that the email does not have a syntax error, does not match the current email, and is not taken
+    return render_email_syntax_error(email:) unless HawthorneCore::Helpers::Email.syntax_valid?(email:)
+    return render_email_identical_error(email:) if email == HawthorneCore::User.where(user_id: session[:user_id]).pick(:email)
+    return render_email_taken_error(email:) if HawthorneCore::Helpers::Email.taken?(email:)
 
     # ----------------------
 
     # the email is valid!
 
     # set the users new email attributes
+    # then send the user an email with a code to verify their email
     HawthorneCore::User.
       select(:user_id).
       find_by(user_id: session[:user_id]).
-      set_new_email_attrs(email:)
-
-    # send the user an email with a code to verify their email
-    HawthorneCore::Email::SendEmailUpdateCodeJob.perform_later(user_id: session[:user_id])
+      set_new_email_attrs_then_send_it(email:)
 
     # ----------------------
 
@@ -111,32 +96,9 @@ class HawthorneCore::User::Profile::EmailController < HawthorneCore::AccountAppl
 
     # ----------------------
 
-    # if the code is inactive ...
-    # refresh the code, resend, then return back and display an error message
-    unless user_site.new_email_code_active?
-      (code_not_set = true; failure_reason = HawthorneCore::UserAction::FailureReason.code_not_set) unless user_site.new_email_code_set?
-      (code_expired = true; failure_reason = HawthorneCore::UserAction::FailureReason.code_expired) if user_site.new_email_code_expired?
-      (code_max_failed_attempts_reached = true; failure_reason = HawthorneCore::UserAction::FailureReason.code_max_failed_attempts_reached) if user_site.new_email_code_max_failed_attempts_reached?
-      HawthorneCore::UserAction::Log.update_profile_failure(failure_reason:, note: { new_email_code: user_site.new_email_code, new_email_code_created_at: user_site.new_email_code_created_at, new_email_code_failed_attempts_count: user_site.new_email_code_failed_attempts_count })
-      user_site.refresh_new_email_attrs_then_send_it
-      render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/verify_code_failed', locals: { code_not_set:, code_expired:, code_max_failed_attempts_reached: }) and return
-    end
-
-    # verify the code - it is set, not expired, and has not reached the max number of failed attempts
-    # if the entered code does not match, increment the number of failed attempts
-    # if the max number of failed attempts reached ... refresh the users code, resend
-    # lastly, when the entered code does not match, return back and display an error message
-    unless user_site.new_email_code_match?(code:)
-      HawthorneCore::UserAction::Log.update_profile_failure(failure_reason: HawthorneCore::UserAction::FailureReason.code_not_match, note: { action: 'UPDATE_EMAIL', code:, code_to_match: user_site.new_email_code })
-      user_site.add_new_email_code_failed_attempt
-      if user_site.new_email_code_max_failed_attempts_reached?
-        code_max_failed_attempts_reached = true
-        user_site.refresh_new_email_attrs_then_send_it
-      else
-        code_not_match = true
-      end
-      render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/verify_code_failed', locals: { code_not_match:, code_max_failed_attempts_reached: }) and return
-    end
+    # verify that the code is active, and matches
+    return render_code_inactive_error(user_site:) unless user_site.new_email_code_active?
+    return render_code_not_match_error(user_site:, code:) unless user_site.new_email_code_match?(code:)
 
     # ----------------------
 
@@ -153,6 +115,52 @@ class HawthorneCore::User::Profile::EmailController < HawthorneCore::AccountAppl
     # redirect the user to view their profile
     redirect_to account_profile_path
 
+  end
+
+  # -----------------------------------------------------------------------------
+  # -----------------------------------------------------------------------------
+  # -----------------------------------------------------------------------------
+
+  private
+
+  # render an error message that the code is inactive
+  def render_code_inactive_error(user_site:)
+    (code_not_set = true; failure_reason = HawthorneCore::UserAction::FailureReason.code_not_set) unless user_site.new_email_code_set?
+    (code_expired = true; failure_reason = HawthorneCore::UserAction::FailureReason.code_expired) if user_site.new_email_code_expired?
+    (code_max_failed_attempts_reached = true; failure_reason = HawthorneCore::UserAction::FailureReason.code_max_failed_attempts_reached) if user_site.new_email_code_max_failed_attempts_reached?
+    HawthorneCore::UserAction::Log.update_profile_failure(failure_reason:, note: { new_email_code: user_site.new_email_code, new_email_code_created_at: user_site.new_email_code_created_at, new_email_code_failed_attempts_count: user_site.new_email_code_failed_attempts_count })
+    user_site.refresh_new_email_attrs_then_send_it
+    render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/verify_code_failed', locals: { code_not_set:, code_expired:, code_max_failed_attempts_reached: })
+  end
+
+  # render an error message that the code does not match
+  def render_code_not_match_error(user_site:, code:)
+    HawthorneCore::UserAction::Log.update_profile_failure(failure_reason: HawthorneCore::UserAction::FailureReason.code_not_match, note: { action: 'UPDATE_EMAIL', code:, code_to_match: user_site.new_email_code })
+    user_site.add_new_email_code_failed_attempt
+    if user_site.new_email_code_max_failed_attempts_reached?
+      user_site.refresh_new_email_attrs_then_send_it
+      render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/verify_code_failed', locals: { code_max_failed_attempts_reached: true })
+    else
+      render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/verify_code_failed', locals: { code_not_match: true })
+    end
+  end
+
+  # render an error message that the new email is identical to the current email
+  def render_email_identical_error(email:)
+    HawthorneCore::UserAction::Log.update_profile_failure(failure_reason: HawthorneCore::UserAction::FailureReason.email_identical, note: { email: })
+    render turbo_stream: turbo_stream.update('form_errors', partial: 'failed', locals: { identical: true })
+  end
+
+  # render an error message that the email has a syntax error
+  def render_email_syntax_error(email:)
+    HawthorneCore::UserAction::Log.update_profile_failure(failure_reason: HawthorneCore::UserAction::FailureReason.email_syntax_error, note: { email: })
+    render turbo_stream: turbo_stream.update('form_errors', partial: 'failed', locals: { syntax_error: true })
+  end
+
+  # render an error message that the email is taken
+  def render_email_taken_error(email:)
+    HawthorneCore::UserAction::Log.update_profile_failure(failure_reason: HawthorneCore::UserAction::FailureReason.email_taken, note: { email: })
+    render turbo_stream: turbo_stream.update('form_errors', partial: 'failed', locals: { taken: true })
   end
 
   # -----------------------------------------------------------------------------

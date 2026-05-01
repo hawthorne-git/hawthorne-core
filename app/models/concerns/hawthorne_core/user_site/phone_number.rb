@@ -42,6 +42,12 @@ module HawthorneCore::UserSite::PhoneNumber
       HawthorneCore::UserAction::Log.new_phone_number_attrs_set(note: attrs)
     end
 
+    # set the new phone number attributes, then send the code via text message
+    def set_new_phone_number_attrs_then_send_it(new_phone_number:)
+      set_new_phone_number_attrs(new_phone_number:)
+      HawthorneCore::Text::SendPhoneNumberUpdateCodeJob.perform_later(user_id:)
+    end
+
     # ------------------------
 
     # refresh the new phone number attributes
