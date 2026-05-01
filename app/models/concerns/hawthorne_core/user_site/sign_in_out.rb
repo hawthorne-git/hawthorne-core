@@ -1,6 +1,6 @@
 # v3.0
 
-module HawthorneCore::UserSite::SignIn
+module HawthorneCore::UserSite::SignInOut
   extend ActiveSupport::Concern
 
   included do
@@ -9,6 +9,32 @@ module HawthorneCore::UserSite::SignIn
 
     # determine if a user exists for this site
     def self.user_exist?(user_id:) = exists?(user_id:, site_id: HawthorneCore::Site.this_site_id)
+
+    # -----------------------------------------------------------------------------
+
+    # determine if this is the users first sign-in, on the site
+    def first_sign_in? = sign_in_count.zero?
+    def self.first_sign_in?(user_id:) = select(:sign_in_count).find_by(site_id: HawthorneCore::Site.this_site_id, user_id:).first_sign_in?
+
+    # ------------------------
+
+    # capture the user site sign-in
+    # this is a record for each user / site that captures the users first sign-in, last sign-in, #sign-ins, and if they should be kept as signed in
+    def self.site_sign_in(user_id:, keep_signed_in:)
+      signed_in_at = Time.current
+      user_site = find_by(site_id: HawthorneCore::Site.this_site_id, user_id:)
+      user_site.first_signed_in_at = signed_in_at if user_site.first_sign_in?
+      user_site.last_signed_in_at = signed_in_at
+      user_site.keep_signed_in = keep_signed_in
+      user_site.sign_in_count += 1
+      user_site.save!
+    end
+
+    # ------------------------
+
+    def self.site_sign_out
+      #TODO
+    end
 
     # -----------------------------------------------------------------------------
 

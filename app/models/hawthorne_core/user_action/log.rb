@@ -68,29 +68,15 @@ module HawthorneCore::UserAction::Log
 
   def self.update_profile_failure(**attrs) = failure(**attrs, action: action(:profile_updated))
 
-  # ----------------------------------------------------------------------------- Sign-In
+  # ----------------------------------------------------------------------------- Sign-In / Sign-Out
 
-  def self.sign_in(user_id)
-    success_admin(user_id, action(:sign_in), nil)
-  end
+  def self.sign_in(**attrs) = success(**attrs, action: action(:sign_in))
 
   def self.sign_in_failure(**attrs) = failure(**attrs, action: action(:sign_in))
 
-  # ------------------------
+  def self.sign_in_via_cookie(**attrs) = success_admin(**attrs, action: action(:sign_in_via_cookie))
 
-  def self.sign_in_via_cookie(user_id, note)
-    success_admin(user_id, action(:sign_in_via_cookie), note)
-  end
-
-
-
-
-
-  # ----------------------------------------------------------------------------- Sign-Out
-
-  def self.sign_out(user_id)
-    success(user_id, action(:sign_out), nil)
-  end
+  def self.sign_out(**attrs) = success(**attrs, action: action(:sign_out))
 
   # ----------------------------------------------------------------------------- Shipping Address
 
@@ -118,23 +104,15 @@ module HawthorneCore::UserAction::Log
 
   # ----------------------------------------------------------------------------- Stripe
 
-  def self.stripe_credit_card_created(user_id, note)
-    success_admin(user_id, action(:stripe_credit_card_created), note)
-  end
+  def self.stripe_credit_card_created(**attrs) = success_admin(**attrs, action: action(:stripe_credit_card_created))
 
-  def self.stripe_credit_card_detached(user_id, note)
-    success_admin(user_id, action(:stripe_credit_card_detached), note)
-  end
+  def self.stripe_credit_card_detached(**attrs) = success_admin(**attrs, action: action(:stripe_credit_card_detached))
 
-  def self.stripe_customer_created(user_id, note)
-    success_admin(user_id, action(:stripe_customer_created), note)
-  end
+  def self.stripe_customer_created(**attrs) = success_admin(**attrs, action: action(:stripe_customer_created))
 
   def self.stripe_customer_email_updated(**attrs) = success_admin(**attrs, action: action(:stripe_customer_email_updated))
 
-  def self.stripe_setup_intent_created(user_id, note)
-    success_admin(user_id, action(:stripe_setup_intent_created), note)
-  end
+  def self.stripe_setup_intent_created(**attrs) = success_admin(**attrs, action: action(:stripe_setup_intent_created))
 
   # ----------------------------------------------------------------------------- Text Message
 

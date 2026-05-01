@@ -10,13 +10,6 @@ module HawthorneCore::User::Email
     # determine if an email is verified
     def email_verified? = email_verified
 
-    # verify a users email, if not previously verified
-    def verify_email
-      return if email_verified?
-      update_columns(email_verified: true)
-      HawthorneCore::UserAction::Log.email_verified(note: { email: })
-    end
-
     # -----------------------------------------------------------------------------
 
     # clear the users new email attributes, which is site specific

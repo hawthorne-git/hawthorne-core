@@ -31,7 +31,7 @@ module HawthorneCore::UserAuthentication
         if keep_signed_in
           session[:user_id] = user_id
           cookies[:user_session_token] = { value: cookies[:user_session_token], expires: 1.month.from_now, httponly: true, secure: Rails.env.production?, same_site: :lax }
-          HawthorneCore::UserAction::Log.sign_in_via_cookie(user_id, { user_session_token: cookies[:user_session_token] })
+          HawthorneCore::UserAction::Log.sign_in_via_cookie(user_id:, note: { user_session_token: cookies[:user_session_token] })
         end
       end
 

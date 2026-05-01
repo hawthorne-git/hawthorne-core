@@ -5,17 +5,15 @@ class HawthorneCore::Services::StripeSvc
   # ----------------------------------------------------------------
 
   # create a stripe customer, returning its stripe customer id
-  def self.create_customer(user_id, email)
+  def self.create_customer(user_id:, email:)
     customer = Stripe::Customer.create(
       email:,
-      metadata: {
-        user_id:
-      }
+      metadata: { user_id: }
     )
-    HawthorneCore::UserAction::Log.stripe_customer_created(user_id, { email:, stripe_customer_id: customer.id })
+    HawthorneCore::UserAction::Log.stripe_customer_created(user_id:, note: { email:, stripe_customer_id: customer.id })
     customer.id
   rescue Stripe::StripeError => e
-    HawthorneCore::CapturedException.log('HawthorneCore::Services::StripeSvc.create_customer', { user_id:, email: }, e)
+    HawthorneCore::CapturedException.log(location: 'HawthorneCore::Services::StripeSvc.create_customer', note: { user_id:, email: }, e:)
     nil
   end
 
@@ -24,9 +22,9 @@ class HawthorneCore::Services::StripeSvc
   # detach a payment method from a customer (removes the credit card)
   def self.detach_payment_method(user_id, stripe_payment_method_id)
     Stripe::PaymentMethod.detach(stripe_payment_method_id)
-    HawthorneCore::UserAction::Log.stripe_credit_card_detached(user_id, { stripe_payment_method_id: stripe_payment_method_id })
+    HawthorneCore::UserAction::Log.stripe_credit_card_detached(user_id:, note: { stripe_payment_method_id: })
   rescue Stripe::StripeError => e
-    HawthorneCore::CapturedException.log('HawthorneCore::Services::StripeSvc.detach_payment_method', { user_id:, stripe_payment_method_id: stripe_payment_method_id }, e)
+    HawthorneCore::CapturedException.log(location: 'HawthorneCore::Services::StripeSvc.detach_payment_method', note: { user_id:, stripe_payment_method_id: stripe_payment_method_id }, e:)
   end
 
   # ----------------------------------------------------------------
@@ -45,7 +43,7 @@ class HawthorneCore::Services::StripeSvc
       }
     end
   rescue Stripe::StripeError => e
-    HawthorneCore::CapturedException.log('HawthorneCore::Services::StripeSvc.find_all_customer_credit_cards', { user_id:, customer_id: customer_id }, e)
+    HawthorneCore::CapturedException.log(location: 'HawthorneCore::Services::StripeSvc.find_all_customer_credit_cards', note: { user_id:, customer_id: customer_id }, e:)
     nil
   end
 
@@ -69,10 +67,10 @@ class HawthorneCore::Services::StripeSvc
       payment_method_types: ['card'],
       usage: 'off_session'
     )
-    HawthorneCore::UserAction::Log.stripe_setup_intent_created(user_id, { stripe_customer_id: customer_id, user_id:, setup_intent_client_secret: setup_intent.client_secret })
+    HawthorneCore::UserAction::Log.stripe_setup_intent_created(user_id:,note:  { stripe_customer_id: customer_id, user_id:, setup_intent_client_secret: setup_intent.client_secret })
     setup_intent.client_secret
   rescue Stripe::StripeError => e
-    HawthorneCore::CapturedException.log('HawthorneCore::Services::StripeSvc.setup_intent_client_secret', { stripe_customer_id: customer_id, user_id: }, e)
+    HawthorneCore::CapturedException.log(location: 'HawthorneCore::Services::StripeSvc.setup_intent_client_secret', note: { stripe_customer_id: customer_id, user_id: }, e:)
   end
 
   # ----------------------------------------------------------------

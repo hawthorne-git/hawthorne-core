@@ -149,35 +149,16 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
 
     # the code is verified
 
-    # clear the sign-in code - it is one time use only
-    HawthorneCore::UserAction::Log.sign_in_code_verified(user.id)
-    user_site.clear_sign_in_code
-
     # sign-in the user
-    session[:user_id] = user.id
-    HawthorneCore::UserAction::Log.sign_in(user.id)
+    HawthorneCore::User.
+      select(:user_id, :email_verified, :stripe_customer_id).
+      find_by(user_id:).
+      sign_in(user_session_token: cookies[:user_session_token], keep_signed_in:)
 
-    # attach the user to their session
-    HawthorneCore::UserSession.find_by(token: cookies[:user_session_token])&.update_columns(user_id:)
+    # set the user into the session
+    session[:user_id] = user_id
 
-    # verify the users email (if the code was sent via email)
-    user.verify_email if code_delivery_method == HawthorneCore::User::CODE_VIA_EMAIL
-
-    # determine if this is the users first sign-in on this site
-    # if true, a welcome email is sent
-    first_sign_in_on_site = user_site.first_sign_in?
-
-    # log the users site sign-in ...
-    # this is a record for each user / site that captures the users first sign-in, last sign-in, #sign-ins, and if they should be kept as signed in
-    user.log_site_sign_in(keep_signed_in: keep_signed_in)
-
-    # if this is the users first sign-in (on site) ... send the user a welcome email
-    HawthorneCore::Email::SendWelcomeEmailJob.perform_later(user.id) if first_sign_in_on_site
-
-    # create the user a stripe customer account (if not done prior)
-    HawthorneCore::Stripe::CreateCustomerJob.perform_later(user.id) unless user.stripe_customer?
-
-    # TODO: if first sign-in EVER, redirect to enter phone number? or maybe on their third sign-in?
+    # ----------------------
 
     # redirect the user to view their account
     redirect_to account_path
@@ -189,14 +170,16 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
   # sign-out the user
   def sign_out
 
-    # update the user / site record, as the user is forcing a sign-out - remove ability to keep signed in via cookie
-    HawthorneCore::UserSite.log_site_sign_out(session[:user_id])
-
-    # log that the user has signed out
-    HawthorneCore::UserAction::Log.sign_out(session[:user_id])
+    # sign-out the user
+    HawthorneCore::User.
+      select(:user_id).
+      find_by(user_id: session[:user_id]).
+      sign_out
 
     # reset the session
     reset_session
+
+    # ----------------------
 
     # redirect the user to the sites home page
     redirect_to('/')
