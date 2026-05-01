@@ -52,7 +52,7 @@ module HawthorneCore::User::SignInOut
 
       # capture the users site sign-in ...
       # this is a record for each user / site that captures the users first sign-in, last sign-in, #sign-ins, and if they should be kept as signed in
-      HawthorneCore::UserSite.site_sign_in(user_id:, keep_signed_in:)
+      HawthorneCore::UserSite.sign_in(user_id:, keep_signed_in:)
 
       # create the user a stripe customer account, if not done prior
       HawthorneCore::Stripe::CreateCustomerJob.perform_later(user_id:) unless stripe_customer?
@@ -65,14 +65,10 @@ module HawthorneCore::User::SignInOut
     # -----------------------------------------------------------------------------
 
     # sign-out the user
+    # as the user is forcing a sign-out - remove ability to keep signed in via cookie
     def sign_out
-
-      # capture the users site sign-in ...
-      # as the user is forcing a sign-out - remove ability to keep signed in via cookie
-      HawthorneCore::UserSite.site_sign_out(user_id:, keep_signed_in:)
-
+      HawthorneCore::UserSite.sign_out(user_id:)
       HawthorneCore::UserAction::Log.sign_out(user_id:)
-
     end
 
     # -----------------------------------------------------------------------------
