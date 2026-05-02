@@ -42,6 +42,12 @@ module HawthorneCore::UserSite::DeleteAccount
       HawthorneCore::UserAction::Log.delete_account_attrs_set(note: attrs)
     end
 
+    # set the delete account attributes, then send the code via email
+    def set_delete_account_attrs_then_send_it
+      set_delete_account_attrs
+      HawthorneCore::Email::SendDeleteAccountCodeJob.perform_later(user_id:)
+    end
+
     # ------------------------
 
     # refresh the delete account attributes

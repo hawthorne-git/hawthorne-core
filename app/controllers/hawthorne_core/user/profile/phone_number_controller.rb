@@ -125,24 +125,25 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Accou
 
   # render an error message that the code is inactive
   def render_code_inactive_error(user_site:)
-    (code_not_set = true; failure_reason = HawthorneCore::UserAction::FailureReason.code_not_set) unless user_site.new_phone_number_code_set?
-    (code_expired = true; failure_reason = HawthorneCore::UserAction::FailureReason.code_expired) if user_site.new_phone_number_code_expired?
-    (code_max_failed_attempts_reached = true; failure_reason = HawthorneCore::UserAction::FailureReason.code_max_failed_attempts_reached) if user_site.new_phone_number_code_max_failed_attempts_reached?
-    HawthorneCore::UserAction::Log.update_profile_failure(failure_reason: failure_reason, note: { new_phone_number_code: user_site.new_phone_number_code, new_phone_number_code_created_at: user_site.new_phone_number_code_created_at, new_phone_number_code_failed_attempts_count: user_site.new_phone_number_code_failed_attempts_count })
-    user_site.refresh_new_phone_number_attrs_then_send_it
-    render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/verify_code_failed', locals: { code_not_set:, code_expired:, code_max_failed_attempts_reached: })
+    render_shared_code_inactive_error(
+      note: { new_phone_number_code: user_site.new_phone_number_code, new_phone_number_code_created_at: user_site.new_phone_number_code_created_at, new_phone_number_code_failed_attempts_count: user_site.new_phone_number_code_failed_attempts_count },
+      is_code_set: -> { user_site.new_phone_number_code_set? },
+      is_code_expired: -> { user_site.new_phone_number_code_expired? },
+      are_max_attempts_reached: -> { user_site.new_phone_number_code_max_failed_attempts_reached? },
+      refresh_attrs_then_send_it: -> { user_site.refresh_new_phone_number_attrs_then_send_it }
+    )
   end
 
   # render an error message that the code does not match
   def render_code_not_match_error(user_site:, code:)
-    HawthorneCore::UserAction::Log.update_profile_failure(failure_reason: HawthorneCore::UserAction::FailureReason.code_not_match, note: { action: 'UPDATE_PHONE_NUMBER', code:, code_to_match: user_site.new_phone_number_code })
-    user_site.add_new_phone_number_code_failed_attempt
-    if user_site.new_phone_number_code_max_failed_attempts_reached?
-      user_site.refresh_new_phone_number_attrs_then_send_it
-      render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/verify_code_failed', locals: { code_max_failed_attempts_reached: true })
-    else
-      render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/verify_code_failed', locals: { code_not_match: true })
-    end
+    render_shared_code_not_match_error(
+      action: 'UPDATE_PHONE_NUMBER',
+      code:,
+      code_to_match: user_site.new_phone_number_code,
+      add_failed_attempt: -> { user_site.add_new_phone_number_code_failed_attempt },
+      are_max_attempts_reached: -> { user_site.new_phone_number_code_max_failed_attempts_reached? },
+      refresh_attrs_then_send_it: -> { user_site.refresh_new_phone_number_attrs_then_send_it }
+    )
   end
 
   # render an error message that the new phone number is identical to the current phone number

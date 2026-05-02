@@ -10,14 +10,10 @@ class HawthorneCore::Email::SendDeleteAccountCodeJob < HawthorneCore::Applicatio
   def perform(user_id:)
 
     # find the user by their id
-    user = HawthorneCore::User.
-      select(:email, :name).
-      find_by(user_id:)
+    user = HawthorneCore::User.find_by(user_id:)
 
     # find the users site record ... the delete account code is specific to each site
-    user_site = HawthorneCore::UserSite.
-      select(:user_site_id, :user_id, :delete_account_code, :delete_account_code_created_at, :delete_account_code_failed_attempts_count).
-      find_by(user_id:, site_id: HawthorneCore::Site.this_site_id)
+    user_site = HawthorneCore::UserSite.find_by(user_id:, site_id:)
 
     # if the code is inactive, refresh
     user_site.refresh_delete_account_attrs.reload unless user_site.delete_account_code_active?
