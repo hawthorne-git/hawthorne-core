@@ -16,7 +16,7 @@ module HawthorneCore::Errors
       HawthorneCore::UserAction::Log.update_profile_failure(failure_reason:, note:) unless action == 'SIGN_IN'
       refresh_attrs_then_send_it.call
       if from_magic_link
-        redirect_to verify_sign_in_code_path(token: HawthorneCore::User.find_token(user_id:), delivery_method: HawthorneCore::User::CODE_VIA_EMAIL, keep_signed_in: true, from_magic_link:, code_not_set:, code_expired:, code_max_failed_attempts_reached:)
+        redirect_to verify_sign_in_code_path(token: HawthorneCore::User.token(user_id:), delivery_method: HawthorneCore::User::CODE_VIA_EMAIL, keep_signed_in: true, from_magic_link:, code_not_set:, code_expired:, code_max_failed_attempts_reached:)
       else
         render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/verify_code_failed', locals: { code_not_set:, code_expired:, code_max_failed_attempts_reached: })
       end
@@ -32,13 +32,13 @@ module HawthorneCore::Errors
       if are_max_attempts_reached.call
         refresh_attrs_then_send_it.call
         if (action == 'SIGN_IN') && from_magic_link
-          redirect_to verify_sign_in_code_path(token: HawthorneCore::User.find_token(user_id:), delivery_method: HawthorneCore::User::CODE_VIA_EMAIL, keep_signed_in: true, from_magic_link:, code_max_failed_attempts_reached: true)
+          redirect_to verify_sign_in_code_path(token: HawthorneCore::User.token(user_id:), delivery_method: HawthorneCore::User::CODE_VIA_EMAIL, keep_signed_in: true, from_magic_link:, code_max_failed_attempts_reached: true)
         else
           render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/verify_code_failed', locals: { code_max_failed_attempts_reached: true })
         end
       else
         if (action == 'SIGN_IN') && from_magic_link
-          redirect_to verify_sign_in_code_path(token: HawthorneCore::User.find_token(user_id:), delivery_method: HawthorneCore::User::CODE_VIA_EMAIL, keep_signed_in: true, from_magic_link:, code_not_match: true)
+          redirect_to verify_sign_in_code_path(token: HawthorneCore::User.token(user_id:), delivery_method: HawthorneCore::User::CODE_VIA_EMAIL, keep_signed_in: true, from_magic_link:, code_not_match: true)
         else
           render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/verify_code_failed', locals: { code_not_match: true })
         end

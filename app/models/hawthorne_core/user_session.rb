@@ -26,8 +26,8 @@ class HawthorneCore::UserSession < HawthorneCore::ActiveRecordBaseLog
 
   # -----------------------------------------------------------------------------
 
-  # determine if a record exists with the token
-  def self.record_exists_with_token?(token) = exists?(token: token)
+  # determine if a record exists with this token
+  def self.token_exists?(token) = exists?(token: token)
 
   # -----------------------------------------------------------------------------
 

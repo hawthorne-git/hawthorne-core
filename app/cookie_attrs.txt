@@ -1,3 +1,0 @@
-List of cookie attributes used within the gem ...
-
-user_session_token

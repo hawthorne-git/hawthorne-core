@@ -64,8 +64,6 @@ module HawthorneCore::UserAction::Log
 
   def self.update_profile(**attrs) = success(**attrs, action: action(:profile_updated))
 
-  def self.email_verified(**attrs) = success(**attrs, action: action(:email_verified)) #TODO
-
   def self.update_profile_failure(**attrs) = failure(**attrs, action: action(:profile_updated))
 
   # ----------------------------------------------------------------------------- Sign-In / Sign-Out

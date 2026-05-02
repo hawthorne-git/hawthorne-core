@@ -7,8 +7,8 @@ module HawthorneCore::UserSite::PhoneNumber
 
     # -----------------------------------------------------------------------------
 
-    # get the users new phone number
-    def self.new_phone_number(user_id:) = where(user_id:, site_id: HawthorneCore::Site.this_site_id).pick(:new_phone_number)
+    # find the users new phone number
+    def self.new_phone_number(user_id:) = where(user_id:, site_id:).pick(:new_phone_number)
 
     # -----------------------------------------------------------------------------
 
@@ -80,7 +80,7 @@ module HawthorneCore::UserSite::PhoneNumber
     def new_phone_number_code_recently_sent?
       HawthorneCore::UserAction.
         where(
-          site_id: HawthorneCore::Site.this_site_id,
+          site_id:,
           user_id:,
           action: HawthorneCore::UserAction::Action::ACTIONS.fetch(:text_message_sent),
           success: true

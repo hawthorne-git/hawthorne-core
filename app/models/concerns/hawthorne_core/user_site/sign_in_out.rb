@@ -7,11 +7,6 @@ module HawthorneCore::UserSite::SignInOut
 
     # -----------------------------------------------------------------------------
 
-    # determine if a user exists for this site
-    def self.user_exist?(user_id:) = exists?(user_id:, site_id:)
-
-    # -----------------------------------------------------------------------------
-
     # determine if this is the users first sign-in, on the site
     def first_sign_in? = sign_in_count.zero?
     def self.first_sign_in?(user_id:) = find_by(user_id:, site_id:).first_sign_in?

@@ -79,14 +79,14 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
 
       # in the unexpected case where the cloudflare country code is not found within our list,
       # log it and default it to select US
-      unless HawthorneCore::Country.code_alpha2_exists?(cloudflare_country_code_alpha2)
+      unless HawthorneCore::Country.code_alpha2_exists?(code_alpha2: cloudflare_country_code_alpha2)
         HawthorneCore::UserAction::Log.shipping_address_failure(@user.id, HawthorneCore::UserAction::FailureReason.unexpected_state, { message: 'Country not found with Cloudflare country code', cloudflare_country_code: cloudflare_country_code_alpha2 })
         cloudflare_country_code_alpha2 = 'US'
       end
 
       # if the cloudflare country is in our list of countries to ship to, set this as the selected country
       # else this will force the user to select a country that we ship to
-      if HawthorneCore::Country.ship_to?(cloudflare_country_code_alpha2)
+      if HawthorneCore::Country.ship_to_code_alpha2?(code_alpha2: cloudflare_country_code_alpha2)
         @selected_country = HawthorneCore::Country.
           select(:handle, :code_alpha2, :code_alpha3).
           active.

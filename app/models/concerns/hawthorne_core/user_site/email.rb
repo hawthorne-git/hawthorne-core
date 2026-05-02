@@ -7,8 +7,8 @@ module HawthorneCore::UserSite::Email
 
     # -----------------------------------------------------------------------------
 
-    # get the users new email
-    def self.new_email(user_id:) = where(user_id:, site_id: HawthorneCore::Site.this_site_id).pick(:new_email)
+    # find the users new email
+    def self.new_email(user_id:) = where(user_id:, site_id:).pick(:new_email)
 
     # -----------------------------------------------------------------------------
 
@@ -80,7 +80,7 @@ module HawthorneCore::UserSite::Email
     def new_email_code_recently_sent?
       HawthorneCore::UserAction.
         where(
-          site_id: HawthorneCore::Site.this_site_id,
+          site_id:,
           user_id:,
           action: HawthorneCore::UserAction::Action::ACTIONS.fetch(:email_sent),
           success: true

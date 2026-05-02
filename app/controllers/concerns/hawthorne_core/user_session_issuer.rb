@@ -47,7 +47,7 @@ module HawthorneCore::UserSessionIssuer
 
       #  if this token does NOT exist in the database ...
       #  set the user session as NOT verified, delete the cookie, and return
-      unless HawthorneCore::UserSession.record_exists_with_token?(cookies[:user_session_token])
+      unless HawthorneCore::UserSession.token_exists?(cookies[:user_session_token])
         session[:user_session_verified] = false
         cookies.delete(:user_session_token)
         return

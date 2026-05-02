@@ -90,7 +90,7 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
     # ----------------------
 
     # find the user id by their token
-    user_id = HawthorneCore::User.find_user_id(token:)
+    user_id = HawthorneCore::User.user_id_by_token(token:)
 
     # send the user their code via prior delivery method, email or text
     send_sign_in_code(user_id:, keep_signed_in:, delivery_method:)
@@ -128,7 +128,7 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
     # ----------------------
 
     # find the user id by their token
-    user_id = HawthorneCore::User.find_user_id(token:)
+    user_id = HawthorneCore::User.user_id_by_token(token:)
 
     # find the users site record ... the sign-in code is specific to each site
     user_site = HawthorneCore::UserSite.find_by(user_id:, site_id:)
