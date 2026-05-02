@@ -7,6 +7,11 @@ class HawthorneCore::User::ProfileController < HawthorneCore::AccountApplication
   # show the users profile page
   def show
 
+    # find the user
+    @user = HawthorneCore::User.find_by(user_id:)
+
+    # ----------------------
+
     @html_title = 'Profile'
 
   end

@@ -3,7 +3,7 @@
 <%
 
   # find the user - needed in the user greeting section
-  user = HawthorneCore::User.select(:email, :name).find_by(user_id: session[:user_id])
+  user = HawthorneCore::User.find_by(user_id: session[:user_id])
 
   # create each navigation component
   addresses_navigation_component = { handle: 'Addresses', url: helpers.account_addresses_path, selected: (@selected_sidebar_navigation_item.downcase == 'addresses') }

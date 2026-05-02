@@ -10,9 +10,7 @@ class HawthorneCore::Email::SendWelcomeEmailJob < HawthorneCore::ApplicationJob
   def perform(user_id:)
 
     # find the user by their id
-    user = HawthorneCore::User.
-      select(:user_id, :email, :name).
-      find_by(user_id:)
+    user = HawthorneCore::User.find_by(user_id:)
 
     # send the email
     HawthorneCore::Services::MailerSendSvc.send_welcome_email(

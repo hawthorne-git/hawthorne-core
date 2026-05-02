@@ -60,8 +60,7 @@ class HawthorneCore::UserPaymentMethod < HawthorneCore::ActiveRecordBaseApp
     clean_defaulted(user_id)
 
     # find the users active stripe credit card payment methods (in our database)
-    payment_methods = select(:user_payment_method_id, :token, :stripe_payment_method_id, :default).
-      active.
+    payment_methods = active.
       where(user_id:, payment_method_type: 'CREDIT_CARD').
       where.not(stripe_payment_method_id: nil)
 

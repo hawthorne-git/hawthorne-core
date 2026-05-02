@@ -29,7 +29,6 @@ class HawthorneCore::User::Profile::SignInCodeDefaultDeliveryController < Hawtho
 
     # find the user, then update their sign-in code default delivery method
     HawthorneCore::User.
-      select(:user_id, :sign_in_code_default_delivery).
       find_by(user_id: session[:user_id]).
       update_sign_in_code_default_delivery(sign_in_code_default_delivery:)
 

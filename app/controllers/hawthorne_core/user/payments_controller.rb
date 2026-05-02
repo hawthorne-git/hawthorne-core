@@ -8,7 +8,6 @@ class HawthorneCore::User::PaymentsController < HawthorneCore::AccountApplicatio
 
     # find the users active stripe credit cards
     @active_credit_cards = HawthorneCore::User.
-      select(:user_id, :stripe_customer_id).
       find_by(user_id: session[:user_id]).
       active_stripe_credit_cards
 
@@ -25,7 +24,6 @@ class HawthorneCore::User::PaymentsController < HawthorneCore::AccountApplicatio
 
     # find the user
     @user = HawthorneCore::User.
-      select(:user_id, :email, :name, :stripe_customer_id).
       active.
       find_by(user_id: session[:user_id])
 
@@ -51,7 +49,6 @@ class HawthorneCore::User::PaymentsController < HawthorneCore::AccountApplicatio
 
     # find the user
     user = HawthorneCore::User.
-      select(:user_id).
       active.
       find_by(user_id: session[:user_id])
 
@@ -97,7 +94,6 @@ class HawthorneCore::User::PaymentsController < HawthorneCore::AccountApplicatio
 
     # find the user
     user = HawthorneCore::User.
-      select(:user_id).
       active.
       find_by(user_id: session[:user_id])
 
@@ -105,7 +101,6 @@ class HawthorneCore::User::PaymentsController < HawthorneCore::AccountApplicatio
 
     # find the payment method to soft delete / detach in stripe
     payment_method = HawthorneCore::UserPaymentMethod.
-      select(:user_payment_method_id, :stripe_payment_method_id, :default).
       active.
       find_by(user_id:, token: token)
 
@@ -150,7 +145,6 @@ class HawthorneCore::User::PaymentsController < HawthorneCore::AccountApplicatio
 
     # find the user
     user = HawthorneCore::User.
-      select(:user_id).
       active.
       find_by(user_id: session[:user_id])
 
@@ -158,7 +152,6 @@ class HawthorneCore::User::PaymentsController < HawthorneCore::AccountApplicatio
 
     # find the payment method to set as default
     payment_method = HawthorneCore::UserPaymentMethod.
-      select(:user_payment_method_id).
       active.
       find_by(user_id:, token: token)
 

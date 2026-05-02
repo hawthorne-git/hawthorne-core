@@ -7,16 +7,12 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
   def index
 
     # find the user
-    @user = HawthorneCore::User.
-      select(:user_id, :email, :name).
-      active.
-      find_by(user_id: session[:user_id])
+    @user = HawthorneCore::User.find_by(user_id: session[:user_id])
 
     # ----------------------
 
     # find the users shipping addresses
     @shipping_addresses = HawthorneCore::UserShippingAddress.
-      select(:token, :name, :street_address, :street_address_extended, :city, :state_province, :postal_code, :country_code_alpha2, :phone_number).
       active.
       where(user_id: @user.id).
       order(last_checkout_selected_at: :desc, created_at: :desc)
@@ -47,10 +43,7 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
     # ----------------------
 
     # find the user
-    @user = HawthorneCore::User.
-      select(:user_id, :email, :name, :phone_number).
-      active.
-      find_by(user_id: session[:user_id])
+    @user = HawthorneCore::User.find_by(user_id: session[:user_id])
 
     # ----------------------
 
@@ -63,10 +56,7 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
 
     # find the selected country (by the user) ... if present
     if selected_country_code_alpha2.present?
-      @selected_country = HawthorneCore::Country.
-        select(:handle, :code_alpha2, :code_alpha3).
-        active.
-        find_by(code_alpha2: selected_country_code_alpha2.strip.upcase, ship_to: true)
+      @selected_country = HawthorneCore::Country.active.find_by(code_alpha2: selected_country_code_alpha2.strip.upcase, ship_to: true)
     end
 
     # ----------------------
@@ -87,10 +77,7 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
       # if the cloudflare country is in our list of countries to ship to, set this as the selected country
       # else this will force the user to select a country that we ship to
       if HawthorneCore::Country.ship_to_code_alpha2?(code_alpha2: cloudflare_country_code_alpha2)
-        @selected_country = HawthorneCore::Country.
-          select(:handle, :code_alpha2, :code_alpha3).
-          active.
-          find_by(code_alpha2: cloudflare_country_code_alpha2.strip.upcase, ship_to: true)
+        @selected_country = HawthorneCore::Country.active.find_by(code_alpha2: cloudflare_country_code_alpha2.strip.upcase, ship_to: true)
       end
 
     end
@@ -158,10 +145,7 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
     # ----------------------
 
     # find the user
-    @user = HawthorneCore::User.
-      select(:user_id, :email, :name).
-      active.
-      find_by(user_id: session[:user_id])
+    @user = HawthorneCore::User.find_by(user_id: session[:user_id])
 
     # in the unexpected case where the user is not found - reset the session and redirect the user to the sites home page
     reset_session; redirect_to '/' and return unless @user
@@ -169,10 +153,7 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
     # ----------------------
 
     # find the users shipping address to edit
-    @shipping_address = HawthorneCore::UserShippingAddress.
-      select(:token, :name, :street_address, :street_address_extended, :city, :state_province, :postal_code, :country_code_alpha2, :phone_number).
-      active.
-      find_by(user_id: @user.id, token: token)
+    @shipping_address = HawthorneCore::UserShippingAddress.active.find_by(user_id: @user.id, token: token)
 
     # in the unexpected case where the users shipping address is not found
     # log it, and redirect the user to view their shipping addresses
@@ -184,10 +165,7 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
     # ----------------------
 
     # get the selected country within the shipping address
-    @selected_country = HawthorneCore::Country.
-      select(:handle, :code_alpha2, :code_alpha3).
-      active.
-      find_by(code_alpha2: @shipping_address.country_code_alpha2, ship_to: true)
+    @selected_country = HawthorneCore::Country.active.find_by(code_alpha2: @shipping_address.country_code_alpha2, ship_to: true)
 
     # ----------------------
 
@@ -210,10 +188,7 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
     # ----------------------
 
     # find the users shipping address to update
-    shipping_address = HawthorneCore::UserShippingAddress.
-      select(:user_shipping_address_id).
-      active.
-      find_by(user_id: session[:user_id], token: attrs[:token])
+    shipping_address = HawthorneCore::UserShippingAddress.find_by(user_id: session[:user_id], token: attrs[:token])
 
     # in the unexpected case where the users shipping address is not found
     # log it, and redirect the user to view their shipping addresses
@@ -258,10 +233,7 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
     # ----------------------
 
     # find the users shipping address to soft delete
-    shipping_address = HawthorneCore::UserShippingAddress.
-      select(:user_shipping_address_id).
-      active.
-      find_by(user_id: session[:user_id], token: token)
+    shipping_address = HawthorneCore::UserShippingAddress.active.find_by(user_id: session[:user_id], token: token)
 
     # in the unexpected case where the users shipping address is not found
     # log it, and redirect the user to view their shipping addresses

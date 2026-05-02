@@ -10,9 +10,7 @@ class HawthorneCore::Stripe::CreateCustomerJob < HawthorneCore::ApplicationJob
   def perform(user_id:)
 
     # find the user by their id
-    user = HawthorneCore::User.
-      select(:user_id, :email, :stripe_customer_id).
-      find_by(user_id:)
+    user = HawthorneCore::User.find_by(user_id:)
 
     # exit if the user already has an attached stripe customer account
     return if user.stripe_customer?
