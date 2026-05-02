@@ -7,6 +7,11 @@ module HawthorneCore::UserSite::PhoneNumber
 
     # -----------------------------------------------------------------------------
 
+    # get the users new phone number
+    def self.new_phone_number(user_id:) = where(user_id:, site_id: HawthorneCore::Site.this_site_id).pick(:new_phone_number)
+
+    # -----------------------------------------------------------------------------
+
     # format the code, ex: '123456' formatted is '123-456'
     def new_phone_number_code_formatted = "#{new_phone_number_code[0, 3]}-#{new_phone_number_code[3, 3]}"
 

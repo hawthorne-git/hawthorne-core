@@ -7,7 +7,7 @@ module HawthorneCore::User::Email
 
     # -----------------------------------------------------------------------------
 
-    # get the email for a user id
+    # get the users email
     def self.email(user_id:) = where(user_id:).pick(:email)
 
     # -----------------------------------------------------------------------------

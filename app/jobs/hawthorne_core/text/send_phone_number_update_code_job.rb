@@ -10,9 +10,7 @@ class HawthorneCore::Text::SendPhoneNumberUpdateCodeJob < HawthorneCore::Applica
   def perform(user_id:)
 
     # find the users site record ... the new phone number code is specific to each site
-    user_site = HawthorneCore::UserSite.
-      select(:user_site_id, :user_id, :new_phone_number, :new_phone_number_code, :new_phone_number_code_created_at, :new_phone_number_code_failed_attempts_count).
-      find_by(user_id:, site_id: HawthorneCore::Site.this_site_id)
+    user_site = HawthorneCore::UserSite.find_by(user_id:, site_id:)
 
     # if the code is inactive, refresh and reload the model
     user_site.refresh_new_phone_number_attrs.reload unless user_site.new_phone_number_code_active?

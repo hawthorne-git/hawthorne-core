@@ -53,7 +53,7 @@ class HawthorneCore::User::Profile::EmailController < HawthorneCore::AccountAppl
   def verify_code_show
 
     # find the users new email
-    @new_email = HawthorneCore::UserSite.where(user_id:, site_id:).pick(:new_email)
+    @new_email = HawthorneCore::UserSite.new_email(user_id:)
 
     # ----------------------
 

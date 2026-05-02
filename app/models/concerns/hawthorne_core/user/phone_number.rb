@@ -7,17 +7,17 @@ module HawthorneCore::User::PhoneNumber
 
     # -----------------------------------------------------------------------------
 
-    # get the phone number for a user id
+    # get the users phone number
     def self.phone_number(user_id:) = where(user_id:).pick(:phone_number)
 
     # -----------------------------------------------------------------------------
 
     # clear the users new phone number attributes, which is site specific
     def clear_new_phone_number_attrs = user_site.clear_new_phone_number_attrs
-    def self.clear_new_phone_number_attrs(user_id:) = find_by(user_id:).clear_new_phone_number_attrs
+    def self.clear_new_phone_number_attrs(user_id:) = user_site(user_id:).clear_new_phone_number_attrs
 
     # set the users new phone number attributes, which is site specific, then send the code via text message
-    def set_new_phone_number_attrs_then_send_it(phone_number:) = user_site.set_new_phone_number_attrs_then_send_it(new_phone_number: phone_number)
+    def self.set_new_phone_number_attrs_then_send_it(user_id:, phone_number:) = user_site(user_id:).set_new_phone_number_attrs_then_send_it(new_phone_number: phone_number)
 
     # -----------------------------------------------------------------------------
 
@@ -30,9 +30,11 @@ module HawthorneCore::User::PhoneNumber
       HawthorneCore::UserAction::Log.update_profile(note: { old_sign_in_code_default_delivery: sign_in_code_default_delivery_before_last_save, sign_in_code_default_delivery: }) if sign_in_code_default_delivery_previously_changed?
       clear_new_phone_number_attrs
     end
+    def self.update_phone_number(user_id:, phone_number:) = find_by(user_id:).update_phone_number(phone_number:)
 
     # removes a users phone number - which is simply updating it to nil
     def remove_phone_number = update_phone_number(phone_number: nil)
+    def self.remove_phone_number(user_id:) = find_by(user_id:).remove_phone_number
 
     # -----------------------------------------------------------------------------
 

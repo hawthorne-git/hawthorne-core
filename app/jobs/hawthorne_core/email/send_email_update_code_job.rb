@@ -13,7 +13,7 @@ class HawthorneCore::Email::SendEmailUpdateCodeJob < HawthorneCore::ApplicationJ
     user = HawthorneCore::User.find_by(user_id:)
 
     # find the users site record ... the new email code is specific to each site
-    user_site = HawthorneCore::UserSite.find_by(user_id:, site_id: HawthorneCore::Site.this_site_id)
+    user_site = HawthorneCore::UserSite.find_by(user_id:, site_id:)
 
     # if the code is inactive, refresh and reload the model
     user_site.refresh_new_email_attrs.reload unless user_site.new_email_code_active?

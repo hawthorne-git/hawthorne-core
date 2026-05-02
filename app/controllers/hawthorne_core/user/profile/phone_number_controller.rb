@@ -30,7 +30,7 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Accou
 
     # verify that the phone number does not have a syntax error, and does not match the current phone number
     return render_phone_number_syntax_error(phone_number:) unless HawthorneCore::Helpers::PhoneNumber.us_syntax_valid?(phone_number:)
-    return render_phone_number_identical_error(phone_number:) if HawthorneCore::Helpers::PhoneNumber.match?(phone_number:, phone_number_to_match: HawthorneCore::User.where(user_id: session[:user_id]).pick(:phone_number))
+    return render_phone_number_identical_error(phone_number:) if HawthorneCore::Helpers::PhoneNumber.match?(phone_number:, phone_number_to_match: HawthorneCore::User.phone_number(user_id:))
 
     # ----------------------
 
@@ -38,10 +38,7 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Accou
 
     # set the users new phone number attributes
     # then send the user a text message with a code to verify their new phone number
-    HawthorneCore::User.
-      select(:user_id).
-      find_by(user_id: session[:user_id]).
-      set_new_phone_number_attrs_then_send_it(phone_number:)
+    HawthorneCore::User.set_new_phone_number_attrs_then_send_it(user_id:, phone_number:)
 
     # ----------------------
 
@@ -55,15 +52,9 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Accou
   # show the page for the user to verify their code, to update their phone number
   def verify_code_show
 
-    # find the users current phone number
-    @current_phone_number = HawthorneCore::User.
-      where(user_id: session[:user_id]).
-      pick(:phone_number)
-
-    # find the users new phone number
-    @new_phone_number = HawthorneCore::UserSite.
-      where(user_id: session[:user_id], site_id: HawthorneCore::Site.this_site_id).
-      pick(:new_phone_number)
+    # find the users current and new phone number
+    @current_phone_number = HawthorneCore::User.phone_number(user_id:)
+    @new_phone_number = HawthorneCore::UserSite.new_phone_number(user_id:)
 
     # ----------------------
 
@@ -75,7 +66,7 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Accou
 
   # resend the user their code, to update their phone number
   def resend_code
-    HawthorneCore::Text::SendPhoneNumberUpdateCodeJob.perform_later(user_id: session[:user_id])
+    HawthorneCore::Text::SendPhoneNumberUpdateCodeJob.perform_later(user_id:)
     redirect_to account_profile_verify_phone_number_code_path
   end
 
@@ -89,9 +80,7 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Accou
     # ----------------------
 
     # find the users site record ... the new phone number attributes are specific to each site
-    user_site = HawthorneCore::UserSite.
-      select(:user_site_id, :user_id, :new_phone_number, :new_phone_number_code, :new_phone_number_code_created_at, :new_phone_number_code_failed_attempts_count).
-      find_by(user_id: session[:user_id], site_id: HawthorneCore::Site.this_site_id)
+    user_site = HawthorneCore::UserSite.find_by(user_id:, site_id:)
 
     # ----------------------
 
@@ -104,10 +93,7 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Accou
     # the code is verified!
 
     # update the users phone number
-    HawthorneCore::User.
-      select(:user_id, :phone_number, :sign_in_code_default_delivery).
-      find_by(user_id: session[:user_id]).
-      update_phone_number(phone_number: user_site.new_phone_number)
+    HawthorneCore::User.update_phone_number(user_id:, phone_number: user_site.new_phone_number)
 
     # ----------------------
 
@@ -122,10 +108,7 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Accou
   def delete
 
     # remove the users phone number
-    HawthorneCore::User.
-      select(:user_id, :phone_number, :sign_in_code_default_delivery).
-      find_by(user_id: session[:user_id]).
-      remove_phone_number
+    HawthorneCore::User.remove_phone_number(user_id:)
 
     # ----------------------
 

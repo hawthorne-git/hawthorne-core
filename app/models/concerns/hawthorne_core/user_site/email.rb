@@ -7,6 +7,11 @@ module HawthorneCore::UserSite::Email
 
     # -----------------------------------------------------------------------------
 
+    # get the users new email
+    def self.new_email(user_id:) = where(user_id:, site_id: HawthorneCore::Site.this_site_id).pick(:new_email)
+
+    # -----------------------------------------------------------------------------
+
     # format the code, ex: '123456' formatted is '123-456'
     def new_email_code_formatted = "#{new_email_code[0, 3]}-#{new_email_code[3, 3]}"
 
