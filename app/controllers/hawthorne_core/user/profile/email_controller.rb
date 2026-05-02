@@ -7,16 +7,13 @@ class HawthorneCore::User::Profile::EmailController < HawthorneCore::AccountAppl
   # show the page for the user to update their email
   def show
 
+    # ----------------------
+
     # find the users email
-    @email = HawthorneCore::User.
-      where(user_id: session[:user_id]).
-      pick(:email)
+    @email = HawthorneCore::User.where(user_id:).pick(:email)
 
     # clear the users new email attributes
-    HawthorneCore::User.
-      select(:user_id).
-      find_by(user_id: session[:user_id]).
-      clear_new_email_attrs
+    HawthorneCore::User.clear_new_email_attrs(user_id:)
 
     # ----------------------
 
@@ -35,19 +32,15 @@ class HawthorneCore::User::Profile::EmailController < HawthorneCore::AccountAppl
 
     # verify that the email does not have a syntax error, does not match the current email, and is not taken
     return render_email_syntax_error(email:) unless HawthorneCore::Helpers::Email.syntax_valid?(email:)
-    return render_email_identical_error(email:) if email == HawthorneCore::User.where(user_id: session[:user_id]).pick(:email)
+    return render_email_identical_error(email:) if email == HawthorneCore::User.email(user_id:)
     return render_email_taken_error(email:) if HawthorneCore::Helpers::Email.taken?(email:)
 
     # ----------------------
 
     # the email is valid!
 
-    # set the users new email attributes
-    # then send the user an email with a code to verify their email
-    HawthorneCore::User.
-      select(:user_id).
-      find_by(user_id: session[:user_id]).
-      set_new_email_attrs_then_send_it(email:)
+    # set the users new email attributes, then send the user an email with a code to verify their email
+    HawthorneCore::User.set_new_email_attrs_then_send_it(user_id:, email:)
 
     # ----------------------
 
@@ -62,9 +55,7 @@ class HawthorneCore::User::Profile::EmailController < HawthorneCore::AccountAppl
   def verify_code_show
 
     # find the users new email
-    @new_email = HawthorneCore::UserSite.
-      where(user_id: session[:user_id], site_id: HawthorneCore::Site.this_site_id).
-      pick(:new_email)
+    @new_email = HawthorneCore::UserSite.where(user_id:, site_id:).pick(:new_email)
 
     # ----------------------
 
@@ -76,7 +67,7 @@ class HawthorneCore::User::Profile::EmailController < HawthorneCore::AccountAppl
 
   # resend the user their code, to update their email
   def resend_code
-    HawthorneCore::Email::SendEmailUpdateCodeJob.perform_later(user_id: session[:user_id])
+    HawthorneCore::Email::SendEmailUpdateCodeJob.perform_later(user_id:)
     redirect_to account_profile_verify_email_code_path
   end
 
@@ -90,9 +81,7 @@ class HawthorneCore::User::Profile::EmailController < HawthorneCore::AccountAppl
     # ----------------------
 
     # find the users site record ... the new email attributes are specific to each site
-    user_site = HawthorneCore::UserSite.
-      select(:user_site_id, :user_id, :new_email, :new_email_code, :new_email_code_created_at, :new_email_code_failed_attempts_count).
-      find_by(user_id: session[:user_id], site_id: HawthorneCore::Site.this_site_id)
+    user_site = HawthorneCore::UserSite.find_by(user_id:, site_id:)
 
     # ----------------------
 
@@ -105,10 +94,7 @@ class HawthorneCore::User::Profile::EmailController < HawthorneCore::AccountAppl
     # the code is verified!
 
     # update the users email
-    HawthorneCore::User.
-      select(:user_id, :email).
-      find_by(user_id: session[:user_id]).
-      update_email(email: user_site.new_email)
+    HawthorneCore::User.update_email(user_id:, email: user_site.new_email)
 
     # ----------------------
 

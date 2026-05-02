@@ -31,6 +31,9 @@ class HawthorneCore::User < HawthorneCore::ActiveRecordBaseApp
   # determine if a user exists with token
   def self.exists_with_token?(token:) = active.exists?(token:)
 
+  # get the email for a user id
+  def self.email(user_id:) = where(user_id:).pick(:email)
+
   # get the token for a user id
   def self.token_for_user_id(user_id:) = where(user_id:).pick(:token)
 

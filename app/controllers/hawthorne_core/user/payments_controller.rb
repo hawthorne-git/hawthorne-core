@@ -6,17 +6,11 @@ class HawthorneCore::User::PaymentsController < HawthorneCore::AccountApplicatio
 
   def index
 
-    # find the user
-    @user = HawthorneCore::User.
-      select(:user_id, :email, :name, :stripe_customer_id).
-      active.
-      find_by(user_id: session[:user_id])
-
-    # create the user a stripe customer account (if not done prior)
-    HawthorneCore::Stripe::CreateCustomerJob.perform_now(@user.id) unless @user.stripe_customer?
-
     # find the users active stripe credit cards
-    @active_credit_cards = @user.active_stripe_credit_cards
+    @active_credit_cards = HawthorneCore::User.
+      select(:user_id, :stripe_customer_id).
+      find_by(user_id: session[:user_id]).
+      active_stripe_credit_cards
 
     # ----------------------
 
