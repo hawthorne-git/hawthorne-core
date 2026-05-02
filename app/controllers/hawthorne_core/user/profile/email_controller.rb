@@ -7,10 +7,8 @@ class HawthorneCore::User::Profile::EmailController < HawthorneCore::AccountAppl
   # show the page for the user to update their email
   def show
 
-    # ----------------------
-
     # find the users email
-    @email = HawthorneCore::User.where(user_id:).pick(:email)
+    @email = HawthorneCore::User.email(user_id:)
 
     # clear the users new email attributes
     HawthorneCore::User.clear_new_email_attrs(user_id:)

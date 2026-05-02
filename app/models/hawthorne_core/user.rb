@@ -21,7 +21,8 @@ class HawthorneCore::User < HawthorneCore::ActiveRecordBaseApp
   # -----------------------------------------------------------------------------
 
   # find the users site record
-  def user_site = HawthorneCore::UserSite.select(:user_site_id, :user_id).find_by(user_id:, site_id: HawthorneCore::Site.this_site_id)
+  def user_site = HawthorneCore::UserSite.find_by(user_id:, site_id: HawthorneCore::Site.this_site_id)
+  def self.user_site(user_id:) = HawthorneCore::UserSite.find_by(user_id:, site_id: HawthorneCore::Site.this_site_id)
 
   # -----------------------------------------------------------------------------
 
@@ -30,9 +31,6 @@ class HawthorneCore::User < HawthorneCore::ActiveRecordBaseApp
 
   # determine if a user exists with token
   def self.exists_with_token?(token:) = active.exists?(token:)
-
-  # get the email for a user id
-  def self.email(user_id:) = where(user_id:).pick(:email)
 
   # get the token for a user id
   def self.token_for_user_id(user_id:) = where(user_id:).pick(:token)

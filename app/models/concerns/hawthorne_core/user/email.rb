@@ -7,6 +7,11 @@ module HawthorneCore::User::Email
 
     # -----------------------------------------------------------------------------
 
+    # get the email for a user id
+    def self.email(user_id:) = where(user_id:).pick(:email)
+
+    # -----------------------------------------------------------------------------
+
     # determine if an email is verified
     def email_verified? = email_verified
 
@@ -14,11 +19,10 @@ module HawthorneCore::User::Email
 
     # clear the users new email attributes, which is site specific
     def clear_new_email_attrs = user_site.clear_new_email_attrs
-    def self.clear_new_email_attrs(user_id:) = find_by(user_id:).clear_new_email_attrs
+    def self.clear_new_email_attrs(user_id:) = user_site(user_id:).clear_new_email_attrs
 
     # set the users new email attributes, which is site specific, then send the code via email
-    def set_new_email_attrs_then_send_it(email:) = user_site.set_new_email_attrs_then_send_it(new_email: email)
-    def self.set_new_email_attrs_then_send_it(user_id:, email:) = find_by(user_id:).set_new_email_attrs_then_send_it(email:)
+    def self.set_new_email_attrs_then_send_it(user_id:, email:) = user_site(user_id:).set_new_email_attrs_then_send_it(new_email: email)
 
     # -----------------------------------------------------------------------------
 

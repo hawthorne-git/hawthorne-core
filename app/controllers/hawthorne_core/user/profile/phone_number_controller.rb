@@ -8,15 +8,10 @@ class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::Accou
   def show
 
     # find the users phone number
-    @phone_number = HawthorneCore::User.
-      where(user_id: session[:user_id]).
-      pick(:phone_number)
+    @phone_number = HawthorneCore::User.phone_number(user_id:)
 
     # clear the users new phone number attributes
-    HawthorneCore::User.
-      select(:user_id).
-      find_by(user_id: session[:user_id]).
-      clear_new_phone_number_attrs
+    HawthorneCore::User.clear_new_phone_number_attrs(user_id:)
 
     # ----------------------
 
