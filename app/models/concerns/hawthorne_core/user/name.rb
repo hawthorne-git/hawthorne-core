@@ -7,6 +7,11 @@ module HawthorneCore::User::Name
 
     # -----------------------------------------------------------------------------
 
+    # get the users name - cannot label the method 'name', as it is restricted
+    def self.user_name(user_id:) = where(user_id:).pick(:name)
+
+    # -----------------------------------------------------------------------------
+
     # determine if the user has a first name
     def first_name? = name.present?
 
@@ -20,6 +25,8 @@ module HawthorneCore::User::Name
       update(name:)
       HawthorneCore::UserAction::Log.update_profile(note: { old_name: name_before_last_save, name: })
     end
+    def self.update_name(user_id:, name:) = find_by(user_id:).update_name(name:)
+
 
     # -----------------------------------------------------------------------------
 

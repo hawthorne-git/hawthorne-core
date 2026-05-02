@@ -8,9 +8,7 @@ class HawthorneCore::User::Profile::NameController < HawthorneCore::AccountAppli
   def show
 
     # find the users name
-    @name = HawthorneCore::User.
-      where(user_id: session[:user_id]).
-      pick(:name)
+    @name = HawthorneCore::User.user_name(user_id:)
 
     # ----------------------
 
@@ -27,11 +25,8 @@ class HawthorneCore::User::Profile::NameController < HawthorneCore::AccountAppli
 
     # ----------------------
 
-    # find the user, then update their name
-    HawthorneCore::User.
-      select(:user_id, :name).
-      find_by(user_id: session[:user_id]).
-      update_name(name:)
+    # update the users name
+    HawthorneCore::User.update_name(user_id:, name:)
 
     # ----------------------
 
