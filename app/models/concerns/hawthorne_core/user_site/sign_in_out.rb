@@ -14,7 +14,7 @@ module HawthorneCore::UserSite::SignInOut
 
     # determine if this is the users first sign-in, on the site
     def first_sign_in? = sign_in_count.zero?
-    def self.first_sign_in?(user_id:) = select(:sign_in_count).find_by(user_id:, site_id: HawthorneCore::Site.this_site_id).first_sign_in?
+    def self.first_sign_in?(user_id:) = find_by(user_id:, site_id: HawthorneCore::Site.this_site_id).first_sign_in?
 
     # ------------------------
 
@@ -35,8 +35,7 @@ module HawthorneCore::UserSite::SignInOut
     # set the user as signed-out,
     # disable the users ability to sign-in via cookie
     def self.sign_out(user_id:)
-      select(:user_site_id, :keep_signed_in).
-        find_by(user_id:, site_id: HawthorneCore::Site.this_site_id).
+      find_by(user_id:, site_id: HawthorneCore::Site.this_site_id).
         update_columns(keep_signed_in: false)
     end
 

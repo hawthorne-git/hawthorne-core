@@ -4,9 +4,6 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
 
   # -----------------------------------------------------------------------------
 
-  # verify that the user is signed in prior to signing out
-  before_action :user_signed_in?, only: [:sign_out]
-
   # verify that the user is signed out prior to all action, but signing out
   before_action :user_signed_out?, except: [:sign_out]
 
@@ -55,21 +52,19 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
   def verify_code_show
 
     @token = token = params[:token]
-    @delivery_method = params[:delivery_method]
+    @delivery_method = delivery_method = params[:delivery_method]
     @keep_signed_in = params[:keep_signed_in].to_i
 
     # ----------------------
 
-    # in the unexpected case where the user is not found, return back to the sign-in page
-    return redirect_to_sign_in_when_user_not_found(method: 'verify_code_show', token:) unless HawthorneCore::User.exists_with_token?(token:)
+    # in the unexpected case where the user is not found or the code delivery method is an unexpected value, return back to the sign-in page
+    return redirect_to_sign_in_when_user_not_found(method: 'verify_sign_in_code', token:) unless HawthorneCore::User.token_exists?(token:)
+    return redirect_to_sign_in_when_delivery_method_unexpected(method: 'verify_sign_in_code', delivery_method:, token:) unless HawthorneCore::User::sign_in_code_delivery_methods.include?(delivery_method)
 
     # ----------------------
 
     # find the users email and phone number
-    @email, @phone_number = HawthorneCore::User.
-      active.
-      where(token:).
-      pick(:email, :phone_number)
+    @email, @phone_number = HawthorneCore::User.active.where(token:).pick(:email, :phone_number)
 
     # ----------------------
 
@@ -88,13 +83,14 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
 
     # ----------------------
 
-    # in the unexpected case where the user is not found, return back to the sign-in page
-    return redirect_to_sign_in_when_user_not_found(method: 'resend_code', token:) unless HawthorneCore::User.exists_with_token?(token:)
+    # in the unexpected case where the user is not found or the code delivery method is an unexpected value, return back to the sign-in page
+    return redirect_to_sign_in_when_user_not_found(method: 'verify_sign_in_code', token:) unless HawthorneCore::User.token_exists?(token:)
+    return redirect_to_sign_in_when_delivery_method_unexpected(method: 'verify_sign_in_code', delivery_method:, token:) unless HawthorneCore::User::sign_in_code_delivery_methods.include?(delivery_method)
 
     # ----------------------
 
     # find the user id by their token
-    user_id = HawthorneCore::User.user_id_for_token(token:)
+    user_id = HawthorneCore::User.find_user_id(token:)
 
     # send the user their code via prior delivery method, email or text
     send_sign_in_code(delivery_method:, user_id:, keep_signed_in:)
@@ -126,18 +122,16 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
     # ----------------------
 
     # in the unexpected case where the user is not found or the code delivery method is an unexpected value, return back to the sign-in page
-    return redirect_to_sign_in_when_user_not_found(method: 'verify_sign_in_code', token:) unless HawthorneCore::User.exists_with_token?(token:)
+    return redirect_to_sign_in_when_user_not_found(method: 'verify_sign_in_code', token:) unless HawthorneCore::User.token_exists?(token:)
     return redirect_to_sign_in_when_delivery_method_unexpected(method: 'verify_sign_in_code', delivery_method:, token:) unless HawthorneCore::User::sign_in_code_delivery_methods.include?(delivery_method)
 
     # ----------------------
 
     # find the user id by their token
-    user_id = HawthorneCore::User.user_id_for_token(token:)
+    user_id = HawthorneCore::User.find_user_id(token:)
 
     # find the users site record ... the sign-in code is specific to each site
-    user_site = HawthorneCore::UserSite.
-      select(:user_site_id, :user_id, :sign_in_code, :sign_in_code_created_at, :sign_in_code_failed_attempts_count, :sign_in_count).
-      find_by(user_id:, site_id: HawthorneCore::Site.this_site_id)
+    user_site = HawthorneCore::UserSite.find_by(user_id:, site_id:)
 
     # ----------------------
 
@@ -150,10 +144,7 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
     # the code is verified
 
     # sign-in the user
-    HawthorneCore::User.
-      select(:user_id, :email_verified, :stripe_customer_id).
-      find_by(user_id:).
-      sign_in(user_session_token: cookies[:user_session_token], keep_signed_in:)
+    HawthorneCore::User.sign_in(user_id:, user_session_token: cookies[:user_session_token], keep_signed_in:)
 
     # set the user into the session
     session[:user_id] = user_id
@@ -171,10 +162,7 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
   def sign_out
 
     # sign-out the user
-    HawthorneCore::User.
-      select(:user_id).
-      find_by(user_id: session[:user_id]).
-      sign_out
+    HawthorneCore::User.sign_out(user_id:)
 
     # reset the session
     reset_session
@@ -218,39 +206,30 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
 
   # render an error message that the code is inactive
   def render_code_inactive_error(user_site:, delivery_method:, keep_signed_in:, from_magic_link:)
-    (code_not_set = true; failure_reason = HawthorneCore::UserAction::FailureReason.code_not_set) unless user_site.sign_in_code_set?
-    (code_expired = true; failure_reason = HawthorneCore::UserAction::FailureReason.code_expired) if user_site.sign_in_code_expired?
-    (code_max_failed_attempts_reached = true; failure_reason = HawthorneCore::UserAction::FailureReason.code_max_failed_attempts_reached) if user_site.sign_in_code_max_failed_attempts_reached?
-    HawthorneCore::UserAction::Log.sign_in_failure(user_id: user_site.user_id, failure_reason:, note: { sign_in_code: user_site.sign_in_code, sign_in_code_created_at: user_site.sign_in_code_created_at, sign_in_code_failed_attempts_count: user_site.sign_in_code_failed_attempts_count })
-    user_site.refresh_sign_in_attrs_then_send_it(delivery_method:, keep_signed_in:)
-    if from_magic_link
-      token = HawthorneCore::User.token_for_user_id(user_id: user_site.user_id)
-      redirect_to verify_sign_in_code_path(token:, delivery_method:, keep_signed_in:, from_magic_link:, code_not_set:, code_expired:, code_max_failed_attempts_reached:)
-    else
-      render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/verify_code_failed', locals: { code_not_set:, code_expired:, code_max_failed_attempts_reached: })
-    end
+    render_shared_code_inactive_error(
+      user_id: user_site.user_id,
+      action: 'SIGN_IN',
+      from_magic_link:,
+      note: { sign_in_code: user_site.sign_in_code, sign_in_code_created_at: user_site.sign_in_code_created_at, sign_in_code_failed_attempts_count: user_site.sign_in_code_failed_attempts_count },
+      is_code_set: -> { user_site.sign_in_code_set? },
+      is_code_expired: -> { user_site.sign_in_code_expired? },
+      are_max_attempts_reached: -> { user_site.sign_in_code_max_failed_attempts_reached? },
+      refresh_attrs_then_send_it: -> { user_site.refresh_sign_in_attrs_then_send_it(delivery_method:, keep_signed_in:) }
+    )
   end
 
   # render an error message that the code does not match
   def render_code_not_match_error(user_site:, code:, delivery_method:, keep_signed_in:, from_magic_link:)
-    HawthorneCore::UserAction::Log.sign_in_failure(user_id: user_site.user_id, failure_reason: HawthorneCore::UserAction::FailureReason.code_not_match, note: { code:, code_to_match: user_site.sign_in_code })
-    user_site.add_sign_in_code_failed_attempt
-    if user_site.sign_in_code_max_failed_attempts_reached?
-      user_site.refresh_sign_in_attrs_then_send_it(delivery_method:, keep_signed_in:)
-      if from_magic_link
-        token = HawthorneCore::User.token_for_user_id(user_id: user_site.user_id)
-        redirect_to verify_sign_in_code_path(token:, delivery_method:, keep_signed_in:, from_magic_link:, code_max_failed_attempts_reached: true)
-      else
-        render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/verify_code_failed', locals: { code_max_failed_attempts_reached: true })
-      end
-    else
-      if from_magic_link
-        token = HawthorneCore::User.token_for_user_id(user_id: user_site.user_id)
-        redirect_to verify_sign_in_code_path(token:, delivery_method:, keep_signed_in:, from_magic_link:, code_not_match: true)
-      else
-        render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/verify_code_failed', locals: { code_not_match: true })
-      end
-    end
+    render_shared_code_not_match_error(
+      user_id: user_site.user_id,
+      action: 'SIGN_IN',
+      from_magic_link:,
+      code:,
+      code_to_match: user_site.sign_in_code,
+      add_failed_attempt: -> { user_site.add_sign_in_code_failed_attempt },
+      are_max_attempts_reached: -> { user_site.sign_in_code_max_failed_attempts_reached? },
+      refresh_attrs_then_send_it: -> { user_site.refresh_sign_in_attrs_then_send_it(delivery_method:, keep_signed_in:) }
+    )
   end
 
   # render an error message that the email has a syntax error

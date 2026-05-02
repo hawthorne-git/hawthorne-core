@@ -61,12 +61,13 @@ module HawthorneCore::User::SignInOut
       HawthorneCore::Email::SendWelcomeEmailJob.perform_later(user_id:) if first_sign_in_on_site
 
     end
+    def self.sign_in(user_id:, user_session_token:, keep_signed_in:) = find_by(user_id:).sign_in(user_session_token:, keep_signed_in:)
 
     # -----------------------------------------------------------------------------
 
     # sign-out the user
     # as the user is forcing a sign-out - remove ability to keep signed in via cookie
-    def sign_out
+    def self.sign_out(user_id:)
       HawthorneCore::UserSite.sign_out(user_id:)
       HawthorneCore::UserAction::Log.sign_out(user_id:)
     end
