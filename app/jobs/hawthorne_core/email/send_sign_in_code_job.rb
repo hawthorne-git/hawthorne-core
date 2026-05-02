@@ -10,15 +10,10 @@ class HawthorneCore::Email::SendSignInCodeJob < HawthorneCore::ApplicationJob
   def perform(user_id:, keep_signed_in: false)
 
     # find the user by their id
-    user = HawthorneCore::User.
-      select(:token, :email, :name).
-      active.
-      find_by(user_id:)
+    user = HawthorneCore::User.active.find_by(user_id:)
 
     # find the users site record ... the code is specific to the site
-    user_site = HawthorneCore::UserSite.
-      select(:user_site_id, :user_id, :sign_in_code, :sign_in_code_created_at, :sign_in_code_failed_attempts_count).
-      find_by(user_id:, site_id: HawthorneCore::Site.this_site_id)
+    user_site = HawthorneCore::UserSite.find_by(user_id:, site_id:)
 
     # if the code is inactive, refresh and reload the model
     user_site.refresh_sign_in_attrs.reload unless user_site.sign_in_code_active?

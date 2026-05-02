@@ -8,13 +8,13 @@ module HawthorneCore::UserSite::SignInOut
     # -----------------------------------------------------------------------------
 
     # determine if a user exists for this site
-    def self.user_exist?(user_id:) = exists?(user_id:, site_id: HawthorneCore::Site.this_site_id)
+    def self.user_exist?(user_id:) = exists?(user_id:, site_id:)
 
     # -----------------------------------------------------------------------------
 
     # determine if this is the users first sign-in, on the site
     def first_sign_in? = sign_in_count.zero?
-    def self.first_sign_in?(user_id:) = find_by(user_id:, site_id: HawthorneCore::Site.this_site_id).first_sign_in?
+    def self.first_sign_in?(user_id:) = find_by(user_id:, site_id:).first_sign_in?
 
     # ------------------------
 
@@ -22,7 +22,7 @@ module HawthorneCore::UserSite::SignInOut
     # this is a record for each user / site that captures the users first sign-in, last sign-in, #sign-ins, and if they should be kept as signed in
     def self.sign_in(user_id:, keep_signed_in:)
       signed_in_at = Time.current
-      user_site = find_by(user_id:, site_id: HawthorneCore::Site.this_site_id)
+      user_site = find_by(user_id:, site_id:)
       user_site.first_signed_in_at = signed_in_at if user_site.first_sign_in?
       user_site.last_signed_in_at = signed_in_at
       user_site.keep_signed_in = keep_signed_in
@@ -34,10 +34,8 @@ module HawthorneCore::UserSite::SignInOut
 
     # set the user as signed-out,
     # disable the users ability to sign-in via cookie
-    def self.sign_out(user_id:)
-      find_by(user_id:, site_id: HawthorneCore::Site.this_site_id).
-        update_columns(keep_signed_in: false)
-    end
+    def sign_out = update_columns(keep_signed_in: false)
+    def self.sign_out(user_id:) = find_by(user_id:, site_id:).sign_out
 
     # -----------------------------------------------------------------------------
 
@@ -104,7 +102,7 @@ module HawthorneCore::UserSite::SignInOut
     def sign_in_code_recently_sent_via_email?
       HawthorneCore::UserAction.
         where(
-          site_id: HawthorneCore::Site.this_site_id,
+          site_id:,
           user_id:,
           action: HawthorneCore::UserAction::Action::ACTIONS.fetch(:email_sent),
           success: true
@@ -119,7 +117,7 @@ module HawthorneCore::UserSite::SignInOut
     def sign_in_code_recently_sent_via_text_message?
       HawthorneCore::UserAction.
         where(
-          site_id: HawthorneCore::Site.this_site_id,
+          site_id:,
           user_id:,
           action: HawthorneCore::UserAction::Action::ACTIONS.fetch(:text_message_sent),
           success: true

@@ -15,7 +15,7 @@ module HawthorneCore::User::SignInOut
 
     # -----------------------------------------------------------------------------
 
-    # get the sign in code default delivery, in a prettier format then what is saved in the database
+    # find the sign in code default delivery label
     def sign_in_code_default_delivery_pretty_print = sign_in_code_delivery_labels[sign_in_code_default_delivery]
 
     # updates a users sign-in code default delivery method
@@ -26,10 +26,10 @@ module HawthorneCore::User::SignInOut
 
     # -----------------------------------------------------------------------------
 
-    # clear the users sign-in attributes, which is site specific
+    # clear the users sign-in attributes
     def clear_sign_in_attrs = user_site.clear_sign_in_attrs
 
-    # set the users sign-in attributes, which is site specific
+    # set the users sign-in attributes
     def set_sign_in_attrs = user_site.set_sign_in_attrs
 
     # -----------------------------------------------------------------------------

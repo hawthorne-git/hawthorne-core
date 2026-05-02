@@ -7,7 +7,7 @@ module HawthorneCore::User::Name
 
     # -----------------------------------------------------------------------------
 
-    # get the users name - cannot label the method 'name', as it is restricted
+    # find the users name - cannot label the method 'name' as it is restricted
     def self.user_name(user_id:) = where(user_id:).pick(:name)
 
     # -----------------------------------------------------------------------------
@@ -15,7 +15,7 @@ module HawthorneCore::User::Name
     # determine if the user has a first name
     def first_name? = name.present?
 
-    # get the first name of the user
+    # find the first name of the user
     def first_name = first_name? ? name.split(' ').first : nil
 
     # -----------------------------------------------------------------------------

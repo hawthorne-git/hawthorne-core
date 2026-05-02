@@ -4,7 +4,7 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
 
   # -----------------------------------------------------------------------------
 
-  # verify that the user is signed out prior to all action, but signing out
+  # verify that the user is signed out prior to all action, except signing out
   before_action :user_signed_out?, except: [:sign_out]
 
   # -----------------------------------------------------------------------------
@@ -37,7 +37,7 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
     user.set_sign_in_attrs
 
     # send the user their code via default delivery method, email or text
-    send_sign_in_code(delivery_method: user.sign_in_code_default_delivery, user_id: user.id, keep_signed_in:)
+    send_sign_in_code(user_id: user.id, keep_signed_in:, delivery_method: user.sign_in_code_default_delivery)
 
     # ----------------------
 
@@ -93,7 +93,7 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
     user_id = HawthorneCore::User.find_user_id(token:)
 
     # send the user their code via prior delivery method, email or text
-    send_sign_in_code(delivery_method:, user_id:, keep_signed_in:)
+    send_sign_in_code(user_id:, keep_signed_in:, delivery_method:)
 
     # ----------------------
 
@@ -183,7 +183,7 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
   # ------------------------
 
   # send the user their sign-in code, via delivery method
-  def send_sign_in_code(delivery_method:, user_id:, keep_signed_in:)
+  def send_sign_in_code(user_id:, keep_signed_in:, delivery_method:)
     HawthorneCore::Email::SendSignInCodeJob.perform_later(user_id:, keep_signed_in:) if delivery_method == HawthorneCore::User::CODE_VIA_EMAIL
     HawthorneCore::Text::SendSignInCodeJob.perform_later(user_id:) if delivery_method == HawthorneCore::User::CODE_VIA_PHONE
   end

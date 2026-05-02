@@ -25,7 +25,7 @@ module HawthorneCore::HasToken
   ALPHABET = 'BCDFGHJKLMNPQRSTVWXYZ23456789'.chars.freeze
 
   # define the list of token lengths ... by the objects table name
-  TOKEN_LENGTHS =
+  LENGTHS =
     {
       'users' => 12,
       'user_payment_methods' => 12,
@@ -38,8 +38,7 @@ module HawthorneCore::HasToken
 
     # ---------------------------------------------------------------------------------
 
-    # before creating a record,
-    # set the records token attribute
+    # before creating a record, set the records token attribute
     before_validation :set_token, on: :create
 
     # ---------------------------------------------------------------------------------
@@ -49,15 +48,15 @@ module HawthorneCore::HasToken
     # set the token
     # the length of the token is based on the object type (table name)
     def set_token
-      token_length = TOKEN_LENGTHS[self.class.table_name]
-      self.token = generate_unique_token(token_length)
+      length = LENGTHS[self.class.table_name]
+      self.token = generate_unique_token(length:)
     end
 
     # ------------------------
 
     # generates a (unique) token at a specified length
     # if the token is already in use, generate another
-    def generate_unique_token(length)
+    def generate_unique_token(length:)
       loop do
         candidate = Array.new(length) { ALPHABET[SecureRandom.random_number(ALPHABET.length)] }.join
         return candidate unless self.class.exists?(token: candidate)
