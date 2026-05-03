@@ -4,38 +4,38 @@
   add_action = (action == 'add')
 
   select_country_form_url = add_action ? account_new_address_with_selected_country_path : nil
-  url = add_action ? account_add_address_path : account_profile_update_shipping_address_path
+  url = add_action ? account_add_address_path : account_update_address_path
 
-  title = "#{action.capitalize} shipping address"
+  title = "#{action.capitalize} address"
 
-  token_value = @shipping_address.token
+  token_value = @address.token
 
   country_label = 'Country'
   country_value = @selected_country.handle
   country_code_alpha2_value = @selected_country&.code_alpha2
 
   name_label = 'Name'
-  name_value = @shipping_address.name
+  name_value = @address.name
 
   street_address_label = 'Street address'
-  street_address_value = @shipping_address.street_address
+  street_address_value = @address.street_address
 
   street_address_extended_label = 'Apartment, unit, suite, or floor #'
-  street_address_extended_value = @shipping_address.street_address_extended
+  street_address_extended_value = @address.street_address_extended
 
   city_label = 'City'
-  city_value = @shipping_address.city
+  city_value = @address.city
 
   state_province_label = @selected_country&.us? ? 'State' : 'State / Province / Region'
-  state_province_value = @shipping_address.state_province
+  state_province_value = @address.state_province
 
   postal_code_label = @selected_country&.us? ? 'Zip code' : 'Postal code'
-  postal_code_value = @shipping_address.postal_code
+  postal_code_value = @address.postal_code
 
   phone_number_label = 'Phone number - required by select couriers'
-  phone_number_value = @shipping_address.phone_number
+  phone_number_value = @address.phone_number
 
-  submit_button_text = "#{action.capitalize} Shipping Address"
+  submit_button_text = "#{action.capitalize} Address"
 %>
 
 <%= render HawthorneCore::UI::User::Layout::AddressesComponent.new(title:) do %>
@@ -50,10 +50,10 @@
     <% end %>
 
     <% if @selected_country %>
-      <%= form_with model: @shipping_address, url: form_url do |form| %>
+      <%= form_with model: @address, url: do |form| %>
         <%= render HawthorneCore::UI::Form::HiddenFieldComponent.new(form:, attribute: :token, value: token_value, required: false) %>
         <%= render HawthorneCore::UI::Form::HiddenFieldComponent.new(form:, attribute: :country_code_alpha2, value: country_code_alpha2_value, required: true) %>
-        <%= render HawthorneCore::UI::Form::Attr::Address::AutocompleteAddressComponent.new(form:, model: @shipping_address, selected_country: @selected_country) if add_action %>
+        <%= render HawthorneCore::UI::Form::Attr::Address::AutocompleteAddressComponent.new(form:, model: @address, selected_country: @selected_country) if add_action %>
         <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form:, attribute: :name, label: name_label, value: name_value, required: true) %>
         <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form:, attribute: :street_address, label: street_address_label, value: street_address_value, required: true) %>
         <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form:, attribute: :street_address_extended, label: street_address_extended_label, value: street_address_extended_value) %>
@@ -68,4 +68,4 @@
   <% end %>
 <% end %>
 
-<%= render partial: '/hawthorne_core/partials/autocomplete_address', locals: { model: @shipping_address, selected_country: @selected_country } if @selected_country %>
+<%= render partial: '/hawthorne_core/partials/autocomplete_address', locals: { model: @address, selected_country: @selected_country } if @selected_country %>

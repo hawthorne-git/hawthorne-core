@@ -8,6 +8,16 @@ module HawthorneCore::UserAction::Log
 
   def self.account_deleted(**attrs) = success(**attrs, action: action(:account_deleted))
 
+  # ----------------------------------------------------------------------------- Address
+
+  def self.add_address(**attrs) = success(**attrs, action: action(:address_added))
+
+  def self.update_address(**attrs) = success(**attrs, action: action(:address_updated))
+
+  def self.remove_address(**attrs) = success(**attrs, action: action(:address_removed))
+
+  def self.address_failure(**attrs) = failure(**attrs, action: action(:address))
+
   # ----------------------------------------------------------------------------- Code Attrs - Delete Account
 
   def self.delete_account_attrs_cleared(**attrs) = success_admin(**attrs, action: action(:delete_account_attrs_cleared))
@@ -76,29 +86,6 @@ module HawthorneCore::UserAction::Log
 
   def self.sign_out(**attrs) = success(**attrs, action: action(:sign_out))
 
-  # ----------------------------------------------------------------------------- Shipping Address
-
-  def self.add_shipping_address(user_id, note)
-    success(user_id, action(:shipping_address_added), note)
-  end
-
-  # ------------------------
-
-  def self.update_shipping_address(user_id, note)
-    success(user_id, action(:shipping_address_updated), note)
-  end
-
-  # ------------------------
-
-  def self.remove_shipping_address(user_id, note)
-    success(user_id, action(:shipping_address_removed), note)
-  end
-
-  # ------------------------
-
-  def self.shipping_address_failure(user_id, failure_reason, note)
-    failure(user_id, action(:shipping_address), failure_reason, note)
-  end
 
   # ----------------------------------------------------------------------------- Stripe
 

@@ -5,7 +5,7 @@ module HawthorneCore::Helpers::Email
   # -----------------------------------------------------------------------------
 
   # determine if the email is used, with the site sharing scope
-  def self.taken?(email:) = HawthorneCore::User.exists?(email:, site_sharing_scope:)
+  def self.taken?(email:) = HawthorneCore::User.exists?(email:, site_sharing_scope: HawthorneCore::Site.this_site_sharing_scope)
 
   # -----------------------------------------------------------------------------
 

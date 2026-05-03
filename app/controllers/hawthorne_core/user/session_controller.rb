@@ -192,13 +192,13 @@ class HawthorneCore::User::SessionController < HawthorneCore::ApplicationControl
 
   # redirect the user to the sign-in page when the delivery method is unexpected
   def redirect_to_sign_in_when_delivery_method_unexpected(method:, delivery_method:, token:)
-    HawthorneCore::UserAction::Log.sign_in_failure(failure_reason: HawthorneCore::UserAction::FailureReason.unexpected_state, note: { class: "HawthorneCore::User::SessionController", method:, message: 'Unexpected delivery method', delivery_method:, token: })
+    HawthorneCore::UserAction::Log.sign_in_failure(failure_reason: HawthorneCore::UserAction::FailureReason.unexpected_state, note: { class: 'HawthorneCore::User::SessionController', method:, message: 'Unexpected delivery method', delivery_method:, token: })
     redirect_to sign_in_path
   end
 
   # redirect the user to the sign-in page when the user is not found with token
   def redirect_to_sign_in_when_user_not_found(method:, token:)
-    HawthorneCore::UserAction::Log.sign_in_failure(failure_reason: HawthorneCore::UserAction::FailureReason.unexpected_state, note: { class: "HawthorneCore::User::SessionController", method:, message: "User not found with token", token: })
+    HawthorneCore::UserAction::Log.sign_in_failure(failure_reason: HawthorneCore::UserAction::FailureReason.unexpected_state, note: { class: 'HawthorneCore::User::SessionController', method:, message: 'User not found with token', token: })
     redirect_to sign_in_path
   end
 

@@ -6,22 +6,8 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
 
   def index
 
-    # find the user
-    @user = HawthorneCore::User.find_by(user_id: session[:user_id])
-
-    # ----------------------
-
-    # find the users shipping addresses
-    @shipping_addresses = HawthorneCore::UserShippingAddress.
-      active.
-      where(user_id: @user.id).
-      order(last_checkout_selected_at: :desc, created_at: :desc)
-
-    # ----------------------
-
-    # if the user does not have any shipping addresses in their profile,
-    # redirect the user to add their first shipping address
-    redirect_to account_new_address_path and return unless @shipping_addresses.any?
+    # find the users addresses
+    @addresses = HawthorneCore::UserAddress.all_for_user(user_id:)
 
     # ----------------------
 
@@ -31,33 +17,30 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
 
   # -----------------------------------------------------------------------------
 
-  # show the page to add a shipping address
+  # show the page to add an address
   # by default the page is loaded with the Cloudflare country selected
   # if the Cloudflare country is NOT a country that we ship to - force the user to select a country
   # the user can also choose to select an alternate country - if selected, use this country
   def new
 
-    # get the request attributes
-    selected_country_code_alpha2 = params[:selected_country]
+    code_alpha2 = params[:selected_country]&.strip&.upcase
 
     # ----------------------
 
-    # find the user
-    @user = HawthorneCore::User.find_by(user_id: session[:user_id])
+    # find the users name and phone number
+    name, phone_number = HawthorneCore::User.where(user_id:).pick(:name, :phone_number)
 
     # ----------------------
 
-    # set the users shipping address defaults ... add in their name / phone number
-    @shipping_address = HawthorneCore::UserShippingAddress.new
-    @shipping_address.name = @user.name
-    @shipping_address.phone_number = HawthorneCore::Helpers::PhoneNumber.us_format(phone_number: @user.phone_number)
+    # set the address defaults ... add in the users name / phone number
+    @address = HawthorneCore::UserAddress.new
+    @address.name = name
+    @address.phone_number = HawthorneCore::Helpers::PhoneNumber.us_format(phone_number:)
 
     # ----------------------
 
-    # find the selected country (by the user) ... if present
-    if selected_country_code_alpha2.present?
-      @selected_country = HawthorneCore::Country.active.find_by(code_alpha2: selected_country_code_alpha2.strip.upcase, ship_to: true)
-    end
+    # find the selected country (by the user)
+    @selected_country = HawthorneCore::Country.ship_to_country_with_code_alpha2(code_alpha2:)
 
     # ----------------------
 
@@ -65,27 +48,24 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
     unless @selected_country
 
       # get the users country (code alpha 2) via cloudflare
-      cloudflare_country_code_alpha2 = request.headers['CF-IPCountry']
+      code_alpha2 = request.headers['CF-IPCountry']&.strip&.upcase
 
-      # in the unexpected case where the cloudflare country code is not found within our list,
-      # log it and default it to select US
-      unless HawthorneCore::Country.code_alpha2_exists?(code_alpha2: cloudflare_country_code_alpha2)
-        HawthorneCore::UserAction::Log.shipping_address_failure(@user.id, HawthorneCore::UserAction::FailureReason.unexpected_state, { message: 'Country not found with Cloudflare country code', cloudflare_country_code: cloudflare_country_code_alpha2 })
-        cloudflare_country_code_alpha2 = 'US'
+      # if the cloudflare country code is not found, default to US
+      unless HawthorneCore::Country.code_alpha2_exists?(code_alpha2:)
+        HawthorneCore::UserAction::Log.address_failure(failure_reason: HawthorneCore::UserAction::FailureReason.unexpected_state, note: { class: 'HawthorneCore::User::AddressesController', method: 'new', message: 'Country (code alpha 2) not found with Cloudflare country code', code_alpha2: })
+        code_alpha2 = 'US'
       end
 
-      # if the cloudflare country is in our list of countries to ship to, set this as the selected country
+      # if the cloudflare country is an active country shipped to, set this country as the selected country
       # else this will force the user to select a country that we ship to
-      if HawthorneCore::Country.ship_to_code_alpha2?(code_alpha2: cloudflare_country_code_alpha2)
-        @selected_country = HawthorneCore::Country.active.find_by(code_alpha2: cloudflare_country_code_alpha2.strip.upcase, ship_to: true)
-      end
+      @selected_country = HawthorneCore::Country.ship_to_country_with_code_alpha2(code_alpha2:) if HawthorneCore::Country.ship_to_code_alpha2?(code_alpha2:)
 
     end
 
     # ----------------------
 
-    # get all countries that we ship to
-    # and get all states that we ship to if the selected country is US
+    # find all countries that we ship to,
+    # and find all states that we ship to if the selected country is US
     @ship_to_countries = HawthorneCore::Country.ship_to
     @us_states = HawthorneCore::UsState.ship_to if @selected_country&.us?
 
@@ -97,40 +77,33 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
 
   # -----------------------------------------------------------------------------
 
-  # user action when a country is selected - on adding
+  # action when a user selects an alternate country
   def new_selected_country = redirect_to account_new_address_path(selected_country: params[:country_code_alpha2])
 
   # -----------------------------------------------------------------------------
 
-  # action to create the shipping address
+  # create the address
   def create
 
-    # get the request attributes, and merge in the user id - needed to create the record
-    attrs = normalized_address_params
-    attrs = attrs.merge(user_id: session[:user_id])
+    attrs = normalized_address_params.merge(user_id:)
 
     # ----------------------
 
-    # TODO: verify address, and if not verified ... different action?
+    # verify the address is not identical to another on file
+    return render_identical_address_error(action: 'ADD', attrs:) if HawthorneCore::UserAddress.identical?(attrs)
 
     # ----------------------
 
-    # if the shipping address matches a current,
-    # log it, and display an error message
-    if HawthorneCore::UserShippingAddress.identical?(attrs)
-      HawthorneCore::UserAction::Log.shipping_address_failure(session[:user_id], HawthorneCore::UserAction::FailureReason.shipping_address_identical, { action: 'CREATE', attrs: attrs })
-      render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/shipping_address_failed', locals: { shipping_address_identical: true }) and return
-    end
+    # TODO: verify address, and if not verified ... different action before adding?
 
     # ----------------------
 
-    # add the users shipping address
-    shipping_address = HawthorneCore::UserShippingAddress.create!(attrs)
-    HawthorneCore::UserAction::Log.add_shipping_address(session[:user_id], attrs.merge(user_shipping_address_id: shipping_address.id))
+    # add the address
+    HawthorneCore::UserAddress.perform_add(attrs:)
 
     # ----------------------
 
-    # redirect the user to view their shipping addresses
+    # redirect the user to view their addresses
     redirect_to account_addresses_path
 
   end
@@ -139,37 +112,18 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
 
   def edit
 
-    # get the request attributes
     token = params[:token]
 
     # ----------------------
 
-    # find the user
-    @user = HawthorneCore::User.find_by(user_id: session[:user_id])
+    # find the address to edit
+    # verify the address belongs to the user
+    @address = HawthorneCore::UserAddress.find_by_token_with_user_id(user_id:, token:)
+    return redirect_when_address_not_found(method: 'edit', token:) unless @address
 
-    # in the unexpected case where the user is not found - reset the session and redirect the user to the sites home page
-    reset_session; redirect_to '/' and return unless @user
-
-    # ----------------------
-
-    # find the users shipping address to edit
-    @shipping_address = HawthorneCore::UserShippingAddress.active.find_by(user_id: @user.id, token: token)
-
-    # in the unexpected case where the users shipping address is not found
-    # log it, and redirect the user to view their shipping addresses
-    unless @shipping_address
-      HawthorneCore::UserAction::Log.shipping_address_failure(@user.id, HawthorneCore::UserAction::FailureReason.unexpected_state, { message: 'Users shipping address not found', token: token })
-      redirect_to account_addresses_path and return
-    end
-
-    # ----------------------
-
-    # get the selected country within the shipping address
-    @selected_country = HawthorneCore::Country.active.find_by(code_alpha2: @shipping_address.country_code_alpha2, ship_to: true)
-
-    # ----------------------
-
-    # get all states that we ship to if the selected country is US
+    # find the selected country within the address
+    # and find all states that we ship to if the selected country is US
+    @selected_country = HawthorneCore::Country.ship_to_country_with_code_alpha2(code_alpha2: @address.country_code_alpha2)
     @us_states = HawthorneCore::UsState.ship_to if @selected_country&.us?
 
     # ----------------------
@@ -182,43 +136,29 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
 
   def update
 
-    # get the request attributes
     attrs = normalized_address_params
+    token = attrs[:token]
 
     # ----------------------
 
-    # find the users shipping address to update
-    shipping_address = HawthorneCore::UserShippingAddress.find_by(user_id: session[:user_id], token: attrs[:token])
-
-    # in the unexpected case where the users shipping address is not found
-    # log it, and redirect the user to view their shipping addresses
-    unless shipping_address
-      HawthorneCore::UserAction::Log.shipping_address_failure(session[:user_id], HawthorneCore::UserAction::FailureReason.unexpected_state, { message: 'Users shipping address not found', token: attrs[:token] })
-      redirect_to account_addresses_path and return
-    end
+    # find the address to update
+    # verify the address belongs to the user and the updated address is not identical to another on file
+    address = HawthorneCore::UserAddress.find_by_token_with_user_id(user_id:, token:)
+    return redirect_when_address_not_found(method: 'update', token:) unless address
+    return render_identical_address_error(action: 'UPDATE', attrs:) if HawthorneCore::UserAddress.identical?(attrs)
 
     # ----------------------
 
-    # TODO: verify address, and if not verified ... different action?
+    # TODO: verify address, and if not verified ... different action before updating?
 
     # ----------------------
 
-    # if the shipping address matches a current,
-    # log it, and display an error message
-    if HawthorneCore::UserShippingAddress.identical?(attrs)
-      HawthorneCore::UserAction::Log.shipping_address_failure(session[:user_id], HawthorneCore::UserAction::FailureReason.shipping_address_identical, { action: 'UPDATE', attrs: attrs })
-      render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/shipping_address_failed', locals: { shipping_address_identical: true }) and return
-    end
+    # update the address
+    address.perform_update(attrs:)
 
     # ----------------------
 
-    # update the users shipping address
-    shipping_address.update!(attrs)
-    HawthorneCore::UserAction::Log.update_shipping_address(session[:user_id], attrs.merge(user_shipping_address_id: shipping_address.id))
-
-    # ----------------------
-
-    # redirect the user to view their shipping addresses
+    # redirect the user to view their addresses
     redirect_to account_addresses_path
 
   end
@@ -227,30 +167,21 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
 
   def delete
 
-    # get the request attributes
     token = params[:token]
 
     # ----------------------
 
-    # find the users shipping address to soft delete
-    shipping_address = HawthorneCore::UserShippingAddress.active.find_by(user_id: session[:user_id], token: token)
+    # find the address to delete
+    # verify the address belongs to the user
+    address = HawthorneCore::UserAddress.find_by_token_with_user_id(user_id:, token:)
+    return redirect_when_address_not_found(method: 'delete', token:) unless address
 
-    # in the unexpected case where the users shipping address is not found
-    # log it, and redirect the user to view their shipping addresses
-    unless shipping_address
-      HawthorneCore::UserAction::Log.shipping_address_failure(session[:user_id], HawthorneCore::UserAction::FailureReason.unexpected_state, { message: 'Users shipping address not found', token: token })
-      redirect_to account_addresses_path and return
-    end
-
-    # soft delete the record
-    shipping_address.soft_delete
-
-    # log it
-    HawthorneCore::UserAction::Log.remove_shipping_address(session[:user_id], { user_shipping_address_id: shipping_address.id })
+    # delete the address
+    address.perform_delete
 
     # ----------------------
 
-    # redirect the user to view their shipping addresses
+    # redirect the user to view their addresses
     redirect_to account_addresses_path
 
   end
@@ -260,7 +191,7 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
   private
 
   def address_params
-    params.require(:user_shipping_address).
+    params.require(:user_address).
       permit(
         :token,
         :name,
@@ -286,6 +217,22 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
       country_code_alpha2: address_params[:country_code_alpha2].to_s.strip.squish.upcase,
       phone_number: address_params[:phone_number].to_s.strip.squish.upcase
     }
+  end
+
+  # ----------------------
+
+  # redirect to view all addresses when the address is not found
+  def redirect_when_address_not_found(method:, token:)
+    HawthorneCore::UserAction::Log.address_failure(failure_reason: HawthorneCore::UserAction::FailureReason.unexpected_state, note: { class: 'HawthorneCore::User::AddressesController', method:, message: 'Users address not found', token: })
+    redirect_to account_addresses_path
+  end
+
+  # ----------------------
+
+  # render an error message that the address is identical to another on file
+  def render_identical_address_error(action:, attrs:)
+    HawthorneCore::UserAction::Log.address_failure(failure_reason: HawthorneCore::UserAction::FailureReason.address_identical, note: { action:, attrs: })
+    render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/address_failed', locals: { address_identical: true })
   end
 
   # -----------------------------------------------------------------------------

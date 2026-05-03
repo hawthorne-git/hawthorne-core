@@ -20,14 +20,17 @@ class HawthorneCore::Country < HawthorneCore::ActiveRecordBaseAdmin
 
   # -----------------------------------------------------------------------------
 
-  # determine if an active country exists with code alpha 2
+  # determine if an active country exists with this country code alpha 2
   def self.code_alpha2_exists?(code_alpha2:) = active.exists?(code_alpha2:)
 
-  # determine if we ship to the country, and that the country is active
-  def self.ship_to_code_alpha2?(code_alpha2:) = active.exists?(code_alpha2: code_alpha2.strip.upcase, ship_to: true)
+  # determine if an active country exists, that we ship to, with this country code alpha 2
+  def self.ship_to_code_alpha2?(code_alpha2:) = active.exists?(code_alpha2:, ship_to: true)
 
-  # find all countries that we ship to
+  # find all countries that we ship to, ordered
   def self.ship_to = active.where(ship_to: true).order(handle: :asc)
+
+  # find a country, that we ship to, with county code alpha 2
+  def self.ship_to_country_with_code_alpha2(code_alpha2:) = code_alpha2.present? ? active.find_by(code_alpha2:, ship_to: true) : nil
 
   # -----------------------------------------------------------------------------
 

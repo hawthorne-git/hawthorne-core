@@ -6,6 +6,7 @@ module HawthorneCore::UserAction::FailureReason
 
   REASONS =
     {
+      address_identical: 'ADDRESS IDENTICAL',
       code_expired: 'CODE EXPIRED',
       code_max_failed_attempts_reached: 'CODE MAX FAILED ATTEMPTS REACHED',
       code_not_match: 'CODE DOES NOT MATCH',
@@ -17,7 +18,6 @@ module HawthorneCore::UserAction::FailureReason
       exception_caught: 'EXCEPTION CAUGHT',
       phone_number_identical: 'PHONE NUMBER IDENTICAL',
       phone_number_syntax_error: 'PHONE NUMBER SYNTAX ERROR',
-      shipping_address_identical: 'SHIPPING ADDRESS IDENTICAL',
       stripe_payment_method_id_invalid: 'STRIPE PAYMENT METHOD INVALID',
       text_message_recently_sent: 'TEXT MESSAGE RECENTLY SENT',
       unexpected_state: 'UNEXPECTED STATE',

@@ -1,0 +1,40 @@
+<%# v3.0 %>
+
+<div class="border border-gray-200 rounded-xl p-5 bg-white flex flex-col mb-4">
+
+  <%# Name %>
+  <p class="font-semibold text-gray-900 mb-1"><%= @address.name %></p>
+
+  <%# Street %>
+  <p class="text-sm text-gray-600"><%= @address.street_address %></p>
+  <% if @address.street_address_extended.present? %>
+    <p class="text-sm text-gray-600"><%= @address.street_address_extended %></p>
+  <% end %>
+
+  <%# City, State, Zip %>
+  <p class="text-sm text-gray-600">
+    <%= [@address.city, @address.state_province, @address.postal_code].reject(&:blank?).join(', ') %>
+  </p>
+
+  <%# Country (if not US) %>
+  <% if @address.country_code_alpha2 != 'US' %>
+    <p class="text-sm text-gray-600"><%= @address.country_handle %></p>
+  <% end %>
+
+  <%# Phone %>
+  <% if @address.phone_number.present? %>
+    <p class="text-sm text-gray-600 mt-1"><%= HawthorneCore::Helpers::PhoneNumber.us_format(phone_number: @address.phone_number) %></p>
+  <% end %>
+
+  <%# Actions %>
+  <div class="mt-4 pt-4 border-t border-gray-100 flex items-center gap-4 text-sm">
+    <%= link_to 'Edit',
+                helpers.account_edit_address_path(token: @address.token),
+                class: "text-brand-dark no-underline hover:underline" %>
+    <%= link_to 'Remove',
+                helpers.account_remove_address_path(token: @address.token),
+                data: { turbo_method: :delete, turbo_confirm: 'Remove this address?' },
+                class: "text-brand-dark no-underline hover:underline" %>
+  </div>
+
+</div>

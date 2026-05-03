@@ -1,10 +1,10 @@
 <%# v3.0 %>
 
 <%
-  title = 'Shipping addresses'
+  title = 'Addresses'
 %>
 
 <%= render HawthorneCore::UI::User::Layout::AddressesComponent.new(title:) do %>
-  <%= render HawthorneCore::UI::User::ShippingAddressAddComponent.new %>
-  <%= render HawthorneCore::UI::User::ShippingAddressComponent.with_collection(@shipping_addresses) %>
+  <%= render HawthorneCore::UI::User::AddressAddComponent.new %>
+  <%= render HawthorneCore::UI::User::AddressComponent.with_collection(@addresses) %>
 <% end %>
