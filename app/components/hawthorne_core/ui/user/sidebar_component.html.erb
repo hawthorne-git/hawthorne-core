@@ -7,10 +7,11 @@
 
   # create each navigation component
   addresses_navigation_component = { handle: 'Addresses', url: helpers.account_addresses_path, selected: (@selected_sidebar_navigation_item.downcase == 'addresses') }
+  gift_cards_navigation_component = { handle: 'Gift Cards', url: helpers.account_gift_cards_path, selected: (@selected_sidebar_navigation_item.downcase == 'gift cards') }
   favorites_navigation_component = { handle: 'Favorites', url: helpers.account_favorites_path, selected: (@selected_sidebar_navigation_item.downcase == 'favorites') }
   notifications_navigation_component = { handle: 'Notifications', url: helpers.account_notifications_path, selected: (@selected_sidebar_navigation_item.downcase == 'notifications') }
   orders_navigation_component = { handle: 'Orders', url: helpers.account_orders_path, selected: (@selected_sidebar_navigation_item.downcase == 'orders') }
-  payments_navigation_component = { handle: 'Payments', url: helpers.account_payments_path, selected: (@selected_sidebar_navigation_item.downcase == 'payments') }
+  payment_methods_navigation_component = { handle: 'Credit Cards', url: helpers.account_payment_methods_path, selected: (@selected_sidebar_navigation_item.downcase == 'credit cards') }
   profile_navigation_component = { handle: 'Profile', url: helpers.account_profile_path, selected: (@selected_sidebar_navigation_item.downcase == 'profile') }
 
   # set these navigation components into a list
@@ -21,7 +22,8 @@
       orders_navigation_component,
       notifications_navigation_component,
       addresses_navigation_component,
-      payments_navigation_component
+      payment_methods_navigation_component,
+      gift_cards_navigation_component
     ]
 
 %>

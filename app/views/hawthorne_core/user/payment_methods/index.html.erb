@@ -1,10 +1,10 @@
 <%# v3.0 %>
 
 <%
-  title = 'Payments'
+  title = 'Credit Cards'
 %>
 
-<%= render HawthorneCore::UI::User::Layout::PaymentsComponent.new(title:) do %>
+<%= render HawthorneCore::UI::User::Layout::PaymentMethodsComponent.new(title:) do %>
   <%= render HawthorneCore::UI::User::PaymentMethodAddComponent.new %>
   <% @active_credit_cards.each do |payment_method| %>
     <%= render HawthorneCore::UI::User::PaymentMethodComponent.new(payment_method: payment_method) %>

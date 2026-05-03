@@ -70,6 +70,10 @@ HawthorneCore::Engine.routes.draw do
 
   get 'account/favorites', to: 'user/favorites#show'
 
+  # ---------------------- Favorites
+
+  get 'account/gift_cards', to: 'user/gift_cards#show'
+
   # ---------------------- Notifications
 
   get 'account/notifications', to: 'user/notifications#show'
@@ -78,13 +82,13 @@ HawthorneCore::Engine.routes.draw do
 
   get 'account/orders', to: 'user/orders#show'
 
-  # ---------------------- Payments
+  # ---------------------- Payment Methods (Credit Cards)
 
-  get 'account/payments', to: 'user/payments#index'
-  get 'account/new-payment', to: 'user/payments#new'
-  post 'account/add-payment', to: 'user/payments#create'
-  delete 'account/profile/delete-payment', to: 'user/payments#delete'
-  patch 'account/profile/set-default-payment', to: 'user/payments#set_default'
+  get 'account/payment_methods', to: 'user/payment_methods#index'
+  get 'account/new-payment-method', to: 'user/payment_methods#new'
+  post 'account/add-payment-method', to: 'user/payment_methods#create'
+  delete 'account/profile/delete-payment-method', to: 'user/payment_methods#delete'
+  patch 'account/profile/set-default-payment-method', to: 'user/payment_methods#set_default'
 
   # ----------------------------------------------------------------------------
 
