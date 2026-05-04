@@ -9,6 +9,7 @@ class HawthorneCore::User < HawthorneCore::ActiveRecordBaseApp
           HawthorneCore::User::Email,
           HawthorneCore::User::Name,
           HawthorneCore::User::PaymentMethods,
+          HawthorneCore::User::PaymentMethods::Stripe,
           HawthorneCore::User::PhoneNumber,
           HawthorneCore::User::SignInOut
 

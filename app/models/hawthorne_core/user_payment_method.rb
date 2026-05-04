@@ -3,7 +3,9 @@
 class HawthorneCore::UserPaymentMethod < HawthorneCore::ActiveRecordBaseApp
 
   include HawthorneCore::CanBeSoftDeleted,
-          HawthorneCore::HasToken
+          HawthorneCore::HasToken,
+          HawthorneCore::UserPaymentMethod::Stripe
+
 
   # -----------------------------------------------------------------------------
 
@@ -14,6 +16,12 @@ class HawthorneCore::UserPaymentMethod < HawthorneCore::ActiveRecordBaseApp
   # -----------------------------------------------------------------------------
 
   def default? = default
+
+  # -----------------------------------------------------------------------------
+
+  def payment_method_id
+    stripe_payment_method_id
+  end
 
   # -----------------------------------------------------------------------------
 
@@ -54,7 +62,7 @@ class HawthorneCore::UserPaymentMethod < HawthorneCore::ActiveRecordBaseApp
 
   # find the users active stripe credit cards
   # in doing so, clean up
-  def self.active_stripe_credit_cards(user_id, stripe_customer_id)
+  def self.active_stripe_credit_cards(user_id:, stripe_customer_id:)
 
     # clean the users defaulted payment methods, if needed
     clean_defaulted(user_id)
@@ -65,7 +73,7 @@ class HawthorneCore::UserPaymentMethod < HawthorneCore::ActiveRecordBaseApp
       where.not(stripe_payment_method_id: nil)
 
     # find the users credit cards (in stripe)
-    credit_cards = HawthorneCore::Services::StripeSvc.find_all_customer_credit_cards(user_id, stripe_customer_id)
+    credit_cards = HawthorneCore::Services::StripeSvc.find_all_customer_credit_cards(user_id:, customer_id: stripe_customer_id)
 
     # find all active credit cards
     # in the process, if an expired credit card is marked as default - remove it as default
@@ -82,6 +90,30 @@ class HawthorneCore::UserPaymentMethod < HawthorneCore::ActiveRecordBaseApp
 
     # return all active credit cards
     return active_credit_cards
+
+  end
+
+  # -----------------------------------------------------------------------------
+
+  # find the payment method, by its token
+  def self.find_by_token_with_user_id(user_id:, token:) = active.find_by(user_id:, token:)
+
+  # -----------------------------------------------------------------------------
+
+  # (soft) delete the payment method
+  # detach the payment method within stripe
+  def perform_delete
+    HawthorneCore::Services::StripeSvc.detach_payment_method(user_id:, payment_method_id:)
+    soft_delete
+    HawthorneCore::UserAction::Log.remove_credit_card(note: { token: token })
+
+    # ----------------------
+
+    # if this user has one active credit card - set this card as the default
+    #if user.one_active_credit_card?
+    #  payment_method_to_default = HawthorneCore::UserPaymentMethod.active.where(user_id:).first
+    #  payment_method_to_default.update_columns(default: true)
+    #end
 
   end
 

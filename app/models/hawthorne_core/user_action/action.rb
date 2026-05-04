@@ -21,6 +21,7 @@ module HawthorneCore::UserAction::Action
       email_update_attrs_cleared: 'EMAIL UPDATE ATTRIBUTES CLEARED',
       email_update_attrs_refreshed: 'EMAIL UPDATE ATTRIBUTES REFRESHED',
       email_update_attrs_set: 'EMAIL UPDATE ATTRIBUTES SET',
+      payment_method: 'PAYMENT METHOD',
       phone_number_update_attrs_cleared: 'PHONE NUMBER UPDATE ATTRIBUTES CLEARED',
       phone_number_update_attrs_refreshed: 'PHONE NUMBER UPDATE ATTRIBUTES REFRESHED',
       phone_number_update_attrs_set: 'PHONE NUMBER UPDATE ATTRIBUTES SET',

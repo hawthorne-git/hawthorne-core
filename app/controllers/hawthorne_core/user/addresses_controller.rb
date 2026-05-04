@@ -4,6 +4,7 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
 
   # -----------------------------------------------------------------------------
 
+  # show the user addresses
   def index
 
     # find the users addresses
@@ -82,7 +83,7 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
 
   # -----------------------------------------------------------------------------
 
-  # create the address
+  # create am address
   def create
 
     attrs = normalized_address_params.merge(user_id:)
@@ -110,6 +111,7 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
 
   # -----------------------------------------------------------------------------
 
+  # show the page to edit an address
   def edit
 
     token = params[:token]
@@ -134,6 +136,7 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
 
   # -----------------------------------------------------------------------------
 
+  # update am address
   def update
 
     attrs = normalized_address_params
@@ -165,6 +168,7 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
 
   # -----------------------------------------------------------------------------
 
+  # delete am address
   def delete
 
     token = params[:token]

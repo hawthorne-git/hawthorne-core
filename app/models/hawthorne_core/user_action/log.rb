@@ -52,23 +52,21 @@ module HawthorneCore::UserAction::Log
 
   # ----------------------------------------------------------------------------- Credit Card
 
-  def self.add_credit_card(user_id, note)
-    success(user_id, action(:credit_card_added), note)
-  end
+  def self.add_credit_card(**attrs) = success(**attrs, action: action(:credit_card_added))
 
-  def self.add_credit_card_failure(user_id, failure_reason, note)
-    failure(user_id, action(:credit_card_added), failure_reason, note)
-  end
+  def self.add_credit_card_failure(**attrs) = failure(**attrs, action: action(:credit_card_added))
 
-  def self.remove_credit_card(user_id, note)
-    success(user_id, action(:credit_card_removed), note)
-  end
+  def self.remove_credit_card(**attrs) = success(**attrs, action: action(:credit_card_removed))
 
   # ----------------------------------------------------------------------------- Email
 
   def self.email_sent(**attrs) = success_admin(**attrs, action: action(:email_sent))
 
   def self.email_sent_failure(**attrs) = failure_admin(**attrs, action: action(:email_sent))
+
+  # ----------------------------------------------------------------------------- Payment Methods
+
+  def self.payment_method_failure(**attrs) = failure(**attrs, action: action(:payment_method))
 
   # ----------------------------------------------------------------------------- Profile
 
@@ -85,7 +83,6 @@ module HawthorneCore::UserAction::Log
   def self.sign_in_via_cookie(**attrs) = success_admin(**attrs, action: action(:sign_in_via_cookie))
 
   def self.sign_out(**attrs) = success(**attrs, action: action(:sign_out))
-
 
   # ----------------------------------------------------------------------------- Stripe
 

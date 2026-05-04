@@ -84,7 +84,7 @@ HawthorneCore::Engine.routes.draw do
 
   # ---------------------- Payment Methods (Credit Cards)
 
-  get 'account/payment_methods', to: 'user/payment_methods#index'
+  get 'account/payment-methods', to: 'user/payment_methods#index'
   get 'account/new-payment-method', to: 'user/payment_methods#new'
   post 'account/add-payment-method', to: 'user/payment_methods#create'
   delete 'account/profile/delete-payment-method', to: 'user/payment_methods#delete'

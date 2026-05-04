@@ -2,13 +2,18 @@
 
 class HawthorneCore::User::PaymentMethodsController < HawthorneCore::AccountApplicationController
 
+  include HawthorneCore::Validation::PaymentMethod,
+          HawthorneCore::Validation::PaymentMethod::Stripe
+
+
   # -----------------------------------------------------------------------------
 
+  # show the user payment methods
   def index
 
-    # find the users active stripe credit cards
-    @active_credit_cards = HawthorneCore::User.
-      find_by(user_id: session[:user_id]).
+    # find the users credit cards
+    @credit_cards = HawthorneCore::User.
+      find_by(user_id:).
       active_stripe_credit_cards
 
     # ----------------------
@@ -22,14 +27,9 @@ class HawthorneCore::User::PaymentMethodsController < HawthorneCore::AccountAppl
   # show the page to add a credit card
   def new
 
-    # find the user
-    @user = HawthorneCore::User.
-      active.
-      find_by(user_id: session[:user_id])
-
     # set up the user to add a credit card,
-    # the setup intent - client secret is a stripe identifier for the user to add a credit card to their stripe account
-    @stripe_setup_intent_client_secret = HawthorneCore::Services::StripeSvc.setup_intent_client_secret(@user.id, @user.stripe_customer_id)
+    # the setup intent client secret is a stripe identifier for the user to add a credit card to their stripe account
+    @stripe_setup_intent_client_secret = HawthorneCore::User.stripe_setup_intent_client_secret(user_id:)
 
     # ----------------------
 
@@ -39,97 +39,39 @@ class HawthorneCore::User::PaymentMethodsController < HawthorneCore::AccountAppl
 
   # -----------------------------------------------------------------------------
 
-  # receive the stripe payment method id from the frontend and save it
+  # add a credit card
   def create
 
-    # get the request attributes
     stripe_payment_method_id = params[:stripe_payment_method_id]
 
-    # ----------------------
+    # verify the stripe payment method identifier is valid
+    return redirect_on_invalid_stripe_payment_method_id(action: 'ADD_CREDIT_CARD_TO_ACCOUNT', stripe_payment_method_id:) unless HawthorneCore::UserPaymentMethod.stripe_payment_method_id_valid?(stripe_payment_method_id:)
 
-    # find the user
-    user = HawthorneCore::User.
-      active.
-      find_by(user_id: session[:user_id])
-
-    # ----------------------
-
-    # verify that the stripe payment method id is present and is starts with 'pm_'
-    # if invalid, return back and display all payment methods
-    if stripe_payment_method_id.blank? || !stripe_payment_method_id.start_with?('pm_')
-      HawthorneCore::UserAction::Log.add_credit_card_failure(user.id, HawthorneCore::UserAction::FailureReason.stripe_payment_method_id_invalid, { stripe_payment_method_id: stripe_payment_method_id })
-      redirect_to account_new_payment_method_path and return
-    end
-
-    # ----------------------
-
-    # create the user payment method
-    # set as  default, if the user does not have an existing defaulted payment method
-    HawthorneCore::UserPaymentMethod.create!(
-      user_id:,
-      payment_method_type: 'CREDIT_CARD',
-      stripe_payment_method_id: stripe_payment_method_id,
-      default: !user.defaulted_payment_method_exists?
-    )
-
-    # log it
-    HawthorneCore::UserAction::Log.add_credit_card(user.id, { stripe_payment_method_id: stripe_payment_method_id })
-
-    # ----------------------
+    # add the stripe credit card as a payment method
+    HawthorneCore::UserPaymentMethod.add_stripe_credit_card(user_id:, action_location: 'ACCOUNT', stripe_payment_method_id:)
 
     # redirect the user to view their payment methods
-    redirect_to account_new_payment_method_path
+    redirect_to account_payment_methods_path
 
   end
 
   # -----------------------------------------------------------------------------
 
-  # remove a credit card - soft delete in our database, and detach in stripe
+  # delete a credit card
   def delete
 
-    # get the request attributes
     token = params[:token]
 
-    # ----------------------
+    # find the payment methods to delete
+    payment_method = HawthorneCore::UserPaymentMethod.find_by_token_with_user_id(user_id:, token:)
 
-    # find the user
-    user = HawthorneCore::User.
-      active.
-      find_by(user_id: session[:user_id])
+    # verify the payment method is found, and belongs to the user
+    return redirect_when_payment_method_not_found(location: 'HawthorneCore::User::PaymentMethodsController.delete', token:) unless payment_method
 
-    # ----------------------
+    # delete the payment method
+    payment_method.perform_delete
 
-    # find the payment method to soft delete / detach in stripe
-    payment_method = HawthorneCore::UserPaymentMethod.
-      active.
-      find_by(user_id:, token: token)
-
-    # in the unexpected case where the payment method is not found
-    # redirect the user to view their payment methods
-    redirect_to account_profile_payment_methods_path and return unless payment_method
-
-    # ----------------------
-
-    # detach the payment method from stripe
-    HawthorneCore::Services::StripeSvc.detach_payment_method(user.id, payment_method.stripe_payment_method_id)
-
-    # soft delete the record
-    payment_method.soft_delete
-
-    # log it
-    HawthorneCore::UserAction::Log.remove_credit_card(user.id, { token: token })
-
-    # ----------------------
-
-    # if this user has one active credit card - set this card as the default
-    if user.one_active_credit_card?
-      payment_method_to_default = HawthorneCore::UserPaymentMethod.active.where(user_id:).first
-      payment_method_to_default.update_columns(default: true)
-    end
-
-    # ----------------------
-
-    redirect_to account_profile_payment_methods_path
+    redirect_to account_payment_methods_path
 
   end
 
@@ -157,7 +99,7 @@ class HawthorneCore::User::PaymentMethodsController < HawthorneCore::AccountAppl
 
     # in the unexpected case where the payment method is not found
     # redirect the user to view their payment methods
-    redirect_to account_profile_payment_methods_path and return unless payment_method
+    redirect_to account_payment_methods_path and return unless payment_method
 
     # ----------------------
 
@@ -170,7 +112,7 @@ class HawthorneCore::User::PaymentMethodsController < HawthorneCore::AccountAppl
     # ----------------------
 
     # redirect the user to view their payment methods
-    redirect_to account_profile_payment_methods_path
+    redirect_to account_payment_methods_path
 
   end
 
