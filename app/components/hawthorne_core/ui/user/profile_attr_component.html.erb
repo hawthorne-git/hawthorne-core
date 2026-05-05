@@ -1,15 +1,16 @@
 <%# v3.0 %>
 
 <%
-  blank_value = 'Not on File'
+  blank_value = 'Not on file'
+  is_blank = @value.blank?
   @value = @value.presence || blank_value
-  @action = (@value == blank_value ? 'Add' : 'Update')
+  @action = (is_blank ? 'Add' : 'Edit')
 %>
 
 <div class="py-5 border-b border-gray-200 flex items-center justify-between">
   <div>
     <p class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1"><%= @label %></p>
-    <p class="text-gray-900"><%= @value %></p>
+    <p class="text-gray-900<%= ' profile-attr-value--blank' if is_blank %>"><%= @value %></p>
     <p class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1"><%= @description %></p>
   </div>
   <div class="flex items-center gap-2 text-sm shrink-0">

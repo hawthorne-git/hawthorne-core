@@ -31,10 +31,29 @@
 <%# Sidebar %>
 <aside class="w-64 shrink-0 border-r border-gray-200 px-6 py-10">
 
+  <%# Mobile-only close button — shown when sidebar is open %>
+  <button type="button" class="sidebar-close" data-action="mobile-menu#close" aria-label="Close menu">&times;</button>
+
   <%# User greeting %>
-  <div class="mb-8">
-    <p class="text-lg font-semibold text-brand-heading">Hi, <%= user.first_name.capitalize if user.first_name? %></p>
-    <p class="text-sm text-gray-500"><%= user.email %></p>
+  <div class="sidebar-greeting">
+
+    <%# Avatar: first letter of name, or a generic person icon %>
+    <div class="sidebar-avatar">
+      <% if user.first_name? %>
+        <span class="sidebar-avatar__initial"><%= user.first_name.upcase.first %></span>
+      <% else %>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="sidebar-avatar__icon">
+          <path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clip-rule="evenodd" />
+        </svg>
+      <% end %>
+    </div>
+
+    <%# Name and email %>
+    <div>
+      <p class="sidebar-greeting__name">Hello<%= user.first_name? ? ", #{user.first_name.capitalize}" : '' %></p>
+      <p class="sidebar-greeting__email"><%= user.email %></p>
+    </div>
+
   </div>
 
   <%# Navigation %>
@@ -46,7 +65,7 @@
 
   <%# Sign out %>
   <div class="mt-10 pt-6 border-t border-gray-200">
-    <%= link_to 'Sign Out', helpers.sign_out_path, data: { turbo: :false }, class: "px-3 py-2 text-sm text-gray-500 hover:text-gray-700 no-underline hover:no-underline block" %>
+    <%= link_to 'Logout', helpers.sign_out_path, data: { turbo: :false }, class: "px-3 py-2 text-sm text-gray-500 hover:text-gray-700 no-underline hover:no-underline block" %>
   </div>
 
 </aside>

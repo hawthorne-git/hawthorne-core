@@ -3,15 +3,15 @@
 <%
   title = 'Profile'
 
-  name_label = 'Name'
+  name_label = 'Full Name'
   name_value = @user.name
   name_url = account_profile_name_path
 
-  email_label = 'Email'
+  email_label = 'Email Address'
   email_value = @user.email
   email_url = account_profile_email_path
 
-  phone_number_label = 'Phone number'
+  phone_number_label = 'Phone Number'
   phone_number_description = 'For sign-in purposes only'
   phone_number_value = HawthorneCore::Helpers::PhoneNumber.us_format(phone_number: @user.phone_number)
   phone_number_url = account_profile_phone_number_path
@@ -19,13 +19,17 @@
   code_delivery_label = 'Sign-In Code delivery'
   code_delivery_description = 'How we send your code'
   code_delivery_value = @user.sign_in_code_default_delivery_pretty_print
-  code_delivery_url = phone_number_value.present? ? account_profile_sign_in_code_default_delivery_path : nil
+  code_delivery_url = account_profile_sign_in_code_default_delivery_path
+
+  show_phone_number = code_delivery_value == 'Text Message'
 %>
 
 <%= render HawthorneCore::UI::User::Layout::ProfileComponent.new(title:) do %>
   <%= render HawthorneCore::UI::User::ProfileAttrComponent.new(label: name_label, value: name_value, url: name_url) %>
   <%= render HawthorneCore::UI::User::ProfileAttrComponent.new(label: email_label, value: email_value, url: email_url) %>
-  <%= render HawthorneCore::UI::User::ProfileAttrComponent.new(label: phone_number_label, description: phone_number_description, value: phone_number_value, url: phone_number_url) %>
+  <% if show_phone_number %>
+    <%= render HawthorneCore::UI::User::ProfileAttrComponent.new(label: phone_number_label, description: phone_number_description, value: phone_number_value, url: phone_number_url) %>
+  <% end %>
   <%= render HawthorneCore::UI::User::ProfileAttrComponent.new(label: code_delivery_label, description: code_delivery_description, value: code_delivery_value, url: code_delivery_url) %>
   <div class="mt-8 pt-6 border-t border-gray-100">
     <%= link_to 'Delete account', account_profile_delete_account_path, class: "text-red-500 no-underline hover:underline text-sm" %>
