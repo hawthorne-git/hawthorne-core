@@ -8,7 +8,6 @@ module HawthorneCore::Helpers::Bot
     2a06:98c0:3600::103
   ].freeze
 
-
   REFERER_BOTS = %w[
     hawthorne-s3-bucket
   ].freeze
