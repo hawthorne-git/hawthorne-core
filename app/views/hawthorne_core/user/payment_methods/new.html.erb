@@ -10,19 +10,27 @@
        data-stripe-card-publishable-key-value="<%= HawthorneCore::AppConfig.stripe_publishable_key %>"
        data-stripe-card-client-secret-value="<%= @stripe_setup_intent_client_secret %>">
 
-    <form data-action="submit->stripe-card#submit" class="mt-6 max-w-md">
+    <form data-action="submit->stripe-card#submit" class="cc-form">
 
-      <div class="mb-4">
-        <label class="block text-sm text-gray-500 mb-1">Credit card details</label>
-        <div data-stripe-card-target="cardElement"
-             class="w-full px-4 py-4 border border-gray-300 rounded-xl bg-white"></div>
+      <div class="cc-row">
+        <label class="cc-field-label">Card number</label>
+        <div data-stripe-card-target="cardNumber" class="cc-field"></div>
       </div>
 
-      <div data-stripe-card-target="errors" class="text-red-600 text-sm mb-4"></div>
+      <div class="cc-grid">
+        <div>
+          <label class="cc-field-label">Expiry</label>
+          <div data-stripe-card-target="cardExpiry" class="cc-field"></div>
+        </div>
+        <div>
+          <label class="cc-field-label">CVC</label>
+          <div data-stripe-card-target="cardCvc" class="cc-field"></div>
+        </div>
+      </div>
 
-      <button type="submit"
-              data-stripe-card-target="submit"
-              class="w-full py-3.5 px-4 bg-brand hover:bg-brand-dark text-white text-base font-semibold rounded-xl transition-colors duration-150 cursor-pointer">
+      <div data-stripe-card-target="errors" class="cc-errors"></div>
+
+      <button type="submit" data-stripe-card-target="submit" class="cc-submit">
         Add Credit Card
       </button>
 
