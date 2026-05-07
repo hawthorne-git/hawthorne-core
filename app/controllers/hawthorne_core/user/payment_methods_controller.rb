@@ -12,9 +12,7 @@ class HawthorneCore::User::PaymentMethodsController < HawthorneCore::AccountAppl
   def index
 
     # find the users credit cards
-    @credit_cards = HawthorneCore::User.
-      find_by(user_id:).
-      active_stripe_credit_cards
+    @credit_cards = HawthorneCore::User.stripe_credit_cards(user_id:)
 
     # ----------------------
 
@@ -62,54 +60,36 @@ class HawthorneCore::User::PaymentMethodsController < HawthorneCore::AccountAppl
 
     token = params[:token]
 
-    # find the payment methods to delete
-    payment_method = HawthorneCore::UserPaymentMethod.find_by_token_with_user_id(user_id:, token:)
-
+    # find the payment method to delete
     # verify the payment method is found, and belongs to the user
+    payment_method = HawthorneCore::UserPaymentMethod.find_by_token_with_user_id(user_id:, token:)
     return redirect_when_payment_method_not_found(location: 'HawthorneCore::User::PaymentMethodsController.delete', token:) unless payment_method
 
     # delete the payment method
     payment_method.perform_delete
 
+    # redirect the user to view their payment methods
     redirect_to account_payment_methods_path
 
   end
 
   # -----------------------------------------------------------------------------
 
-  # set a credit card as the default
+  # set a credit card as the default payment method
   def set_default
 
-    # get the request attributes
     token = params[:token]
 
-    # ----------------------
-
-    # find the user
-    user = HawthorneCore::User.
-      active.
-      find_by(user_id: session[:user_id])
-
-    # ----------------------
-
     # find the payment method to set as default
-    payment_method = HawthorneCore::UserPaymentMethod.
-      active.
-      find_by(user_id:, token: token)
+    # verify the payment method is found, and belongs to the user
+    payment_method = HawthorneCore::UserPaymentMethod.find_by_token_with_user_id(user_id:, token:)
+    return redirect_when_payment_method_not_found(location: 'HawthorneCore::User::PaymentMethodsController.set_default', token:) unless payment_method
 
-    # in the unexpected case where the payment method is not found
-    # redirect the user to view their payment methods
-    redirect_to account_payment_methods_path and return unless payment_method
-
-    # ----------------------
-
-    # set all the user payment methods to not be defaulted
-    user.set_all_payment_methods_to_not_defaulted
+    # set all the user payment methods as not defaulted
+    HawthorneCore::User.set_all_payment_methods_as_not_defaulted(user_id:)
 
     # update the selected payment method as the default
     payment_method.update_columns(default: true)
-
-    # ----------------------
 
     # redirect the user to view their payment methods
     redirect_to account_payment_methods_path

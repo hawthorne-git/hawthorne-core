@@ -7,12 +7,6 @@ module HawthorneCore::User::PaymentMethods
 
     # -----------------------------------------------------------------------------
 
-
-    # -----------------------------------------------------------------------------
-
-    # find the active stripe credit cards for the user
-    def active_stripe_credit_cards = HawthorneCore::UserPaymentMethod.active_stripe_credit_cards(user_id:, stripe_customer_id:)
-
     # determine if the user has a defaulted payment method
     def defaulted_payment_method_exists? = HawthorneCore::UserPaymentMethod.defaulted_payment_method_exists?(id)
 
@@ -21,11 +15,13 @@ module HawthorneCore::User::PaymentMethods
 
     def active_credit_card = HawthorneCore::UserPaymentMethod.active.where(user_id:).first
 
-    # set all the user payment methods to not be defaulted
-    def set_all_payment_methods_to_not_defaulted = HawthorneCore::UserPaymentMethod.set_all_payment_methods_to_not_defaulted(id)
-
     # determine if the user has a stripe customer account
     def stripe_customer? = stripe_customer_id.present?
+
+    # -----------------------------------------------------------------------------
+
+    # set all the user payment methods as not defaulted
+    def self.set_all_payment_methods_as_not_defaulted(user_id:) = HawthorneCore::UserPaymentMethod.set_all_payment_methods_as_not_defaulted(user_id:)
 
     # -----------------------------------------------------------------------------
 

@@ -20,6 +20,13 @@ module HawthorneCore::User::PaymentMethods::Stripe
 
     # -----------------------------------------------------------------------------
 
+    # find the users stripe credit cards
+    def self.stripe_credit_cards(user_id:)
+      HawthorneCore::UserPaymentMethod.stripe_credit_cards(user_id:, stripe_customer_id: stripe_customer_id(user_id:))
+    end
+    
+    # -----------------------------------------------------------------------------
+
     # set up the user to add a credit card,
     # the setup intent client secret is a stripe identifier for the user to add a credit card to their stripe account
     def self.stripe_setup_intent_client_secret(user_id:)

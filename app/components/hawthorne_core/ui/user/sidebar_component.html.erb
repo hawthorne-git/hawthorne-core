@@ -5,14 +5,23 @@
   # find the user - needed in the user greeting section
   user = HawthorneCore::User.find_by(user_id: session[:user_id])
 
+  # navigation component titles
+  addresses_handle = 'Addresses'
+  favorites_handle = 'Favorites'
+  gift_cards_handle = 'Gift Cards'
+  notifications_handle = 'Notifications'
+  orders_handle = 'Orders'
+  payment_methods_handle = 'Credit Cards'
+  profile_handle = 'Profile'
+
   # create each navigation component
-  addresses_navigation_component = { handle: 'Addresses', url: helpers.account_addresses_path, selected: (@selected_sidebar_navigation_item.downcase == 'addresses') }
-  gift_cards_navigation_component = { handle: 'Gift Cards', url: helpers.account_gift_cards_path, selected: (@selected_sidebar_navigation_item.downcase == 'gift cards') }
-  favorites_navigation_component = { handle: 'Favorites', url: helpers.account_favorites_path, selected: (@selected_sidebar_navigation_item.downcase == 'favorites') }
-  notifications_navigation_component = { handle: 'Notifications', url: helpers.account_notifications_path, selected: (@selected_sidebar_navigation_item.downcase == 'notifications') }
-  orders_navigation_component = { handle: 'Orders', url: helpers.account_orders_path, selected: (@selected_sidebar_navigation_item.downcase == 'orders') }
-  payment_methods_navigation_component = { handle: 'Credit Cards', url: helpers.account_payment_methods_path, selected: (@selected_sidebar_navigation_item.downcase == 'credit cards') }
-  profile_navigation_component = { handle: 'Profile', url: helpers.account_profile_path, selected: (@selected_sidebar_navigation_item.downcase == 'profile') }
+  addresses_navigation_component = { handle: addresses_handle, url: helpers.account_addresses_path, selected: (@selected_sidebar_navigation_item == addresses_handle) }
+  favorites_navigation_component = { handle: favorites_handle, url: helpers.account_favorites_path, selected: (@selected_sidebar_navigation_item == favorites_handle) }
+  gift_cards_navigation_component = { handle: gift_cards_handle, url: helpers.account_gift_cards_path, selected: (@selected_sidebar_navigation_item == gift_cards_handle) }
+  notifications_navigation_component = { handle: notifications_handle, url: helpers.account_notifications_path, selected: (@selected_sidebar_navigation_item == notifications_handle) }
+  orders_navigation_component = { handle: orders_handle, url: helpers.account_orders_path, selected: (@selected_sidebar_navigation_item == orders_handle) }
+  payment_methods_navigation_component = { handle: payment_methods_handle, url: helpers.account_payment_methods_path, selected: (@selected_sidebar_navigation_item == payment_methods_handle) }
+  profile_navigation_component = { handle: profile_handle, url: helpers.account_profile_path, selected: (@selected_sidebar_navigation_item == profile_handle) }
 
   # set these navigation components into a list
   navigation_components =
