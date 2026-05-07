@@ -60,7 +60,7 @@
     <%# Name and email %>
     <div>
       <p class="sidebar-greeting__name">Hello<%= user.first_name? ? ", #{user.first_name.capitalize}" : '' %></p>
-      <p class="sidebar-greeting__email"><%= user.email %></p>
+      <p class="sidebar-greeting__email" data-turbo-permanent id="sidebar-greeting-email"><%= user.email %></p>
     </div>
 
   </div>
