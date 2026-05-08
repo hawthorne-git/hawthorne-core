@@ -30,7 +30,7 @@ module HawthorneCore::UserPaymentMethod::Stripe
         stripe_payment_method_id: payment_method_id,
         default: !HawthorneCore::User.find_by(user_id:).default_exists?
       )
-      HawthorneCore::UserAction::Log.add_credit_card(user_id:, note: { service: 'STRIPE', action_location:, payment_method_id: })
+      HawthorneCore::UserAction::Log.add_payment_method(user_id:, note: { service: 'STRIPE', payment_method_type: 'CREDIT_CARD', action_location:, payment_method_id: })
     end
 
     # -----------------------------------------------------------------------------

@@ -29,11 +29,11 @@ class HawthorneCore::UserPaymentMethod < HawthorneCore::ActiveRecordBaseApp
 
   # -----------------------------------------------------------------------------
 
-  # determine if the user has a defaulted payment method
-  def self.default_exists?(user_id) = active.exists?(user_id:, default: true)
-
   # determine if the user has any (active) payment methods
   def self.has_payment_method?(user_id:) = active.where(user_id:).exists?
+
+  # determine if the user has a defaulted payment method
+  def self.default_exists?(user_id) = active.exists?(user_id:, default: true)
 
   # determine if the user has more than one (active or inactive) default payment method
   def self.more_than_one_default_payment_method?(user_id:) = where(user_id:, default: true).count > 1
@@ -93,7 +93,7 @@ class HawthorneCore::UserPaymentMethod < HawthorneCore::ActiveRecordBaseApp
     soft_delete
     if detach_from_service
       HawthorneCore::Services::StripeSvc.detach_payment_method(user_id:, payment_method_id:)
-      HawthorneCore::UserAction::Log.remove_credit_card(note: { token: token })
+      HawthorneCore::UserAction::Log.remove_payment_method(note: { token: token })
     end
     clean_defaulted(user_id:)
   end

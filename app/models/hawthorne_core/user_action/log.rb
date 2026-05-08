@@ -50,14 +50,6 @@ module HawthorneCore::UserAction::Log
 
   def self.new_phone_number_attrs_set(**attrs) = success_admin(**attrs, action: action(:phone_number_update_attrs_set))
 
-  # ----------------------------------------------------------------------------- Credit Card
-
-  def self.add_credit_card(**attrs) = success(**attrs, action: action(:credit_card_added))
-
-  def self.add_credit_card_failure(**attrs) = failure(**attrs, action: action(:credit_card_added))
-
-  def self.remove_credit_card(**attrs) = success(**attrs, action: action(:credit_card_removed))
-
   # ----------------------------------------------------------------------------- Email
 
   def self.email_sent(**attrs) = success_admin(**attrs, action: action(:email_sent))
@@ -65,6 +57,12 @@ module HawthorneCore::UserAction::Log
   def self.email_sent_failure(**attrs) = failure_admin(**attrs, action: action(:email_sent))
 
   # ----------------------------------------------------------------------------- Payment Methods
+
+  def self.add_payment_method(**attrs) = success(**attrs, action: action(:payment_method_added))
+
+  def self.add_payment_method_failure(**attrs) = failure(**attrs, action: action(:payment_method_added))
+
+  def self.remove_payment_method(**attrs) = success(**attrs, action: action(:payment_method_removed))
 
   def self.payment_method_failure(**attrs) = failure(**attrs, action: action(:payment_method))
 
