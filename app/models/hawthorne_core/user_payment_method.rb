@@ -14,7 +14,7 @@ class HawthorneCore::UserPaymentMethod < HawthorneCore::ActiveRecordBaseApp
 
   # -----------------------------------------------------------------------------
 
-  # determine if a payment method is marked as defaulted
+  # determine if a payment method is marked as default
   def default? = default
 
   # -----------------------------------------------------------------------------
@@ -24,24 +24,25 @@ class HawthorneCore::UserPaymentMethod < HawthorneCore::ActiveRecordBaseApp
 
   # -----------------------------------------------------------------------------
 
-  # find the payment method, by its token
+  # find the users payment method, by its token
   def self.find_by_token_with_user_id(user_id:, token:) = active.find_by(user_id:, token:)
 
   # -----------------------------------------------------------------------------
 
+  # determine if the user has a defaulted payment method
+  def self.default_exists?(user_id) = active.exists?(user_id:, default: true)
+
   # determine if the user has any (active) payment methods
-  def self.has_payment_method?(user_id:) = active.where(user_id:).count > 0
+  def self.has_payment_method?(user_id:) = active.where(user_id:).exists?
 
-  # determine if the user has more than one (active or inactive) payment method defaulted
-  def self.more_than_one_payment_method_defaulted?(user_id:) = where(user_id:, default: true).count > 1
+  # determine if the user has more than one (active or inactive) default payment method
+  def self.more_than_one_default_payment_method?(user_id:) = where(user_id:, default: true).count > 1
 
-  # determine if the user has no (active) payment method defaulted
-  def self.no_payment_method_defaulted?(user_id:) = active.where(user_id:, default: true).count.zero?
+  # determine if the user has no (active) default payment method
+  def self.no_default_payment_method?(user_id:) = !active.where(user_id:, default: true).exists?
 
-  # determine if the user has one (active) payment method defaulted
-  def self.one_payment_method_defaulted?(user_id:) = where(user_id:, default: true).count == 1
-
-  # ----------------------
+  # determine if the user has one (active) default payment method
+  def self.one_default_payment_method?(user_id:) = where(user_id:, default: true).count == 1
 
   # set all payment methods as not defaulted
   def self.set_all_payment_methods_as_not_defaulted(user_id:) = where(user_id:).update_all(default: false)
@@ -56,11 +57,6 @@ class HawthorneCore::UserPaymentMethod < HawthorneCore::ActiveRecordBaseApp
 
   # -----------------------------------------------------------------------------
 
-  # determine if the user has a defaulted payment method
-  def self.default_exists?(user_id) = active.exists?(user_id:, default: true)
-
-  # -----------------------------------------------------------------------------
-
   # clean up a users defaulted payment methods
   # exit if the user does not have any (active) payment methods
   # if the user has more than one (active or inactive) payment method defaulted - which should not happen, set all as not defaulted
@@ -70,9 +66,9 @@ class HawthorneCore::UserPaymentMethod < HawthorneCore::ActiveRecordBaseApp
   # lastly, return is if there was a change
   def self.clean_defaulted(user_id:)
     return { change_made: false } unless has_payment_method?(user_id:)
-    set_all_payment_methods_as_not_defaulted(user_id:) if more_than_one_payment_method_defaulted?(user_id:)
-    set_all_payment_methods_as_not_defaulted(user_id:) if no_payment_method_defaulted?(user_id:)
-    return { change_made: false } if one_payment_method_defaulted?(user_id:)
+    set_all_payment_methods_as_not_defaulted(user_id:) if more_than_one_default_payment_method?(user_id:)
+    set_all_payment_methods_as_not_defaulted(user_id:) if no_default_payment_method?(user_id:)
+    return { change_made: false } if one_default_payment_method?(user_id:)
     { change_made: true, token: set_last_used_or_created_as_default(user_id:) }
   end
 

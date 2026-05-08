@@ -13,7 +13,7 @@ module HawthorneCore::User::PaymentMethods::Stripe
     # -----------------------------------------------------------------------------
 
     # find the users stripe customer id
-    # in the unexpected case where the stripe customer account does not exist - create it, then return the users stripe customer id
+    # in the unexpected case where the stripe customer account does not exist - create it (NOW), then return the users stripe customer id
     def self.stripe_customer_id(user_id:)
       customer_id = where(user_id:).pick(:stripe_customer_id)
       return customer_id if customer_id.present?

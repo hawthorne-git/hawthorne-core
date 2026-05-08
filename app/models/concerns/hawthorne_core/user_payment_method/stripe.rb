@@ -60,7 +60,7 @@ module HawthorneCore::UserPaymentMethod::Stripe
       end
 
       # clean up a users defaulted payment methods (in our database)
-      # if there was a change, then update the current credit cards
+      # if there was a change, then update the current credit card list
       clean_defaulted_result = clean_defaulted(user_id:)
       if clean_defaulted_result[:change_made]
         credit_cards.each { |e| e[:default] = false }

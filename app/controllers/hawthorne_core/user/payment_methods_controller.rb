@@ -25,7 +25,7 @@ class HawthorneCore::User::PaymentMethodsController < HawthorneCore::AccountAppl
 
     # set up the user to add a credit card 
     # the service key is a one-time identifier for the user to add a credit card 
-    @service_key = HawthorneCore::User.payment_method_service_key(user_id:)
+    @service_key = HawthorneCore::User.create_payment_method_service_key(user_id:)
 
     @html_title = 'Add Credit Card | Profile'
 
@@ -57,7 +57,7 @@ class HawthorneCore::User::PaymentMethodsController < HawthorneCore::AccountAppl
     token = params[:token]
 
     # find the payment method to delete
-    # verify the payment method is found, and belongs to the user
+    # verify that the payment method is found, and belongs to the user
     payment_method = HawthorneCore::UserPaymentMethod.find_by_token_with_user_id(user_id:, token:)
     return redirect_when_payment_method_not_found(location: 'HawthorneCore::User::PaymentMethodsController.delete', token:) unless payment_method
 
@@ -77,7 +77,7 @@ class HawthorneCore::User::PaymentMethodsController < HawthorneCore::AccountAppl
     token = params[:token]
 
     # find the payment method to set as default
-    # verify the payment method is found, and belongs to the user
+    # verify that the payment method is found, and belongs to the user
     payment_method = HawthorneCore::UserPaymentMethod.find_by_token_with_user_id(user_id:, token:)
     return redirect_when_payment_method_not_found(location: 'HawthorneCore::User::PaymentMethodsController.set_default', token:) unless payment_method
 
