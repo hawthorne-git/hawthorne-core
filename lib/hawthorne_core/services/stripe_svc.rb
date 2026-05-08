@@ -1,16 +1,18 @@
 # v3.0
 
+# Stripe service ... for payment methods (credit cards)
 class HawthorneCore::Services::StripeSvc
 
   # ----------------------------------------------------------------
 
-  # create a stripe customer, returning its stripe customer id
+  # create a stripe customer
+  # returning its customer id
   def self.create_customer(user_id:, email:)
     customer = Stripe::Customer.create(
       email:,
       metadata: { user_id: }
     )
-    HawthorneCore::UserAction::Log.stripe_customer_created(user_id:, note: { email:, stripe_customer_id: customer.id })
+    HawthorneCore::UserAction::Log.stripe_customer_created(user_id:, note: { email:, customer_id: customer.id })
     customer.id
   rescue Stripe::StripeError => e
     HawthorneCore::CapturedException.log(location: 'HawthorneCore::Services::StripeSvc.create_customer', note: { user_id:, email: }, e:)
@@ -19,7 +21,7 @@ class HawthorneCore::Services::StripeSvc
 
   # ----------------------------------------------------------------
 
-  # detach a payment method from a customer (removes the credit card)
+  # detach a payment method from a customer
   def self.detach_payment_method(user_id:, payment_method_id:)
     Stripe::PaymentMethod.detach(payment_method_id)
     HawthorneCore::UserAction::Log.stripe_credit_card_detached(user_id:, note: { payment_method_id: })
@@ -29,7 +31,8 @@ class HawthorneCore::Services::StripeSvc
 
   # ----------------------------------------------------------------
 
-  # find all customer credit cards, in an array of hashes
+  # find all customer credit cards,
+  # returning in an array of hashes
   def self.find_all_customer_credit_cards(user_id:, customer_id:)
     payment_methods = Stripe::PaymentMethod.list(customer: customer_id, type: 'card')
     payment_methods.data.map do |payment_method|
@@ -60,7 +63,7 @@ class HawthorneCore::Services::StripeSvc
   # ----------------------------------------------------------------
 
   # create a setup intent (credit card) for a customer
-  # this does NOT create the credit card - just setting up the form for the user to add a credit card
+  # this does NOT create the credit card - just setting up the (javascript) form for the user to add a credit card
   def self.setup_intent_client_secret(user_id:, customer_id:)
     setup_intent = Stripe::SetupIntent.create(
       customer: customer_id,

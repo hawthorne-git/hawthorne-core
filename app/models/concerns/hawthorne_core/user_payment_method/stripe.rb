@@ -17,11 +17,6 @@ module HawthorneCore::UserPaymentMethod::Stripe
 
     # -----------------------------------------------------------------------------
 
-    # order the stripe credit cards - with the defaulted credit card first, then last used at checkout, then created at
-    def self.stripe_credit_cards_ordered(credit_cards:) = credit_cards.sort_by { |e| [e[:default] ? 0 : 1, -e[:last_checkout_selected_at].to_i, -e[:created_at].to_i] }
-
-    # -----------------------------------------------------------------------------
-
     # add a stripe credit card as a payment method
     def self.add_stripe_credit_card(user_id:, action_location:, payment_method_id:)
       HawthorneCore::UserPaymentMethod.create!(
@@ -30,10 +25,15 @@ module HawthorneCore::UserPaymentMethod::Stripe
         stripe_payment_method_id: payment_method_id,
         default: !HawthorneCore::User.find_by(user_id:).default_exists?
       )
-      HawthorneCore::UserAction::Log.add_credit_card(user_id:, note: { service: 'STRIPE', action_location:, payment_method_id: })
+      HawthorneCore::UserAction::Log.add_payment_method(user_id:, note: { service: 'STRIPE', payment_method_type: 'CREDIT_CARD', action_location:, payment_method_id: })
     end
 
     # -----------------------------------------------------------------------------
+
+    # order the stripe credit cards - with the defaulted credit card first, then last used at checkout, then created at
+    def self.stripe_credit_cards_ordered(credit_cards:) = credit_cards.sort_by { |e| [e[:default] ? 0 : 1, -e[:last_checkout_selected_at].to_i, -e[:created_at].to_i] }
+
+    # ----------------------
 
     # find the users (active) stripe credit cards
     def self.stripe_credit_cards(user_id:, customer_id:)
@@ -60,7 +60,7 @@ module HawthorneCore::UserPaymentMethod::Stripe
       end
 
       # clean up a users defaulted payment methods (in our database)
-      # if there was a change, then update the current credit cards
+      # if there was a change, then update the current credit card list
       clean_defaulted_result = clean_defaulted(user_id:)
       if clean_defaulted_result[:change_made]
         credit_cards.each { |e| e[:default] = false }

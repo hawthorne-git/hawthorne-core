@@ -16,8 +16,8 @@ class HawthorneCore::Stripe::CreateCustomerJob < HawthorneCore::ApplicationJob
 
     # creates a customer within the stripe payment service
     # attach the stripe customer id to the user
-    stripe_customer_id = HawthorneCore::Services::StripeSvc.create_customer(user_id:, email: user.email)
-    user.update_columns(stripe_customer_id:)
+    customer_id = HawthorneCore::Services::StripeSvc.create_customer(user_id:, email: user.email)
+    user.update_columns(stripe_customer_id: customer_id)
 
   end
 
