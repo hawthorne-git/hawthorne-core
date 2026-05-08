@@ -26,6 +26,12 @@
           <label class="cc-field-label">CVC</label>
           <div data-stripe-card-target="cardCvc" class="cc-field"></div>
         </div>
+        <div>
+          <label class="cc-field-label">ZIP</label>
+          <input type="text" required
+                 data-stripe-card-target="postalCode"
+                 class="cc-field cc-field-input">
+        </div>
       </div>
 
       <div data-stripe-card-target="errors" class="cc-errors"></div>
