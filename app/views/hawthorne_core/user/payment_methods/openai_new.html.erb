@@ -8,7 +8,7 @@
 
 <%= render HawthorneCore::UI::User::Layout::PaymentMethodsComponent.new(title:) do %>
 
-  <form id="payment-form" data-client-secret="<%= @stripe_setup_intent_client_secret %>" class="mt-6 max-w-md">
+  <form id="payment-form" data-client-secret="<%= @service_key %>" class="mt-6 max-w-md">
 
     <div class="relative mb-4">
       <input type="text"

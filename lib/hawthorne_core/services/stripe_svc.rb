@@ -34,12 +34,12 @@ class HawthorneCore::Services::StripeSvc
     payment_methods = Stripe::PaymentMethod.list(customer: customer_id, type: 'card')
     payment_methods.data.map do |payment_method|
       {
-        stripe_payment_method_id: payment_method.id,
-        stripe_fingerprint: payment_method.card.fingerprint,
+        payment_method_id: payment_method.id,
+        fingerprint: payment_method.card.fingerprint,
         brand: payment_method.card.brand,
         credit_card_last4: payment_method.card.last4,
-        credit_card_expiration_month: payment_method.card.exp_month,
-        credit_card_expiration_year: payment_method.card.exp_year
+        credit_card_exp_month: payment_method.card.exp_month,
+        credit_card_exp_year: payment_method.card.exp_year
       }
     end
   rescue Stripe::StripeError => e

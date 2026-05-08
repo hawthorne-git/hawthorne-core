@@ -8,7 +8,7 @@
 
   <div data-controller="stripe-card"
        data-stripe-card-publishable-key-value="<%= HawthorneCore::AppConfig.stripe_publishable_key %>"
-       data-stripe-card-client-secret-value="<%= @stripe_setup_intent_client_secret %>">
+       data-stripe-card-client-secret-value="<%= @service_key %>">
 
     <form data-action="submit->stripe-card#submit" class="cc-form">
 

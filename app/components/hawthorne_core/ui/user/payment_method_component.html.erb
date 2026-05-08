@@ -11,7 +11,7 @@
   </div>
 
   <%# Expiry %>
-  <p class="text-sm text-gray-600">Expires <%= @payment_method[:credit_card_expiration_month].to_s.rjust(2, '0') %>/<%= @payment_method[:credit_card_expiration_year] %></p>
+  <p class="text-sm text-gray-600">Expires <%= @payment_method[:credit_card_exp_month].to_s.rjust(2, '0') %>/<%= @payment_method[:credit_card_exp_year] %></p>
 
   <%# Actions %>
   <div class="mt-4 pt-4 border-t border-gray-100 flex items-center gap-4 text-sm">

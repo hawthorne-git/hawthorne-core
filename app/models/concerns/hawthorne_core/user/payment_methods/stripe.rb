@@ -7,33 +7,33 @@ module HawthorneCore::User::PaymentMethods::Stripe
 
     # -----------------------------------------------------------------------------
 
-    # find the users stripe customer id
-    def self.stripe_customer_id(user_id:) = where(user_id:).pick(:stripe_customer_id)
+    # determine if the user has a stripe customer account
+    def stripe_customer? = stripe_customer_id.present?
 
     # -----------------------------------------------------------------------------
 
-    # create the users stripe customer account (NOW), returning its stripe customer id
-    def self.create_stripe_customer_now(user_id:)
+    # find the users stripe customer id
+    # in the unexpected case where the stripe customer account does not exist - create it, then return the users stripe customer id
+    def self.stripe_customer_id(user_id:)
+      customer_id = where(user_id:).pick(:stripe_customer_id)
+      return customer_id if customer_id.present?
       HawthorneCore::Stripe::CreateCustomerJob.perform_now(user_id:)
-      HawthorneCore::User.stripe_customer_id(user_id:)
+      where(user_id:).pick(:stripe_customer_id)
+    end
+
+    # -----------------------------------------------------------------------------
+
+    # set up the user to add a credit card,
+    # the setup intent client secret is a stripe identifier embedded into the JavaScript
+    def self.stripe_service_key(user_id:)
+      customer_id = HawthorneCore::User.stripe_customer_id(user_id:)
+      HawthorneCore::Services::StripeSvc.setup_intent_client_secret(user_id:, customer_id:)
     end
 
     # -----------------------------------------------------------------------------
 
     # find the users stripe credit cards
-    def self.stripe_credit_cards(user_id:)
-      HawthorneCore::UserPaymentMethod.stripe_credit_cards(user_id:, stripe_customer_id: stripe_customer_id(user_id:))
-    end
-    
-    # -----------------------------------------------------------------------------
-
-    # set up the user to add a credit card,
-    # the setup intent client secret is a stripe identifier for the user to add a credit card to their stripe account
-    def self.stripe_setup_intent_client_secret(user_id:)
-      stripe_customer_id = HawthorneCore::User.stripe_customer_id(user_id:)
-      stripe_customer_id = create_stripe_customer_now(user_id:) unless stripe_customer_id
-      HawthorneCore::Services::StripeSvc.setup_intent_client_secret(user_id:, customer_id: stripe_customer_id)
-    end
+    def self.stripe_credit_cards(user_id:) = HawthorneCore::UserPaymentMethod.stripe_credit_cards(user_id:, customer_id: stripe_customer_id(user_id:))
 
     # -----------------------------------------------------------------------------
 
