@@ -88,14 +88,13 @@ class HawthorneCore::UserPaymentMethod < HawthorneCore::ActiveRecordBaseApp
   # -----------------------------------------------------------------------------
 
   # (soft) delete the payment method
-  # detach the payment method within stripe #TODO:
+  # as stripe is our merchant, detach the payment method within stripe - if the request is from the user
+  # lastly, go through the payment methods and clean up a users defaulted payment methods
   def perform_delete(detach_from_service: false)
     soft_delete
-    if detach_from_service
-      HawthorneCore::Services::StripeSvc.detach_payment_method(user_id:, payment_method_id:)
-      HawthorneCore::UserAction::Log.remove_payment_method(note: { token: token })
-    end
-    clean_defaulted(user_id:)
+    HawthorneCore::Services::StripeSvc.detach_payment_method(user_id:, payment_method_id:) if detach_from_service
+    HawthorneCore::UserAction::Log.remove_payment_method(note: { token:, detach_from_service: })
+    HawthorneCore::UserPaymentMethod.clean_defaulted(user_id:)
   end
 
   # -----------------------------------------------------------------------------
