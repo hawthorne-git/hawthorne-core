@@ -17,11 +17,6 @@ module HawthorneCore::UserPaymentMethod::Stripe
 
     # -----------------------------------------------------------------------------
 
-    # order the stripe credit cards - with the defaulted credit card first, then last used at checkout, then created at
-    def self.stripe_credit_cards_ordered(credit_cards:) = credit_cards.sort_by { |e| [e[:default] ? 0 : 1, -e[:last_checkout_selected_at].to_i, -e[:created_at].to_i] }
-
-    # -----------------------------------------------------------------------------
-
     # add a stripe credit card as a payment method
     def self.add_stripe_credit_card(user_id:, action_location:, payment_method_id:)
       HawthorneCore::UserPaymentMethod.create!(
@@ -34,6 +29,11 @@ module HawthorneCore::UserPaymentMethod::Stripe
     end
 
     # -----------------------------------------------------------------------------
+
+    # order the stripe credit cards - with the defaulted credit card first, then last used at checkout, then created at
+    def self.stripe_credit_cards_ordered(credit_cards:) = credit_cards.sort_by { |e| [e[:default] ? 0 : 1, -e[:last_checkout_selected_at].to_i, -e[:created_at].to_i] }
+
+    # ----------------------
 
     # find the users (active) stripe credit cards
     def self.stripe_credit_cards(user_id:, customer_id:)

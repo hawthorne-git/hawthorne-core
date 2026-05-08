@@ -62,7 +62,7 @@ class HawthorneCore::User::PaymentMethodsController < HawthorneCore::AccountAppl
     return redirect_when_payment_method_not_found(location: 'HawthorneCore::User::PaymentMethodsController.delete', token:) unless payment_method
 
     # delete the payment method, and detach the payment method from the service
-    payment_method.perform_delete(detach_from_service: true)
+    payment_method.perform_delete(detach_requested_by_user: true)
 
     # redirect the user to view their payment methods
     redirect_to account_payment_methods_path

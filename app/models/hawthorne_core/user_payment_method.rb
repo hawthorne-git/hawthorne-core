@@ -74,11 +74,6 @@ class HawthorneCore::UserPaymentMethod < HawthorneCore::ActiveRecordBaseApp
 
   # -----------------------------------------------------------------------------
 
-  # add the payment method
-  def self.perform_add(...) = add_stripe_credit_card(...)
-
-  # -----------------------------------------------------------------------------
-
   # set a payment method as the default - while first setting all as not defaulted
   def set_as_default
     HawthorneCore::UserPaymentMethod.where(user_id:).update_all(default: false)
@@ -87,13 +82,18 @@ class HawthorneCore::UserPaymentMethod < HawthorneCore::ActiveRecordBaseApp
 
   # -----------------------------------------------------------------------------
 
+  # as stripe is our merchant, add the stripe payment method
+  def self.perform_add(...) = add_stripe_credit_card(...)
+
+  # -----------------------------------------------------------------------------
+
   # (soft) delete the payment method
-  # as stripe is our merchant, detach the payment method within stripe - if the request is from the user
+  # as stripe is our merchant, detach the payment method within stripe - if the delete request is from the user
   # lastly, go through the payment methods and clean up a users defaulted payment methods
-  def perform_delete(detach_from_service: false)
+  def perform_delete(detach_requested_by_user: false)
     soft_delete
-    HawthorneCore::Services::StripeSvc.detach_payment_method(user_id:, payment_method_id:) if detach_from_service
-    HawthorneCore::UserAction::Log.remove_payment_method(note: { token:, detach_from_service: })
+    HawthorneCore::Services::StripeSvc.detach_payment_method(user_id:, payment_method_id:) if detach_requested_by_user
+    HawthorneCore::UserAction::Log.remove_payment_method(note: { token:, detach_requested_by_user: })
     HawthorneCore::UserPaymentMethod.clean_defaulted(user_id:)
   end
 
