@@ -59,6 +59,7 @@ module HawthorneCore::UserPaymentMethod::Stripe
 
       end
 
+      # a new credit card has been added into stripe!
 
       # create the record
       HawthorneCore::UserPaymentMethod.create!(
