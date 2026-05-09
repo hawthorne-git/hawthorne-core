@@ -10,22 +10,68 @@ module HawthorneCore::UserPaymentMethod::Stripe
     # determine if a stripe credit card is expired
     def self.stripe_credit_card_expired?(credit_card:)
       HawthorneCore::Helpers::CreditCard.credit_card_expired?(
-        exp_month: credit_card[:credit_card_exp_month].to_i,
-        exp_year: credit_card[:credit_card_exp_year].to_i
+        exp_month: credit_card[:exp_month].to_i,
+        exp_year: credit_card[:exp_year].to_i
       )
     end
 
     # -----------------------------------------------------------------------------
 
-    # add a stripe credit card as a payment method
+    # determine if the user has an identical (active) credit card with fingerprint
+    def self.identical_stripe_credit_card_fingerprint?(user_id:, fingerprint:) = active.where(user_id:, service: 'STRIPE', payment_method_type: 'CREDIT_CARD', fingerprint:).exists?
+
+    # find the users identical (active) credit card with fingerprint
+    def self.stripe_credit_card_with_fingerprint?(user_id:, fingerprint:) = active.find_by(user_id:, service: 'STRIPE', payment_method_type: 'CREDIT_CARD', fingerprint:)
+
+    # -----------------------------------------------------------------------------
+
+    # add (or update) a stripe credit card as a payment method
     def self.add_stripe_credit_card(user_id:, action_location:, payment_method_id:)
+
+      # get the fingerprint for the credit card added into stripe
+      # the stripe fingerprint is a unique string that identifies the credit card number
+      fingerprint = HawthorneCore::Services::StripeSvc.credit_card_fingerprint(payment_method_id:)
+
+      # if the user has an identical (active) credit card with the same fingerprint ...
+      if identical_stripe_credit_card_fingerprint?(user_id:, fingerprint:)
+
+        # find the credit card added into stripe - specifically get the credit cards expiration and postal code
+        # find the credit card in the database with the matching fingerprint
+        payment_method_in_stripe = HawthorneCore::Services::StripeSvc.credit_card_expiry_and_postal_code(payment_method_id:)
+        payment_method_with_fingerprint_in_db = stripe_credit_card_with_fingerprint?(user_id:, fingerprint:)
+
+        # update the existing credit card in stripe
+        HawthorneCore::Services::StripeSvc.update_credit_card_expiry_and_zip(
+          user_id:,
+          payment_method_id: payment_method_with_fingerprint_in_db.payment_method_id,
+          exp_month: payment_method_in_stripe[:exp_month],
+          exp_year: payment_method_in_stripe[:exp_year],
+          postal_code: payment_method_in_stripe[:postal_code]
+        )
+
+        HawthorneCore::UserAction::Log.update_payment_method(user_id:, note: { payment_method_id: payment_method_with_fingerprint_in_db.payment_method_id, message: 'Updated credit cards expiration and postal code' })
+
+        # detach the newly added credit card in stripe - as we updated the existing
+        HawthorneCore::Services::StripeSvc.detach_payment_method(user_id:, payment_method_id:)
+
+        # exit - do not continue with creating a new credit card in the database
+        return
+
+      end
+
+
+      # create the record
       HawthorneCore::UserPaymentMethod.create!(
         user_id:,
+        service: 'STRIPE',
         payment_method_type: 'CREDIT_CARD',
         stripe_payment_method_id: payment_method_id,
+        fingerprint:,
         default: !HawthorneCore::User.find_by(user_id:).default_exists?
       )
+      
       HawthorneCore::UserAction::Log.add_payment_method(user_id:, note: { service: 'STRIPE', payment_method_type: 'CREDIT_CARD', action_location:, payment_method_id: })
+
     end
 
     # -----------------------------------------------------------------------------
@@ -40,7 +86,7 @@ module HawthorneCore::UserPaymentMethod::Stripe
 
       # find the users credit cards, in our database and in stripe
       credit_cards_in_db = active.where(user_id:, payment_method_type: 'CREDIT_CARD').where.not(stripe_payment_method_id: nil)
-      credit_cards_in_stripe = HawthorneCore::Services::StripeSvc.find_all_customer_credit_cards(user_id:, customer_id:)
+      credit_cards_in_stripe = HawthorneCore::Services::StripeSvc.customer_credit_cards(user_id:, customer_id:)
 
       # capture all credit cards
       # iterate through all credit cards in stripe ...

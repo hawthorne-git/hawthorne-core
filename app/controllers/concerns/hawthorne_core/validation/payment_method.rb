@@ -7,10 +7,10 @@ module HawthorneCore::Validation::PaymentMethod
 
     # ---------------------------------------------------------------------------
 
-    # determine if the payment method id is valid
+    # determine if the payment method id is valid - with stripe
     def payment_method_id_valid?(...) = stripe_payment_method_id_valid?(...)
 
-    # redirect when the payment method id is invalid
+    # redirect when the payment method id is invalid - with stripe
     def redirect_on_invalid_payment_method_id(...) = redirect_on_invalid_stripe_payment_method_id(...)
 
     # ---------------------------------------------------------------------------

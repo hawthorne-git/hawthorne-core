@@ -21,6 +21,7 @@ module HawthorneCore::UserAction::Action
       email_update_attrs_set: 'EMAIL UPDATE ATTRIBUTES SET',
       payment_method: 'PAYMENT METHOD',
       payment_method_added: 'PAYMENT METHOD ADDED',
+      payment_method_updated: 'PAYMENT METHOD UPDATED',
       payment_method_removed: 'PAYMENT METHOD REMOVED',
       phone_number_update_attrs_cleared: 'PHONE NUMBER UPDATE ATTRIBUTES CLEARED',
       phone_number_update_attrs_refreshed: 'PHONE NUMBER UPDATE ATTRIBUTES REFRESHED',

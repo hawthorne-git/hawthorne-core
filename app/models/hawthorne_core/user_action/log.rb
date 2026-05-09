@@ -64,6 +64,8 @@ module HawthorneCore::UserAction::Log
 
   def self.remove_payment_method(**attrs) = success(**attrs, action: action(:payment_method_removed))
 
+  def self.update_payment_method(**attrs) = success(**attrs, action: action(:payment_method_updated))
+
   def self.payment_method_failure(**attrs) = failure(**attrs, action: action(:payment_method))
 
   # ----------------------------------------------------------------------------- Profile

@@ -13,7 +13,7 @@ class HawthorneCore::User::PaymentMethodsController < HawthorneCore::AccountAppl
 
     # find the users credit cards
     @credit_cards = HawthorneCore::User.credit_cards(user_id:)
-    
+
     @html_title = 'Credit Cards | Profile'
 
   end
@@ -38,7 +38,7 @@ class HawthorneCore::User::PaymentMethodsController < HawthorneCore::AccountAppl
 
     payment_method_id = params[:payment_method_id]
 
-    # verify the payment method identifier is valid
+    # verify the payment method identifier is valid, and that the credit card (fingerprint) is not identical to another on file
     return redirect_on_invalid_payment_method_id(action: 'ADD_CREDIT_CARD_TO_ACCOUNT', payment_method_id:) unless payment_method_id_valid?(payment_method_id:)
 
     # add the credit card as a payment method
