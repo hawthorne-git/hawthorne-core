@@ -13,8 +13,6 @@ class HawthorneCore::User::Profile::EmailController < HawthorneCore::AccountAppl
     # clear the users new email attributes
     HawthorneCore::User.clear_new_email_attrs(user_id:)
 
-    # ----------------------
-
     @html_title = 'Update Email | Profile'
 
   end
@@ -26,21 +24,15 @@ class HawthorneCore::User::Profile::EmailController < HawthorneCore::AccountAppl
 
     email = params[:email].to_s.strip.downcase
 
-    # ----------------------
-
     # verify that the email does not have a syntax error, does not match the current email, and is not taken
     return render_email_syntax_error(email:) unless HawthorneCore::Helpers::Email.syntax_valid?(email:)
     return render_email_identical_error(email:) if email == HawthorneCore::User.email(user_id:)
     return render_email_taken_error(email:) if HawthorneCore::Helpers::Email.taken?(email:)
 
-    # ----------------------
-
     # the email is valid!
 
     # set the users new email attributes, then send the user an email with a code to verify their email
     HawthorneCore::User.set_new_email_attrs_then_send_it(user_id:, email:)
-
-    # ----------------------
 
     # redirect the user to verify their code, sent via email
     redirect_to account_profile_verify_email_code_path

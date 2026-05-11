@@ -4,7 +4,7 @@ class HawthorneCore::User::ProfileController < HawthorneCore::AccountApplication
 
   # -----------------------------------------------------------------------------
 
-  # show the users profile page
+  # show the users profile
   def show
 
     # find the user

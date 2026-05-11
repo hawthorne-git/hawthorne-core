@@ -4,10 +4,8 @@ class HawthorneCore::User::NotificationsController < HawthorneCore::AccountAppli
 
   # -----------------------------------------------------------------------------
 
-  # show the users favorite page
+  # show the users notifications
   def show
-
-    # ----------------------
 
     @html_title = 'Notifications'
 

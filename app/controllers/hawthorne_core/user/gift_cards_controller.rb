@@ -7,8 +7,6 @@ class HawthorneCore::User::GiftCardsController < HawthorneCore::AccountApplicati
   # show the users gift cards
   def show
 
-    # ----------------------
-
     @html_title = 'Gift Cards'
 
   end

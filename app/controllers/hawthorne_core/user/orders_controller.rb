@@ -4,10 +4,8 @@ class HawthorneCore::User::OrdersController < HawthorneCore::AccountApplicationC
 
   # -----------------------------------------------------------------------------
 
-  # show the users order history page
+  # show the users order history
   def show
-
-    # ----------------------
 
     @html_title = 'Orders'
 

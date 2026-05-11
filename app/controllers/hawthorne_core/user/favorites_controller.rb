@@ -4,10 +4,8 @@ class HawthorneCore::User::FavoritesController < HawthorneCore::AccountApplicati
 
   # -----------------------------------------------------------------------------
 
-  # show the users favorite page
+  # show the users favorites
   def show
-
-    # ----------------------
 
     @html_title = 'Favorites'
 
