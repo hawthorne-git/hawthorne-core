@@ -65,6 +65,7 @@ HawthorneCore::Engine.routes.draw do
   get 'account/edit-address', to: 'user/addresses#edit'
   patch 'account/update-address', to: 'user/addresses#update'
   delete 'account/remove-address', to: 'user/addresses#delete'
+  patch 'account/set-default-address', to: 'user/addresses#set_default'
 
   # ---------------------- Favorites
 

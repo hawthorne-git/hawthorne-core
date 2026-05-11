@@ -1,9 +1,10 @@
 # v3.0
 
 class HawthorneCore::UI::Form::CheckBoxComponent < ViewComponent::Base
-  def initialize(form:, attribute:, text_after_checkbox: nil)
+  def initialize(form:, attribute:, label: nil, value:)
     @form = form
     @attribute = attribute
-    @text_after_checkbox = text_after_checkbox
+    @value = value
+    @label = label
   end
 end

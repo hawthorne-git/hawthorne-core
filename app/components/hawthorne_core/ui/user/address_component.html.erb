@@ -2,8 +2,13 @@
 
 <div class="border border-gray-200 rounded-xl p-5 bg-white flex flex-col mb-4">
 
-  <%# Name %>
-  <p class="font-semibold text-gray-900 mb-1"><%= @address.name %></p>
+  <%# Name + Default badge %>
+  <div class="flex items-center gap-2 mb-1">
+    <p class="font-semibold text-gray-900"><%= @address.name %></p>
+    <% if @address.default %>
+      <span class="text-xs font-medium text-white rounded px-3 py-0.5" style="background-color: var(--color-brand);">Default</span>
+    <% end %>
+  </div>
 
   <%# Street %>
   <p class="text-sm text-gray-600"><%= @address.street_address %></p>
@@ -28,6 +33,12 @@
 
   <%# Actions %>
   <div class="mt-4 pt-4 border-t border-gray-100 flex items-center gap-4 text-sm">
+    <% unless @address.default %>
+      <%= link_to 'Set as default',
+                  helpers.account_set_default_address_path(token: @address.token),
+                  data: { turbo_method: :patch },
+                  class: "text-brand-dark no-underline hover:underline" %>
+    <% end %>
     <%= link_to 'Edit',
                 helpers.account_edit_address_path(token: @address.token),
                 class: "text-brand-dark no-underline hover:underline" %>

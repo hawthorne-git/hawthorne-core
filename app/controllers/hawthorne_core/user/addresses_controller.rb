@@ -2,6 +2,8 @@
 
 class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicationController
 
+  include HawthorneCore::Validation::Address
+
   # -----------------------------------------------------------------------------
 
   # show the user addresses
@@ -9,8 +11,6 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
 
     # find the users addresses
     @addresses = HawthorneCore::UserAddress.all_for_user(user_id:)
-
-    # ----------------------
 
     @html_title = 'Addresses | Profile'
 
@@ -26,32 +26,23 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
 
     code_alpha2 = params[:selected_country]&.strip&.upcase
 
-    # ----------------------
-
     # find the users name and phone number
     name, phone_number = HawthorneCore::User.where(user_id:).pick(:name, :phone_number)
-
-    # ----------------------
 
     # set the address defaults ... add in the users name / phone number
     @address = HawthorneCore::UserAddress.new
     @address.name = name
     @address.phone_number = HawthorneCore::Helpers::PhoneNumber.us_format(phone_number:)
 
-    # ----------------------
-
     # find the selected country (by the user)
     @selected_country = HawthorneCore::Country.ship_to_country_with_code_alpha2(code_alpha2:)
-
-    # ----------------------
 
     # if a selected country is not present, default to cloudflare
     unless @selected_country
 
       # get the users country (code alpha 2) via cloudflare
-      code_alpha2 = request.headers['CF-IPCountry']&.strip&.upcase
-
       # if the cloudflare country code is not found, default to US
+      code_alpha2 = request.headers['CF-IPCountry']&.strip&.upcase
       unless HawthorneCore::Country.code_alpha2_exists?(code_alpha2:)
         HawthorneCore::UserAction::Log.address_failure(failure_reason: HawthorneCore::UserAction::FailureReason.unexpected_state, note: { class: 'HawthorneCore::User::AddressesController', method: 'new', message: 'Country (code alpha 2) not found with Cloudflare country code', code_alpha2: })
         code_alpha2 = 'US'
@@ -63,14 +54,10 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
 
     end
 
-    # ----------------------
-
     # find all countries that we ship to,
     # and find all states that we ship to if the selected country is US
     @ship_to_countries = HawthorneCore::Country.ship_to
     @us_states = HawthorneCore::UsState.ship_to if @selected_country&.us?
-
-    # ----------------------
 
     @html_title = 'Add Address | Profile'
 
@@ -88,21 +75,16 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
 
     attrs = normalized_address_params.merge(user_id:)
 
-    # ----------------------
-
     # verify the address is not identical to another on file
     return render_identical_address_error(action: 'ADD', attrs:) if HawthorneCore::UserAddress.identical?(attrs)
 
-    # ----------------------
-
     # TODO: verify address, and if not verified ... different action before adding?
 
-    # ----------------------
-
     # add the address
-    HawthorneCore::UserAddress.perform_add(attrs:)
+    address = HawthorneCore::UserAddress.perform_add(attrs:)
 
-    # ----------------------
+    # set as default if requested
+    address.set_as_default if params.dig(:user_address, :set_as_default) == '1'
 
     # redirect the user to view their addresses
     redirect_to account_addresses_path
@@ -116,8 +98,6 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
 
     token = params[:token]
 
-    # ----------------------
-
     # find the address to edit
     # verify the address belongs to the user
     @address = HawthorneCore::UserAddress.find_by_token_with_user_id(user_id:, token:)
@@ -127,8 +107,6 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
     # and find all states that we ship to if the selected country is US
     @selected_country = HawthorneCore::Country.ship_to_country_with_code_alpha2(code_alpha2: @address.country_code_alpha2)
     @us_states = HawthorneCore::UsState.ship_to if @selected_country&.us?
-
-    # ----------------------
 
     @html_title = 'Update Address | Profile'
 
@@ -142,24 +120,39 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
     attrs = normalized_address_params
     token = attrs[:token]
 
-    # ----------------------
-
     # find the address to update
     # verify the address belongs to the user and the updated address is not identical to another on file
     address = HawthorneCore::UserAddress.find_by_token_with_user_id(user_id:, token:)
     return redirect_when_address_not_found(method: 'update', token:) unless address
     return render_identical_address_error(action: 'UPDATE', attrs:) if HawthorneCore::UserAddress.identical?(attrs)
 
-    # ----------------------
-
     # TODO: verify address, and if not verified ... different action before updating?
-
-    # ----------------------
 
     # update the address
     address.perform_update(attrs:)
 
-    # ----------------------
+    # set as default if requested
+    address.set_as_default if params.dig(:user_address, :set_as_default) == '1'
+
+    # redirect the user to view their addresses
+    redirect_to account_addresses_path
+
+  end
+
+  # -----------------------------------------------------------------------------
+
+  # set an address as the default
+  def set_default
+
+    token = params[:token]
+
+    # find the address to set as default
+    # verify the address belongs to the user
+    address = HawthorneCore::UserAddress.find_by_token_with_user_id(user_id:, token:)
+    return redirect_when_address_not_found(method: 'set_default', token:) unless address
+
+    # set the address as the default
+    address.set_as_default
 
     # redirect the user to view their addresses
     redirect_to account_addresses_path
@@ -173,8 +166,6 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
 
     token = params[:token]
 
-    # ----------------------
-
     # find the address to delete
     # verify the address belongs to the user
     address = HawthorneCore::UserAddress.find_by_token_with_user_id(user_id:, token:)
@@ -182,8 +173,6 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
 
     # delete the address
     address.perform_delete
-
-    # ----------------------
 
     # redirect the user to view their addresses
     redirect_to account_addresses_path
@@ -205,7 +194,8 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
         :state_province,
         :postal_code,
         :country_code_alpha2,
-        :phone_number
+        :phone_number,
+        :default
       )
   end
 
@@ -219,24 +209,9 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
       state_province: address_params[:state_province].to_s.strip.squish,
       postal_code: address_params[:postal_code].to_s.strip.squish.upcase,
       country_code_alpha2: address_params[:country_code_alpha2].to_s.strip.squish.upcase,
-      phone_number: address_params[:phone_number].to_s.strip.squish.upcase
+      phone_number: address_params[:phone_number].to_s.strip.squish.upcase,
+      default: address_params[:default]
     }
-  end
-
-  # ----------------------
-
-  # redirect to view all addresses when the address is not found
-  def redirect_when_address_not_found(method:, token:)
-    HawthorneCore::UserAction::Log.address_failure(failure_reason: HawthorneCore::UserAction::FailureReason.unexpected_state, note: { class: 'HawthorneCore::User::AddressesController', method:, message: 'Users address not found', token: })
-    redirect_to account_addresses_path
-  end
-
-  # ----------------------
-
-  # render an error message that the address is identical to another on file
-  def render_identical_address_error(action:, attrs:)
-    HawthorneCore::UserAction::Log.address_failure(failure_reason: HawthorneCore::UserAction::FailureReason.address_identical, note: { action:, attrs: })
-    render turbo_stream: turbo_stream.update('form_errors', partial: '/hawthorne_core/user/address_failed', locals: { address_identical: true })
   end
 
   # -----------------------------------------------------------------------------
