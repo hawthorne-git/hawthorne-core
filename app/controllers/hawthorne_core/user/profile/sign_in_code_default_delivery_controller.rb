@@ -12,8 +12,6 @@ class HawthorneCore::User::Profile::SignInCodeDefaultDeliveryController < Hawtho
       where(user_id: session[:user_id]).
       pick(:sign_in_code_default_delivery)
 
-    # ----------------------
-
     @html_title = 'Sign-In Code Delivery | Profile'
 
   end
@@ -25,14 +23,10 @@ class HawthorneCore::User::Profile::SignInCodeDefaultDeliveryController < Hawtho
 
     sign_in_code_default_delivery = params[:sign_in_code_default_delivery]
 
-    # ----------------------
-
     # find the user, then update their sign-in code default delivery method
     HawthorneCore::User.
       find_by(user_id: session[:user_id]).
       update_sign_in_code_default_delivery(sign_in_code_default_delivery:)
-
-    # ----------------------
 
     # redirect the user to view their profile
     redirect_to account_profile_path

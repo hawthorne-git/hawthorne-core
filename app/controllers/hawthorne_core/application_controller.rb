@@ -3,7 +3,6 @@
 class HawthorneCore::ApplicationController < ::ApplicationController
 
   include HawthorneCore::Cache,
-          HawthorneCore::Errors,
           HawthorneCore::UserAuthentication,
           HawthorneCore::UserSessionIssuer
 

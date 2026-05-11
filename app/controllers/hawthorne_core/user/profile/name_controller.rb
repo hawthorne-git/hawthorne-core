@@ -10,8 +10,6 @@ class HawthorneCore::User::Profile::NameController < HawthorneCore::AccountAppli
     # find the users name
     @name = HawthorneCore::User.user_name(user_id:)
 
-    # ----------------------
-
     @html_title = 'Name | Profile'
 
   end
@@ -23,12 +21,8 @@ class HawthorneCore::User::Profile::NameController < HawthorneCore::AccountAppli
 
     name = params[:name].to_s.squish
 
-    # ----------------------
-
     # update the users name
     HawthorneCore::User.update_name(user_id:, name:)
-
-    # ----------------------
 
     # redirect the user to view their profile
     redirect_to account_profile_path
