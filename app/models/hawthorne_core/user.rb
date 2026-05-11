@@ -30,6 +30,11 @@ class HawthorneCore::User < HawthorneCore::ActiveRecordBaseApp
 
   # -----------------------------------------------------------------------------
 
+  # determine if the user has a phone number
+  def phone_number? = phone_number.present?
+
+  # -----------------------------------------------------------------------------
+
   # find the users site record
   def user_site = HawthorneCore::UserSite.find_by(user_id:, site_id:)
   def self.user_site(user_id:) = HawthorneCore::UserSite.find_by(user_id:, site_id:)
