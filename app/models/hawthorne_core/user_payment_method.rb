@@ -76,8 +76,9 @@ class HawthorneCore::UserPaymentMethod < HawthorneCore::ActiveRecordBaseApp
 
   # set a payment method as the default - while first setting all as not defaulted
   def set_as_default
-    set_all_payment_methods_as_not_defaulted(user_id:)
+    HawthorneCore::UserPaymentMethod.set_all_payment_methods_as_not_defaulted(user_id:)
     update_columns(default: true)
+    HawthorneCore::UserAction::Log.update_payment_method(note: { message: 'Set as default', user_payment_method_id: })
   end
 
   # -----------------------------------------------------------------------------

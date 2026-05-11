@@ -26,7 +26,7 @@ module HawthorneCore::UserPaymentMethod::Stripe
     # -----------------------------------------------------------------------------
 
     # add (or update) a stripe credit card as a payment method
-    def self.add_stripe_credit_card(user_id:, action_location:, payment_method_id:)
+    def self.add_stripe_credit_card(user_id:, action_location:, payment_method_id:, set_as_default: false)
 
       # get the fingerprint for the credit card added into stripe
       # the stripe fingerprint is a unique string that identifies the credit card number
@@ -51,6 +51,9 @@ module HawthorneCore::UserPaymentMethod::Stripe
 
         HawthorneCore::UserAction::Log.update_payment_method(user_id:, note: { payment_method_id: payment_method_with_fingerprint_in_db.payment_method_id, message: 'Updated credit cards expiration and postal code' })
 
+        # set the existing card as default if requested
+        payment_method_with_fingerprint_in_db.set_as_default if set_as_default
+
         # detach the newly added credit card in stripe - as we updated the existing
         HawthorneCore::Services::StripeSvc.detach_payment_method(user_id:, payment_method_id:)
 
@@ -61,6 +64,10 @@ module HawthorneCore::UserPaymentMethod::Stripe
 
       # a new credit card has been added into stripe!
 
+      # mark as default if explicitly requested, or if the user has no existing default
+      mark_as_default = set_as_default || !HawthorneCore::User.find_by(user_id:).default_exists?
+      set_all_payment_methods_as_not_defaulted(user_id:) if mark_as_default
+
       # create the record
       HawthorneCore::UserPaymentMethod.create!(
         user_id:,
@@ -68,9 +75,9 @@ module HawthorneCore::UserPaymentMethod::Stripe
         payment_method_type: 'CREDIT_CARD',
         stripe_payment_method_id: payment_method_id,
         fingerprint:,
-        default: !HawthorneCore::User.find_by(user_id:).default_exists?
+        default: mark_as_default
       )
-      
+
       HawthorneCore::UserAction::Log.add_payment_method(user_id:, note: { service: 'STRIPE', payment_method_type: 'CREDIT_CARD', action_location:, payment_method_id: })
 
     end

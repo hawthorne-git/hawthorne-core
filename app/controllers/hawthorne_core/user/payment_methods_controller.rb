@@ -23,9 +23,11 @@ class HawthorneCore::User::PaymentMethodsController < HawthorneCore::AccountAppl
   # show the page for the user to add a credit card
   def new
 
-    # set up the user to add a credit card 
-    # the service key is a one-time identifier for the user to add a credit card 
+    # set up the user to add a credit card
+    # the service key is a one-time identifier for the user to add a credit card
+    # also determine if the user has an active payment method - if yes, they can set this new payment as default
     @service_key = HawthorneCore::User.create_payment_method_service_key(user_id:)
+    @has_payment_method = HawthorneCore::UserPaymentMethod.has_payment_method?(user_id:)
 
     @html_title = 'Add Credit Card | Profile'
 
@@ -37,12 +39,13 @@ class HawthorneCore::User::PaymentMethodsController < HawthorneCore::AccountAppl
   def create
 
     payment_method_id = params[:payment_method_id]
+    set_as_default = params[:set_as_default]
 
     # verify the payment method identifier is valid, and that the credit card (fingerprint) is not identical to another on file
     return redirect_on_invalid_payment_method_id(action: 'ADD_CREDIT_CARD_TO_ACCOUNT', payment_method_id:) unless payment_method_id_valid?(payment_method_id:)
 
     # add the credit card as a payment method
-    HawthorneCore::UserPaymentMethod.perform_add(user_id:, action_location: 'ACCOUNT', payment_method_id:)
+    HawthorneCore::UserPaymentMethod.perform_add(user_id:, action_location: 'ACCOUNT', payment_method_id:, set_as_default:)
 
     # redirect the user to view their payment methods
     redirect_to account_payment_methods_path

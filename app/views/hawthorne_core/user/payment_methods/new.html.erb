@@ -36,6 +36,13 @@
 
       <div data-stripe-card-target="errors" class="cc-errors"></div>
 
+      <% if @has_payment_method %>
+        <div class="flex items-center gap-2 my-4">
+          <input type="checkbox" id="set_as_default" data-stripe-card-target="setAsDefault" class="h-4 w-4 rounded border-gray-300 cursor-pointer">
+          <label for="set_as_default" class="text-sm text-gray-600 select-none cursor-pointer">Set as default credit card</label>
+        </div>
+      <% end %>
+
       <button type="submit" data-stripe-card-target="submit" class="cc-submit">
         Add Credit Card
       </button>
