@@ -1,6 +1,6 @@
 # v3.0
 
-class HawthorneCore::AccountApplicationController < ::HawthorneCore::ApplicationController
+class HawthorneCore::AccountApplicationController < HawthorneCore::ApplicationController
 
   # -----------------------------------------------------------------------------
 
