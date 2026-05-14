@@ -1,5 +1,10 @@
+require 'sidekiq/web'
+require 'sidekiq/cron/web'
+
 HawthorneCore::Engine.routes.draw do
 
+  mount Sidekiq::Web => '/sidekiq'
+  
   # ---------------------------------------------------------------------------- Account
 
   # sign-in

@@ -9,6 +9,8 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'activerecord'
   spec.add_dependency 'rails'
+  spec.add_dependency 'sidekiq'
+  spec.add_dependency 'sidekiq-cron'
   spec.add_dependency 'view_component'
 
 end
