@@ -15,6 +15,14 @@ module HawthorneCore::CanBeSoftDeleted
 
     # ---------------------------------------------------------------------------------
 
+    # determine if the record is active
+    def active? = !deleted
+
+    # determine if the record is inactive
+    def inactive? = deleted
+
+    # ---------------------------------------------------------------------------------
+
     # mark the record as deleted
     def soft_delete
       update_columns(deleted: true, deleted_at: Time.current)
