@@ -16,6 +16,8 @@ module HawthorneCore
 
     def self.redis_cache_url = fetch_env_attr('REDIS_CACHE_URL')
 
+    def self.redis_cache_namespace = site_name.downcase
+
     def self.redis_sidekiq_url = fetch_env_attr('REDIS_SIDEKIQ_URL')
 
     def self.rails_env = fetch_env_attr('RAILS_ENV')
