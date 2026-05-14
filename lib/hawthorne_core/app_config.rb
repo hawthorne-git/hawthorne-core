@@ -22,6 +22,10 @@ module HawthorneCore
 
     def self.rails_env = fetch_env_attr('RAILS_ENV')
 
+    def self.sidekiq_web_password = fetch_env_attr('SIDEKIQ_WEB_PASSWORD')
+
+    def self.sidekiq_web_user = fetch_env_attr('SIDEKIQ_WEB_USER')
+
     def self.site_base_url = fetch_env_attr('SITE_BASE_URL')
 
     def self.smarty_auth_id = fetch_env_attr('SMARTY_AUTH_ID')
