@@ -3,8 +3,9 @@ require 'sidekiq/cron/web'
 
 # ----------------------------------------------------------------------------
 
+# require authentication when accessing sidekiq
 Sidekiq::Web.use(Rack::Auth::Basic) do |user, password|
-  user == 'admin' && password == 'admin'
+  user == HawthorneCore::AppConfig::sidekiq_web_user && password == HawthorneCore::AppConfig::sidekiq_web_password
 end
 
 # ----------------------------------------------------------------------------
