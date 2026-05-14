@@ -1,10 +1,18 @@
 require 'sidekiq/web'
 require 'sidekiq/cron/web'
 
+# ----------------------------------------------------------------------------
+
+Sidekiq::Web.use(Rack::Auth::Basic) do |user, password|
+  user == 'admin' && password == 'admin'
+end
+
+# ----------------------------------------------------------------------------
+
 HawthorneCore::Engine.routes.draw do
 
   mount Sidekiq::Web => '/sidekiq'
-  
+
   # ---------------------------------------------------------------------------- Account
 
   # sign-in
