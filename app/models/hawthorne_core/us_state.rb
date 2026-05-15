@@ -5,6 +5,7 @@ class HawthorneCore::UsState < HawthorneCore::ActiveRecordBaseAdmin
   # -----------------------------------------------------------------------------
 
   self.table_name = 'us_states'
+  self.primary_key = 'us_state_id'
 
   def id = us_state_id
 

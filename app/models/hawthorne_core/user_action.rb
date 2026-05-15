@@ -5,6 +5,7 @@ class HawthorneCore::UserAction < HawthorneCore::ActiveRecordBaseLog
   # -----------------------------------------------------------------------------
 
   self.table_name = 'user_actions'
+  self.primary_key = 'user_action_id'
 
   def id = user_action_id
 

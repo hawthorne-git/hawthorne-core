@@ -7,6 +7,7 @@ class HawthorneCore::UserPaymentMethod < HawthorneCore::ActiveRecordBaseApp
   # -----------------------------------------------------------------------------
 
   self.table_name = 'user_payment_methods'
+  self.primary_key = 'user_payment_method_id'
 
   def id = user_payment_method_id
 

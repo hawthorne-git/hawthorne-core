@@ -14,6 +14,7 @@ class HawthorneCore::User < HawthorneCore::ActiveRecordBaseApp
   # -----------------------------------------------------------------------------
 
   self.table_name = 'users'
+  self.primary_key = 'user_id'
 
   def id = user_id
 

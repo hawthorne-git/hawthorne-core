@@ -9,6 +9,7 @@ class HawthorneCore::Site < HawthorneCore::ActiveRecordBaseApp
   # -----------------------------------------------------------------------------
 
   self.table_name = 'sites'
+  self.primary_key = 'site_id'
 
   def id = site_id
 

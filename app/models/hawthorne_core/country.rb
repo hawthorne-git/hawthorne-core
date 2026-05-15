@@ -5,6 +5,7 @@ class HawthorneCore::Country < HawthorneCore::ActiveRecordBaseAdmin
   # -----------------------------------------------------------------------------
 
   self.table_name = 'countries'
+  self.primary_key = 'country_id'
 
   def id = country_id
 

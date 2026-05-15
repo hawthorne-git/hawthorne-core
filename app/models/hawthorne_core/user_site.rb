@@ -10,6 +10,7 @@ class HawthorneCore::UserSite < HawthorneCore::ActiveRecordBaseApp
   # -----------------------------------------------------------------------------
 
   self.table_name = 'user_sites'
+  self.primary_key = 'user_site_id'
 
   def id = user_site_id
 

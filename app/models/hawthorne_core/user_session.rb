@@ -5,6 +5,7 @@ class HawthorneCore::UserSession < HawthorneCore::ActiveRecordBaseLog
   # -----------------------------------------------------------------------------
 
   self.table_name = 'user_sessions'
+  self.primary_key = 'user_session_id'
 
   def id = user_session_id
 

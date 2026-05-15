@@ -5,6 +5,7 @@ class HawthorneCore::CapturedException < HawthorneCore::ActiveRecordBaseLog
   # -----------------------------------------------------------------------------
 
   self.table_name = 'captured_exceptions'
+  self.primary_key = 'captured_exception_id'
 
   def id = captured_exception_id
 

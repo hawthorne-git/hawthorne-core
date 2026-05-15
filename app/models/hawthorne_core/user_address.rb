@@ -6,6 +6,7 @@ class HawthorneCore::UserAddress < HawthorneCore::ActiveRecordBaseApp
   # -----------------------------------------------------------------------------
 
   self.table_name = 'user_addresses'
+  self.primary_key = 'user_address_id'
 
   def id = user_address_id
 
