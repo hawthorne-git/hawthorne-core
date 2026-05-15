@@ -1,5 +1,3 @@
-# v3.0
-
 # job to capture the user session location
 class HawthorneCore::User::CaptureSessionLocationJob < HawthorneCore::ApplicationJob
 

@@ -1,5 +1,3 @@
-# v3.0
-
 # sends a user an email with their code, to verify their new email
 class HawthorneCore::Email::SendEmailUpdateCodeJob < HawthorneCore::ApplicationJob
 

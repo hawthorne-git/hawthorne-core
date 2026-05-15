@@ -1,5 +1,3 @@
-# v3.0
-
 # updates a customers email, within the stripe payment service
 class HawthorneCore::Stripe::UpdateCustomerEmailJob < HawthorneCore::ApplicationJob
 

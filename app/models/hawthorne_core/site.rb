@@ -1,5 +1,3 @@
-# v3.0
-
 class HawthorneCore::Site < HawthorneCore::ActiveRecordBaseApp
 
   include HawthorneCore::Site::HawthorneAdmin,

@@ -1,5 +1,3 @@
-# v3.0
-
 class HawthorneCore::User::Profile::PhoneNumberController < HawthorneCore::AccountApplicationController
 
   include HawthorneCore::Validation::Code,

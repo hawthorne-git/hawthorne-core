@@ -1,5 +1,3 @@
-# v3.0
-
 class HawthorneCore::CapturedException < HawthorneCore::ActiveRecordBaseLog
 
   include HawthorneCore::HasSiteId

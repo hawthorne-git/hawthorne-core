@@ -1,5 +1,3 @@
-# v3.0
-
 # frozen_string_literal: true
 
 module HawthorneCore

@@ -1,4 +1,3 @@
-# v3.0XXX
 # TODO: Test that it is being used
 
 # set the geocoder to timeout after 2 seconds,

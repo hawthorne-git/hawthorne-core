@@ -1,5 +1,3 @@
-# v3.0XXX
-
 class HawthorneCore::Services::SmartySvc
 
   VERIFY_INTL_ADDRESS = 'VERIFY INTERNATIONAL ADDRESS'.freeze

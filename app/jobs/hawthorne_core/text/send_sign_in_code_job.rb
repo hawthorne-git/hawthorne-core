@@ -1,5 +1,3 @@
-# v3.0
-
 # sends a user a text message with their sign-in code
 class HawthorneCore::Text::SendSignInCodeJob < HawthorneCore::ApplicationJob
 

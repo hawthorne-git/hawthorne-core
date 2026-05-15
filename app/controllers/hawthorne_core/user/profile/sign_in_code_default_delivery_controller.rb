@@ -1,5 +1,3 @@
-# v3.0
-
 class HawthorneCore::User::Profile::SignInCodeDefaultDeliveryController < HawthorneCore::AccountApplicationController
 
   # -----------------------------------------------------------------------------

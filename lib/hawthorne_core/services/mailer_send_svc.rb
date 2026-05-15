@@ -1,5 +1,3 @@
-# v3.0
-
 # Mailer Send email service ... ex: send transactions emails (code / back in stock / order confirmation)
 # https://developers.mailersend.com/#mailersend-api
 class HawthorneCore::Services::MailerSendSvc

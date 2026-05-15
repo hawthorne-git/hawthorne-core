@@ -1,5 +1,3 @@
-# v3.0
-
 module HawthorneCore::UserAuthentication
   extend ActiveSupport::Concern
 

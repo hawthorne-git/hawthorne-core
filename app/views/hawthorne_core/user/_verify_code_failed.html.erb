@@ -1,5 +1,3 @@
-<%# v3.0 %>
-
 <%
   message = 'Your code has expired, so we’ve sent you a new one' if local_assigns[:code_expired]
   message = 'There have been too many unsuccessful attempts, so we’ve sent you a new code' if local_assigns[:code_max_failed_attempts_reached]

@@ -1,5 +1,3 @@
-# v3.0
-
 # Twilio service
 class HawthorneCore::Services::TwilioTextSvc
 

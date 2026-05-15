@@ -1,5 +1,3 @@
-# v3.0
-
 # sends a user an email with their sign-in code
 class HawthorneCore::Email::SendSignInCodeJob < HawthorneCore::ApplicationJob
 

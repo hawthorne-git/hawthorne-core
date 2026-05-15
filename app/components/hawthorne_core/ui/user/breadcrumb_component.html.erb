@@ -1,5 +1,3 @@
-<%# v3.0 %>
-
 <%
   breadcrumb = { text: 'Profile', url: helpers.account_profile_path } if (@selected_sidebar_navigation_item.downcase == 'profile' and @title.downcase != @selected_sidebar_navigation_item.downcase)
   breadcrumb = { text: 'Addresses', url: helpers.account_addresses_path } if (@selected_sidebar_navigation_item.downcase == 'addresses' and @title.downcase != @selected_sidebar_navigation_item.downcase)

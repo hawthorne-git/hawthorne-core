@@ -1,5 +1,3 @@
-# v3.0
-
 # creates a customer within the stripe payment service
 class HawthorneCore::Stripe::CreateCustomerJob < HawthorneCore::ApplicationJob
 

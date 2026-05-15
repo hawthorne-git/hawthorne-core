@@ -1,5 +1,3 @@
-# v3.0
-
 class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicationController
 
   include HawthorneCore::Validation::Address

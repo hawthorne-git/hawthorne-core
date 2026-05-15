@@ -1,5 +1,3 @@
-# v3.0
-
 # sends a user an email with their code, to verify that they want to delete their account
 class HawthorneCore::Email::SendDeleteAccountCodeJob < HawthorneCore::ApplicationJob
 

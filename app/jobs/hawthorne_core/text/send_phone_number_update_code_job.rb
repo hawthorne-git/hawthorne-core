@@ -1,5 +1,3 @@
-# v3.0
-
 # sends a user a text message with their code, to verify their new phone number
 class HawthorneCore::Text::SendPhoneNumberUpdateCodeJob < HawthorneCore::ApplicationJob
 

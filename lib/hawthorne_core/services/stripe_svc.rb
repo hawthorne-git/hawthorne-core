@@ -1,5 +1,3 @@
-# v3.0
-
 # Stripe service ... for payment methods (credit cards)
 class HawthorneCore::Services::StripeSvc
 

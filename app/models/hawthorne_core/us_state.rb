@@ -1,5 +1,3 @@
-# v3.0
-
 class HawthorneCore::UsState < HawthorneCore::ActiveRecordBaseAdmin
 
   include HawthorneCore::CanBeSoftDeleted

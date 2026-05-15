@@ -1,5 +1,3 @@
-# v3.0
-
 class HawthorneCore::UI::Form::TextFieldComponent < ViewComponent::Base
   def initialize(form:, attribute:, label:, placeholder: nil, value: nil, disabled: false, required: false, autocomplete: :off, maxlength: 100, autofocus: false, data: nil)
     @form = form

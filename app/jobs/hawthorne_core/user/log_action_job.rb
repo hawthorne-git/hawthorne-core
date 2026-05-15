@@ -1,5 +1,3 @@
-# v3.0
-
 # log a user action
 class HawthorneCore::User::LogActionJob < HawthorneCore::ApplicationJob
 

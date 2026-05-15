@@ -1,5 +1,3 @@
-# v3.0
-
 module HawthorneCore::CanBeSoftDeleted
   extend ActiveSupport::Concern
 

@@ -1,6 +1,3 @@
-<%# v3.0 %>
-
-
 <div class="account-layout" data-controller="mobile-menu">
   <div class="mobile-menu-backdrop" data-action="click->mobile-menu#close"></div>
   <%= render HawthorneCore::UI::User::SidebarComponent.new(selected_sidebar_navigation_item: @selected_sidebar_navigation_item) %>
