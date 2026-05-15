@@ -4,4 +4,4 @@
   message = 'This email is already in use' if local_assigns[:taken]
 %>
 
-<%= render HawthorneCore::UI::Form::ErrorMessageComponent.new(message:) %>
+<%= render HawthorneCore::Form::ErrorMessageComponent.new(message:) %>

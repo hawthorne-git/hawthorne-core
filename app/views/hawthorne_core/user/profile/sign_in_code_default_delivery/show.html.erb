@@ -10,11 +10,11 @@
   submit_button_text = 'Update Sign-In Code Delivery'
 %>
 
-<%= render HawthorneCore::UI::User::Layout::ProfileComponent.new(title:) do %>
-  <%= render HawthorneCore::UI::Form::FormWrapperComponent.new do %>
+<%= render HawthorneCore::User::Layout::ProfileComponent.new(title:) do %>
+  <%= render HawthorneCore::Form::FormWrapperComponent.new do %>
     <%= form_with url: do |form| %>
-      <%= render HawthorneCore::UI::Form::SelectFieldComponent.new(form:, attribute: :sign_in_code_default_delivery, label: sign_in_code_default_delivery_label, options: sign_in_code_default_delivery_options_for_select) %>
-      <%= render HawthorneCore::UI::Form::SubmitButtonComponent.new(form:, submit_button_text:) %>
+      <%= render HawthorneCore::Form::SelectFieldComponent.new(form:, attribute: :sign_in_code_default_delivery, label: sign_in_code_default_delivery_label, options: sign_in_code_default_delivery_options_for_select) %>
+      <%= render HawthorneCore::Form::SubmitButtonComponent.new(form:, submit_button_text:) %>
     <% end %>
   <% end %>
 <% end %>

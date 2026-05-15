@@ -10,13 +10,13 @@
   message = "Didn't get the code? #{link_to 'Resend it', account_profile_resend_email_code_path, data: { turbo: :false }}"
 %>
 
-<%= render HawthorneCore::UI::User::Layout::ProfileComponent.new(title:) do %>
-  <%= render HawthorneCore::UI::Form::FormWrapperComponent.new(instruction_message:) do %>
+<%= render HawthorneCore::User::Layout::ProfileComponent.new(title:) do %>
+  <%= render HawthorneCore::Form::FormWrapperComponent.new(instruction_message:) do %>
     <%= form_with url: do |form| %>
-      <%= render HawthorneCore::UI::Form::Attr::CodeTextFieldComponent.new(form:) %>
-      <%= render HawthorneCore::UI::Form::SubmitButtonComponent.new(form:, submit_button_text:) %>
+      <%= render HawthorneCore::Form::Attr::CodeTextFieldComponent.new(form:) %>
+      <%= render HawthorneCore::Form::SubmitButtonComponent.new(form:, submit_button_text:) %>
     <% end %>
-    <%= render HawthorneCore::UI::Form::SupportMessageComponent.new(message:) %>
+    <%= render HawthorneCore::Form::SupportMessageComponent.new(message:) %>
   <% end %>
 <% end %>
 

@@ -2,4 +2,4 @@
   message = 'This address is already saved to your account' if local_assigns[:address_identical]
 %>
 
-<%= render HawthorneCore::UI::Form::ErrorMessageComponent.new(message:) %>
+<%= render HawthorneCore::Form::ErrorMessageComponent.new(message:) %>

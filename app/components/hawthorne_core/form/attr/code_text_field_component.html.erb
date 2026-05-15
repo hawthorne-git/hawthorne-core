@@ -1,0 +1,9 @@
+<%= render(HawthorneCore::Form::TextFieldComponent.new(
+  form: @form,
+  attribute: :code,
+  label: 'Code',
+  autocomplete: 'one-time-code',
+  required: true,
+  autofocus: true,
+  data: { behavior: 'auto-submit-6-digit' }
+)) %>

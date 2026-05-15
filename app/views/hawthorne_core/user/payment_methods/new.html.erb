@@ -2,7 +2,7 @@
   title = 'Add credit card'
 %>
 
-<%= render HawthorneCore::UI::User::Layout::PaymentMethodsComponent.new(title:) do %>
+<%= render HawthorneCore::User::Layout::PaymentMethodsComponent.new(title:) do %>
 
   <div data-controller="stripe-card"
        data-stripe-card-publishable-key-value="<%= HawthorneCore::AppConfig.stripe_publishable_key %>"

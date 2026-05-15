@@ -10,11 +10,11 @@
   submit_button_text = "#{@name.blank? ? 'Add' : 'Update'} Name"
 %>
 
-<%= render HawthorneCore::UI::User::Layout::ProfileComponent.new(title:) do %>
-  <%= render HawthorneCore::UI::Form::FormWrapperComponent.new do %>
+<%= render HawthorneCore::User::Layout::ProfileComponent.new(title:) do %>
+  <%= render HawthorneCore::Form::FormWrapperComponent.new do %>
     <%= form_with url:, method: :post do |form| %>
-      <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form:, attribute: :name, label: name_label, value: name_value, autofocus: name_autofocus) %>
-      <%= render HawthorneCore::UI::Form::SubmitButtonComponent.new(form:, submit_button_text:) %>
+      <%= render HawthorneCore::Form::TextFieldComponent.new(form:, attribute: :name, label: name_label, value: name_value, autofocus: name_autofocus) %>
+      <%= render HawthorneCore::Form::SubmitButtonComponent.new(form:, submit_button_text:) %>
     <% end %>
   <% end %>
 <% end %>

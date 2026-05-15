@@ -29,20 +29,20 @@
   start_over_message = "Need to change your email? #{link_to 'Start over', sign_in_path, data: { turbo: :false }}"
 %>
 
-<%= render HawthorneCore::UI::TitleComponent.new(title:) %>
-<%= render HawthorneCore::UI::Form::FormWrapperComponent.new(instruction_message:) do %>
+<%= render HawthorneCore::TitleComponent.new(title:) %>
+<%= render HawthorneCore::Form::FormWrapperComponent.new(instruction_message:) do %>
   <%= render partial: '/hawthorne_core/user/verify_code_failed', locals: { code_not_set:, code_expired:, code_max_failed_attempts_reached:, code_not_match: } if from_magic_link %>
   <%= form_with url: do |form| %>
-    <%= render HawthorneCore::UI::Form::HiddenFieldComponent.new(form:, attribute: :token, value: token_value, required: true) %>
-    <%= render HawthorneCore::UI::Form::HiddenFieldComponent.new(form:, attribute: :delivery_method, value: delivery_method_value, required: true) %>
-    <%= render HawthorneCore::UI::Form::HiddenFieldComponent.new(form:, attribute: :keep_signed_in, value: keep_signed_in_value) %>
-    <%= render HawthorneCore::UI::Form::Attr::CodeTextFieldComponent.new(form:) %>
-    <%= render HawthorneCore::UI::Form::SubmitButtonComponent.new(form:, submit_button_text:) %>
+    <%= render HawthorneCore::Form::HiddenFieldComponent.new(form:, attribute: :token, value: token_value, required: true) %>
+    <%= render HawthorneCore::Form::HiddenFieldComponent.new(form:, attribute: :delivery_method, value: delivery_method_value, required: true) %>
+    <%= render HawthorneCore::Form::HiddenFieldComponent.new(form:, attribute: :keep_signed_in, value: keep_signed_in_value) %>
+    <%= render HawthorneCore::Form::Attr::CodeTextFieldComponent.new(form:) %>
+    <%= render HawthorneCore::Form::SubmitButtonComponent.new(form:, submit_button_text:) %>
   <% end %>
-  <%= render HawthorneCore::UI::Form::SupportMessageComponent.new(message: resend_code_message) %>
-  <%= render HawthorneCore::UI::Form::SupportMessageComponent.new(message: send_code_via_email_message) if delivery_method_via_phone %>
-  <%= render HawthorneCore::UI::Form::SupportMessageComponent.new(message: send_code_via_phone_message) if delivery_method_via_email && @phone_number.present? %>
-  <%= render HawthorneCore::UI::Form::SupportMessageComponent.new(message: start_over_message) if delivery_method_via_email %>
+  <%= render HawthorneCore::Form::SupportMessageComponent.new(message: resend_code_message) %>
+  <%= render HawthorneCore::Form::SupportMessageComponent.new(message: send_code_via_email_message) if delivery_method_via_phone %>
+  <%= render HawthorneCore::Form::SupportMessageComponent.new(message: send_code_via_phone_message) if delivery_method_via_email && @phone_number.present? %>
+  <%= render HawthorneCore::Form::SupportMessageComponent.new(message: start_over_message) if delivery_method_via_email %>
 <% end %>
 
 <%= render '/hawthorne_core/user/verify_code_auto_submit_js' %>

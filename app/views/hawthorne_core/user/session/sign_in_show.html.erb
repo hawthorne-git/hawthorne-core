@@ -11,11 +11,11 @@
   submit_button_text = 'Send Code'
 %>
 
-<%= render HawthorneCore::UI::TitleComponent.new(title:)  %>
-<%= render HawthorneCore::UI::Form::FormWrapperComponent.new(instruction_message:) do %>
+<%= render HawthorneCore::TitleComponent.new(title:)  %>
+<%= render HawthorneCore::Form::FormWrapperComponent.new(instruction_message:) do %>
   <%= form_with url: do |form| %>
-    <%= render HawthorneCore::UI::Form::HiddenFieldComponent.new(form:, attribute: :keep_signed_in, value: 1, required: true) %>
-    <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form:, attribute: :email, label: email_label, value: email_value, required: true, maxlength: 320) %>
-    <%= render HawthorneCore::UI::Form::SubmitButtonComponent.new(form:, submit_button_text:) %>
+    <%= render HawthorneCore::Form::HiddenFieldComponent.new(form:, attribute: :keep_signed_in, value: 1, required: true) %>
+    <%= render HawthorneCore::Form::TextFieldComponent.new(form:, attribute: :email, label: email_label, value: email_value, required: true, maxlength: 320) %>
+    <%= render HawthorneCore::Form::SubmitButtonComponent.new(form:, submit_button_text:) %>
   <% end %>
 <% end %>

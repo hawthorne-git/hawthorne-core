@@ -8,10 +8,10 @@
   submit_button_text = 'Send Verification Code'
 %>
 
-<%= render HawthorneCore::UI::User::Layout::ProfileComponent.new(title:) do %>
-  <%= render HawthorneCore::UI::Form::FormWrapperComponent.new(instruction_message:) do %>
+<%= render HawthorneCore::User::Layout::ProfileComponent.new(title:) do %>
+  <%= render HawthorneCore::Form::FormWrapperComponent.new(instruction_message:) do %>
     <%= form_with url: do |form| %>
-      <%= render HawthorneCore::UI::Form::SubmitButtonComponent.new(form:, submit_button_text:) %>
+      <%= render HawthorneCore::Form::SubmitButtonComponent.new(form:, submit_button_text:) %>
     <% end %>
   <% end %>
 <% end %>

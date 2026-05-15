@@ -15,13 +15,13 @@
   message = "Currently, we only support US phone numbers. International support is coming soon."
 %>
 
-<%= render HawthorneCore::UI::User::Layout::ProfileComponent.new(title:) do %>
-  <%= render HawthorneCore::UI::Form::FormWrapperComponent.new(instruction_message:) do %>
+<%= render HawthorneCore::User::Layout::ProfileComponent.new(title:) do %>
+  <%= render HawthorneCore::Form::FormWrapperComponent.new(instruction_message:) do %>
     <%= form_with url: do |form| %>
-      <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form:, attribute: :current_phone_number, label: current_phone_number_label, value: current_phone_number_value, disabled: true, required: true) if @phone_number.present? %>
-      <%= render HawthorneCore::UI::Form::TextFieldComponent.new(form:, attribute: :new_phone_number, label: new_phone_number_label, required: true, autofocus: true) %>
-      <%= render HawthorneCore::UI::Form::SubmitButtonComponent.new(form:, submit_button_text:) %>
+      <%= render HawthorneCore::Form::TextFieldComponent.new(form:, attribute: :current_phone_number, label: current_phone_number_label, value: current_phone_number_value, disabled: true, required: true) if @phone_number.present? %>
+      <%= render HawthorneCore::Form::TextFieldComponent.new(form:, attribute: :new_phone_number, label: new_phone_number_label, required: true, autofocus: true) %>
+      <%= render HawthorneCore::Form::SubmitButtonComponent.new(form:, submit_button_text:) %>
     <% end %>
-    <%= render HawthorneCore::UI::Form::SupportMessageComponent.new(message:) %>
+    <%= render HawthorneCore::Form::SupportMessageComponent.new(message:) %>
   <% end %>
 <% end %>

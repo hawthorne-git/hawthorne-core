@@ -2,7 +2,7 @@
   title = 'Addresses'
 %>
 
-<%= render HawthorneCore::UI::User::Layout::AddressesComponent.new(title:) do %>
-  <%= render HawthorneCore::UI::User::AddressAddComponent.new %>
-  <%= render HawthorneCore::UI::User::AddressComponent.with_collection(@addresses) %>
+<%= render HawthorneCore::User::Layout::AddressesComponent.new(title:) do %>
+  <%= render HawthorneCore::User::AddressAddComponent.new %>
+  <%= render HawthorneCore::User::AddressComponent.with_collection(@addresses) %>
 <% end %>
