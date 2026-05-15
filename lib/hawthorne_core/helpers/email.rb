@@ -18,7 +18,7 @@ module HawthorneCore::Helpers::Email
     # return false if the domain is included on our internal list, of invalid domains
     domain = Mail::Address.new(email).domain
     return false if domain.blank?
-    return false if HawthorneCore::InvalidEmailAddressDomain.invalid?(domain:)
+    return false if HawthorneCore::InvalidEmailDomain.invalid?(domain:)
 
     # all validation passed, return true
     true

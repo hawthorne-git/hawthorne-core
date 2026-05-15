@@ -1,6 +1,7 @@
 class HawthorneCore::Site < HawthorneCore::ActiveRecordBaseApp
 
-  include HawthorneCore::Site::HawthorneAdmin,
+  include HawthorneCore::CanBeSoftDeleted,
+          HawthorneCore::Site::HawthorneAdmin,
           HawthorneCore::Site::HawthorneArtists,
           HawthorneCore::Site::HawthornePrintCo,
           HawthorneCore::Site::HawthorneSupplyCo,

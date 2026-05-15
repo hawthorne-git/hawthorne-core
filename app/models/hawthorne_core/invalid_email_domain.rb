@@ -1,4 +1,6 @@
-class HawthorneCore::InvalidEmailAddressDomain < HawthorneCore::ActiveRecordBaseAdmin
+class HawthorneCore::InvalidEmailDomain < HawthorneCore::ActiveRecordBaseAdmin
+
+  include HawthorneCore::CanBeSoftDeleted
 
   # -----------------------------------------------------------------------------
 
