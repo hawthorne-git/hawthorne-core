@@ -10,8 +10,6 @@ class HawthorneCore::Services::GeocoderSvc
 
     # find the location
     # return if the location is not set
-    # TODO: treat this like an API call ... log it
-    # TODO: catch exceptions
     location = Geocoder.search(ip).first
     return unless location
 
