@@ -55,7 +55,7 @@ class HawthorneCore::UserAddress < HawthorneCore::ActiveRecordBaseApp
   # return the token of the address set as default
   def self.set_last_used_or_created_as_default(user_id:)
     address = active.where(user_id:).order(Arel.sql("last_checkout_selected_at DESC NULLS LAST"), created_at: :desc).first
-    address&.update_columns(default: true)
+    address&.update(default: true)
     address.token
   end
 
@@ -103,7 +103,7 @@ class HawthorneCore::UserAddress < HawthorneCore::ActiveRecordBaseApp
   # set the address as the default - while first setting all as not defaulted
   def set_as_default
     HawthorneCore::UserAddress.set_all_addresses_as_not_defaulted(user_id:)
-    update_columns(default: true)
+    update(default: true)
     HawthorneCore::UserAction::Log.update_address(note: { message: 'Set as default', user_address_id: })
   end
 

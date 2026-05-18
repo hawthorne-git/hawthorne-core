@@ -40,10 +40,10 @@ module HawthorneCore::User::SignInOut
       clear_sign_in_attrs
 
       # verify the users email, if not done prior
-      update_columns(email_verified: true) unless email_verified?
+      update(email_verified: true) unless email_verified?
 
       # attach the user to their session
-      HawthorneCore::UserSession.find_by(token: user_session_token)&.update_columns(user_id:)
+      HawthorneCore::UserSession.find_by(token: user_session_token)&.update(user_id:)
 
       # determine if this is the users first sign-in on this site
       first_sign_in_on_site =  HawthorneCore::UserSite.first_sign_in?(user_id:)

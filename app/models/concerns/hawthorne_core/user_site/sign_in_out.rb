@@ -27,7 +27,7 @@ module HawthorneCore::UserSite::SignInOut
 
     # set the user as signed-out,
     # disable the users ability to sign-in via cookie
-    def sign_out = update_columns(keep_signed_in: false)
+    def sign_out = update(keep_signed_in: false)
     def self.sign_out(user_id:) = find_by(user_id:, site_id:).sign_out
 
     # -----------------------------------------------------------------------------
@@ -54,7 +54,7 @@ module HawthorneCore::UserSite::SignInOut
 
     # clear the sign-in attributes
     def clear_sign_in_attrs
-      update_columns(sign_in_code: nil, sign_in_code_created_at: nil, sign_in_code_failed_attempts_count: nil)
+      update(sign_in_code: nil, sign_in_code_created_at: nil, sign_in_code_failed_attempts_count: nil)
       HawthorneCore::UserAction::Log.sign_in_attrs_cleared
     end
 
@@ -63,7 +63,7 @@ module HawthorneCore::UserSite::SignInOut
     # set the sign-in attributes
     def set_sign_in_attrs
       attrs = { sign_in_code: SecureRandom.random_number(HawthorneCore::User::CODE_RANGE), sign_in_code_created_at: Time.current, sign_in_code_failed_attempts_count: 0 }
-      update_columns(attrs)
+      update(attrs)
       HawthorneCore::UserAction::Log.sign_in_attrs_set(user_id:, note: attrs)
     end
 
@@ -72,7 +72,7 @@ module HawthorneCore::UserSite::SignInOut
     # refresh the sign-in attributes
     def refresh_sign_in_attrs
       attrs = { sign_in_code: SecureRandom.random_number(HawthorneCore::User::CODE_RANGE), sign_in_code_created_at: Time.current, sign_in_code_failed_attempts_count: 0 }
-      update_columns(attrs)
+      update(attrs)
       HawthorneCore::UserAction::Log.sign_in_attrs_refreshed(user_id:, note: attrs)
       self
     end
@@ -87,7 +87,7 @@ module HawthorneCore::UserSite::SignInOut
     # ------------------------
 
     # increment the number of failed sign-in attempts with code
-    def add_sign_in_code_failed_attempt = update_columns(sign_in_code_failed_attempts_count: (sign_in_code_failed_attempts_count.to_i + 1))
+    def add_sign_in_code_failed_attempt = update(sign_in_code_failed_attempts_count: (sign_in_code_failed_attempts_count.to_i + 1))
 
     # ------------------------
 

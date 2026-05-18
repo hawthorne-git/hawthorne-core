@@ -32,7 +32,7 @@ module HawthorneCore::UserSite::PhoneNumber
 
     # clear the new phone number attributes
     def clear_new_phone_number_attrs
-      update_columns(new_phone_number: nil, new_phone_number_code: nil, new_phone_number_code_created_at: nil, new_phone_number_code_failed_attempts_count: nil)
+      update(new_phone_number: nil, new_phone_number_code: nil, new_phone_number_code_created_at: nil, new_phone_number_code_failed_attempts_count: nil)
       HawthorneCore::UserAction::Log.new_phone_number_attrs_cleared
     end
 
@@ -41,7 +41,7 @@ module HawthorneCore::UserSite::PhoneNumber
     # set the new phone number attributes
     def set_new_phone_number_attrs(new_phone_number:)
       attrs = { new_phone_number: Phonelib.parse(new_phone_number, 'US').e164, new_phone_number_code: SecureRandom.random_number(HawthorneCore::User::CODE_RANGE), new_phone_number_code_created_at: Time.current, new_phone_number_code_failed_attempts_count: 0 }
-      update_columns(attrs)
+      update(attrs)
       HawthorneCore::UserAction::Log.new_phone_number_attrs_set(note: attrs)
     end
 
@@ -56,7 +56,7 @@ module HawthorneCore::UserSite::PhoneNumber
     # refresh the new phone number attributes
     def refresh_new_phone_number_attrs
       attrs = { new_phone_number_code: SecureRandom.random_number(HawthorneCore::User::CODE_RANGE), new_phone_number_code_created_at: Time.current, new_phone_number_code_failed_attempts_count: 0 }
-      update_columns(attrs)
+      update(attrs)
       HawthorneCore::UserAction::Log.new_phone_number_attrs_refreshed(user_id:, note: attrs)
       self
     end
@@ -70,7 +70,7 @@ module HawthorneCore::UserSite::PhoneNumber
     # ------------------------
 
     # increment the number of failed attempts with code
-    def add_new_phone_number_code_failed_attempt = update_columns(new_phone_number_code_failed_attempts_count: (new_phone_number_code_failed_attempts_count.to_i + 1))
+    def add_new_phone_number_code_failed_attempt = update(new_phone_number_code_failed_attempts_count: (new_phone_number_code_failed_attempts_count.to_i + 1))
 
     # ------------------------
 

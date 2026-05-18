@@ -7,6 +7,8 @@ class HawthorneCore::Site < HawthorneCore::ActiveRecordBaseApp
           HawthorneCore::Site::HawthorneSupplyCo,
           HawthorneCore::Site::RileyBlake
 
+  has_paper_trail versions: { class_name: 'Version' }
+
   # -----------------------------------------------------------------------------
 
   self.table_name = 'sites'

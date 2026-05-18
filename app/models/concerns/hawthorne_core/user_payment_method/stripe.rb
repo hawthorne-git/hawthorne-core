@@ -104,7 +104,7 @@ module HawthorneCore::UserPaymentMethod::Stripe
         credit_card_in_db = credit_cards_in_db.find { |pm| pm.stripe_payment_method_id == credit_card_in_stripe[:payment_method_id] }
         next unless credit_card_in_db.present?
         if HawthorneCore::UserPaymentMethod.stripe_credit_card_expired?(credit_card: credit_card_in_stripe)
-          credit_card_in_db.update_columns(default: false) if credit_card_in_db.default?
+          credit_card_in_db.update(default: false) if credit_card_in_db.default?
           credit_card_in_db.perform_delete
           next
         end

@@ -32,7 +32,7 @@ module HawthorneCore::UserSite::Email
 
     # clear the new email attributes
     def clear_new_email_attrs
-      update_columns(new_email: nil, new_email_code: nil, new_email_code_created_at: nil, new_email_code_failed_attempts_count: nil)
+      update(new_email: nil, new_email_code: nil, new_email_code_created_at: nil, new_email_code_failed_attempts_count: nil)
       HawthorneCore::UserAction::Log.new_email_attrs_cleared
     end
 
@@ -41,7 +41,7 @@ module HawthorneCore::UserSite::Email
     # set the new email attributes
     def set_new_email_attrs(new_email:)
       attrs = { new_email:, new_email_code: SecureRandom.random_number(HawthorneCore::User::CODE_RANGE), new_email_code_created_at: Time.current, new_email_code_failed_attempts_count: 0 }
-      update_columns(attrs)
+      update(attrs)
       HawthorneCore::UserAction::Log.new_email_attrs_set(note: attrs)
     end
 
@@ -56,7 +56,7 @@ module HawthorneCore::UserSite::Email
     # refresh the new email attributes
     def refresh_new_email_attrs
       attrs = { new_email_code: SecureRandom.random_number(HawthorneCore::User::CODE_RANGE), new_email_code_created_at: Time.current, new_email_code_failed_attempts_count: 0 }
-      update_columns(attrs)
+      update(attrs)
       HawthorneCore::UserAction::Log.new_email_attrs_refreshed(user_id:, note: attrs)
       self
     end
@@ -70,7 +70,7 @@ module HawthorneCore::UserSite::Email
     # ------------------------
 
     # increment the number of failed attempts with code
-    def add_new_email_code_failed_attempt = update_columns(new_email_code_failed_attempts_count: (new_email_code_failed_attempts_count.to_i + 1))
+    def add_new_email_code_failed_attempt = update(new_email_code_failed_attempts_count: (new_email_code_failed_attempts_count.to_i + 1))
 
     # ------------------------
 

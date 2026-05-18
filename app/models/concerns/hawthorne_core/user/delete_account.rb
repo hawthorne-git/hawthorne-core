@@ -23,7 +23,7 @@ module HawthorneCore::User::DeleteAccount
     # clear their delete account attributes
     def delete_account
       soft_delete
-      update_columns(email: token, phone_number: token, name: token)
+      update(email: token, phone_number: token, name: token)
       HawthorneCore::UserAction::Log.account_deleted
       clear_delete_account_attrs
       #TODO: delete all notifications ... follows / newsletter sign-ups

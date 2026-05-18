@@ -50,7 +50,7 @@ class HawthorneCore::UserPaymentMethod < HawthorneCore::ActiveRecordBaseApp
   # return the token of the payment method set as default
   def self.set_last_used_or_created_as_default(user_id:)
     payment_method = active.where(user_id:).order(Arel.sql("last_checkout_selected_at DESC NULLS LAST"), created_at: :desc).first
-    payment_method&.update_columns(default: true)
+    payment_method&.update(default: true)
     payment_method.token
   end
 
@@ -76,7 +76,7 @@ class HawthorneCore::UserPaymentMethod < HawthorneCore::ActiveRecordBaseApp
   # set a payment method as the default - while first setting all as not defaulted
   def set_as_default
     HawthorneCore::UserPaymentMethod.set_all_payment_methods_as_not_defaulted(user_id:)
-    update_columns(default: true)
+    update(default: true)
     HawthorneCore::UserAction::Log.update_payment_method(note: { message: 'Set as default', user_payment_method_id: })
   end
 

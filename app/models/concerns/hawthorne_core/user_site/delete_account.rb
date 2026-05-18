@@ -27,7 +27,7 @@ module HawthorneCore::UserSite::DeleteAccount
 
     # clear the delete account attributes
     def clear_delete_account_attrs
-      update_columns(delete_account_code: nil, delete_account_code_created_at: nil, delete_account_code_failed_attempts_count: nil)
+      update(delete_account_code: nil, delete_account_code_created_at: nil, delete_account_code_failed_attempts_count: nil)
       HawthorneCore::UserAction::Log.delete_account_attrs_cleared
     end
 
@@ -36,7 +36,7 @@ module HawthorneCore::UserSite::DeleteAccount
     # set the delete account attributes
     def set_delete_account_attrs
       attrs = { delete_account_code: SecureRandom.random_number(HawthorneCore::User::CODE_RANGE), delete_account_code_created_at: Time.current, delete_account_code_failed_attempts_count: 0 }
-      update_columns(attrs)
+      update(attrs)
       HawthorneCore::UserAction::Log.delete_account_attrs_set(note: attrs)
     end
 
@@ -51,7 +51,7 @@ module HawthorneCore::UserSite::DeleteAccount
     # refresh the delete account attributes
     def refresh_delete_account_attrs
       attrs = { delete_account_code: SecureRandom.random_number(HawthorneCore::User::CODE_RANGE), delete_account_code_created_at: Time.current, delete_account_code_failed_attempts_count: 0 }
-      update_columns(attrs)
+      update(attrs)
       HawthorneCore::UserAction::Log.delete_account_attrs_refreshed(user_id:, note: attrs)
       self
     end
@@ -65,7 +65,7 @@ module HawthorneCore::UserSite::DeleteAccount
     # ------------------------
 
     # increment the number of failed attempts with code
-    def add_delete_account_code_failed_attempt = update_columns(delete_account_code_failed_attempts_count: (delete_account_code_failed_attempts_count.to_i + 1))
+    def add_delete_account_code_failed_attempt = update(delete_account_code_failed_attempts_count: (delete_account_code_failed_attempts_count.to_i + 1))
 
     # ------------------------
 
