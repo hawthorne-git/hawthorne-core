@@ -2,6 +2,8 @@ class HawthorneCore::Country < HawthorneCore::ActiveRecordBaseAdmin
 
   include HawthorneCore::CanBeSoftDeleted
 
+  has_paper_trail versions: { class_name: 'Version' }
+
   # -----------------------------------------------------------------------------
 
   self.table_name = 'countries'
