@@ -69,6 +69,21 @@ class HawthorneCore::Services::StripeSvc
 
   # ----------------------------------------------------------------
 
+  # get the exchange rates for a country
+  def self.exchange_rate(from_currency:, to_currency:)
+    client = Stripe::StripeClient.new(ENV['STRIPE_SECRET_KEY'], stripe_version: '2025-08-27.basil; fx_quote_preview=v1')
+    client.v1.fx_quotes.create({ from_currency:, to_currency: })
+  rescue Stripe::StripeError => e
+    HawthorneCore::CapturedException.log(location: 'HawthorneCore::Services::StripeSvc.exchange_rate', e:)
+    nil
+  end
+
+  # ----------------------
+
+  # get the exchange rate from USD to a given currency
+  def self.exchange_rate_from_usd(to_currency:) = exchange_rate(from_currency: 'usd', to_currency:)
+
+  # ----------------------------------------------------------------
   # find a payment method
   def self.payment_method(payment_method_id:)
     Stripe::PaymentMethod.retrieve(payment_method_id)
