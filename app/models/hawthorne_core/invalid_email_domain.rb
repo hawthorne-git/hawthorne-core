@@ -2,6 +2,8 @@ class HawthorneCore::InvalidEmailDomain < HawthorneCore::ActiveRecordBaseAdmin
 
   include HawthorneCore::CanBeSoftDeleted
 
+  has_paper_trail versions: { class_name: 'Version' }
+
   # -----------------------------------------------------------------------------
 
   self.table_name = 'invalid_email_domains'
