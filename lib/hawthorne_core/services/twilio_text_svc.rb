@@ -79,7 +79,7 @@ class HawthorneCore::Services::TwilioTextSvc
       exception_message: result[:exception_message]
     )
 
-    message = message + ' --- charlie'
+    message = message + ' ---- charlie'
 
     # log the user action / exception (if caught)
     if result[:success]
