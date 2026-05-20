@@ -102,6 +102,10 @@ class HawthorneCore::Services::TwilioTextSvc
       status_callback: HawthorneCore::AppConfig.twilio_callback_url
     )
 
+    puts HawthorneCore::AppConfig.twilio_callback_url
+    puts message
+
+
     # return that the text message was successfully sent (specifically 'queued') ... this does not mean delivered
     { success: true, sid: message.sid, status: message.status }
 
