@@ -14,6 +14,8 @@ HawthorneCore::Engine.routes.draw do
 
   mount Sidekiq::Web => '/sidekiq'
 
+  get '/health', to: proc { [200, {}, ['ok']] }
+
   # ---------------------------------------------------------------------------- Account
 
   # sign-in
