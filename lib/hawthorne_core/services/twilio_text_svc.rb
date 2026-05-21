@@ -79,8 +79,6 @@ class HawthorneCore::Services::TwilioTextSvc
       exception_message: result[:exception_message]
     )
 
-    message = message + ' ---- charlie'
-
     # log the user action / exception (if caught)
     if result[:success]
       HawthorneCore::UserAction::Log.text_message_sent(user_id:, note: { message_type:, phone_number:, message:, twilio_message_id: result[:sid] })
@@ -103,12 +101,6 @@ class HawthorneCore::Services::TwilioTextSvc
       body:,
       status_callback: HawthorneCore::AppConfig.twilio_callback_url
     )
-
-    puts HawthorneCore::AppConfig.twilio_callback_url
-    puts message
-
-    Rails.logger.info HawthorneCore::AppConfig.twilio_callback_url
-    Rails.logger.info message
 
     # return that the text message was successfully sent (specifically 'queued') ... this does not mean delivered
     { success: true, sid: message.sid, status: message.status }
