@@ -6,7 +6,6 @@ class HawthorneCore::UserSite < HawthorneCore::ActiveRecordBaseApp
           HawthorneCore::UserSite::PhoneNumber,
           HawthorneCore::UserSite::SignInOut
 
-
   # -----------------------------------------------------------------------------
 
   self.table_name = 'user_sites'
