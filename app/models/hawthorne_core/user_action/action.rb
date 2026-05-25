@@ -35,7 +35,7 @@ module HawthorneCore::UserAction::Action
       stripe_credit_card_detached: 'STRIPE CREDIT CARD DETACHED',
       stripe_customer_created: 'STRIPE CUSTOMER CREATED',
       stripe_customer_email_updated: 'STRIPE CUSTOMER EMAIL UPDATED',
-      stripe_setup_intent_created: 'STRIPE SETUP INTERNET CREATED',
+      stripe_setup_intent_created: 'STRIPE SETUP INTENT CREATED',
       text_message_sent: 'TEXT MESSAGE SENT'
     }.freeze
 
