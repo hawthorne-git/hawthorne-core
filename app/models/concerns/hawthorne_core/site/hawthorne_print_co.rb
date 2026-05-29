@@ -14,7 +14,7 @@ module HawthorneCore::Site::HawthornePrintCo
         name_abbreviation: 'HPCO',
         site_sharing_scope: 'HAWTHORNE',
         has_checkout: true,
-        contact_email: 'contact@hawthornesupplyco.com',
+        contact_email: 'hello@hawthorneprintco.com',
         email_from_tagline: 'Lindsay, Charlie, and your friends at Hawthorne',
         mailer_send_welcome_template_id: '0r83ql3v63xgzw1j'
       }.freeze
