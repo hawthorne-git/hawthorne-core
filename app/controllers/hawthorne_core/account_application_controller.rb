@@ -8,6 +8,8 @@ class HawthorneCore::AccountApplicationController < HawthorneCore::ApplicationCo
   # verify that the signed-in user exists as an active user
   before_action :active_user?
 
+  before_action :set_paper_trail_whodunnit
+
   # set the request context - the users id, ip, and session token
   before_action :set_request_context
 
@@ -15,6 +17,12 @@ class HawthorneCore::AccountApplicationController < HawthorneCore::ApplicationCo
 
   # clear the request context - the users id, ip, and session token
   after_action :clear_request_context
+
+  # ---------------------------------------------------------------------------
+
+  def user_for_paper_trail = session[:user_id]
+
+  def info_for_paper_trail = { whodunnit_type: 'HawthorneCore::User' }
 
   # ---------------------------------------------------------------------------
 
