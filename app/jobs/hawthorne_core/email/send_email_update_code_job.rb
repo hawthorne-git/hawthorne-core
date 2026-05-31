@@ -3,6 +3,8 @@ class HawthorneCore::Email::SendEmailUpdateCodeJob < HawthorneCore::ApplicationJ
 
   queue_as :critical
 
+  retry_on Net::OpenTimeout, wait: 5.seconds, attempts: 3
+
   # ----------------------------------------------------------------
 
   def perform(user_id:)

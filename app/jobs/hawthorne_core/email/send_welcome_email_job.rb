@@ -3,6 +3,8 @@ class HawthorneCore::Email::SendWelcomeEmailJob < HawthorneCore::ApplicationJob
 
   queue_as :low
 
+  retry_on Net::OpenTimeout, wait: 5.seconds, attempts: 3
+
   # ----------------------------------------------------------------
 
   def perform(user_id:)

@@ -3,6 +3,8 @@ class HawthorneCore::Email::SendSignInCodeJob < HawthorneCore::ApplicationJob
 
   queue_as :critical
 
+  retry_on Net::OpenTimeout, wait: 5.seconds, attempts: 3
+
   # ----------------------------------------------------------------
 
   def perform(user_id:, keep_signed_in: false)
