@@ -8,6 +8,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ['lib']
 
   spec.add_dependency 'activerecord'
+  spec.add_dependency 'paper_trail'
   spec.add_dependency 'rails'
   spec.add_dependency 'sidekiq'
   spec.add_dependency 'sidekiq-cron'
