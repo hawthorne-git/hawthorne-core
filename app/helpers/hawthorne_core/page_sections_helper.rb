@@ -29,4 +29,18 @@ module HawthorneCore::PageSectionsHelper
 
   # -----------------------------------------------------------------------------
 
+  # render an <img> for an image referenced by id in the section's content_attrs.
+  # looks up the HawthorneCore::Image and renders its attached active storage
+  # file. renders nothing when the id is absent, the image is missing, or it has
+  # no attached file, so a section can exist before its image is set.
+  def page_section_image_tag(section, key: 'image_id')
+    image_id = section.content_attrs[key]
+    return if image_id.blank?
+    image = HawthorneCore::Image.find_by(image_id: image_id)
+    return if image.nil? || !image.file.attached?
+    image_tag(image.file)
+  end
+
+  # -----------------------------------------------------------------------------
+
 end
