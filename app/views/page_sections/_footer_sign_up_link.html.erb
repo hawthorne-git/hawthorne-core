@@ -1,0 +1,7 @@
+<% if section.content_attrs['link_url'].present? %>
+  <a href='<%= section.content_attrs['link_url'] %>'>
+    <img src='<%= section.content_attrs['image_url'] %>'>
+  </a>
+<% else %>
+  <img src='<%= section.content_attrs['image_url'] %>'>
+<% end %>

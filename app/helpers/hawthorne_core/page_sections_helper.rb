@@ -2,14 +2,26 @@ module HawthorneCore::PageSectionsHelper
 
   # -----------------------------------------------------------------------------
 
-  # render a page section using a caller-supplied map of page_block_type_id =>
-  # partial name. the id is immutable, so renaming a block type's handle in the
-  # admin never affects rendering. each site owns its own map and provides the
-  # matching partials under app/views/page_sections/, where each receives the
-  # section as a `section` local. a block type with no mapping renders nothing,
-  # so new types can be created in the admin before their markup exists on a
-  # given site.
-  def render_page_section(section, partials:)
+  # default map of page_block_type_id => partial name, shared by every site.
+  # the id is immutable (block types live in the shared admin database), so
+  # renaming a block type's handle in the admin never affects rendering.
+  # partials live in app/views/page_sections/ and each receives the section as a
+  # `section` local. adding a new block type = add one line here and create the
+  # matching partial. a site that needs to differ can override individual
+  # partials (host views win lookup) or pass its own map via `partials:`.
+  BLOCK_PARTIALS = {
+    3 => 'hero_image',
+    5 => 'header',
+    6 => 'body',
+    7 => 'footer_sign_up_link',
+  }.freeze
+
+  # -----------------------------------------------------------------------------
+
+  # render a page section using the partial mapped to its block type id. a block
+  # type with no mapping renders nothing, so new types can be created in the
+  # admin before their markup exists.
+  def render_page_section(section, partials: BLOCK_PARTIALS)
     name = partials[section.page_block_type_id]
     return if name.nil?
     render("page_sections/#{name}", section: section)
