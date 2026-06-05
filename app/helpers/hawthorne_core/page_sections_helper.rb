@@ -14,6 +14,7 @@ module HawthorneCore::PageSectionsHelper
     5 => 'header',
     6 => 'body',
     7 => 'footer_sign_up_link',
+    8 => 'featured_fabrics',
   }.freeze
 
   # -----------------------------------------------------------------------------
@@ -39,6 +40,19 @@ module HawthorneCore::PageSectionsHelper
     image = HawthorneCore::Image.find_by(image_id: image_id)
     return if image.nil? || !image.file.attached?
     image_tag(image.file)
+  end
+
+  # -----------------------------------------------------------------------------
+
+  # render the section's image (see page_section_image_tag) wrapped in a link
+  # when content_attrs carries a link_url, otherwise the bare image. renders
+  # nothing when the section has no image.
+  def page_section_linked_image(section, link_key: 'link_url', image_key: 'image_id')
+    image = page_section_image_tag(section, key: image_key)
+    return if image.blank?
+    url = section.content_attrs[link_key]
+    return image if url.blank?
+    link_to(image, url)
   end
 
   # -----------------------------------------------------------------------------
