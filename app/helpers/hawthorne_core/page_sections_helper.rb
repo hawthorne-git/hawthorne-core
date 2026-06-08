@@ -30,16 +30,39 @@ module HawthorneCore::PageSectionsHelper
 
   # -----------------------------------------------------------------------------
 
+  # responsive widths (css pixels) requested from cloudflare. the browser picks
+  # the smallest that covers its layout width times its device pixel ratio, so
+  # phones fetch small images and retina desktops fetch large ones.
+  IMAGE_WIDTHS = [640, 960, 1280, 1920].freeze
+
+  # build a host-relative cloudflare image-transformation url for a source image
+  # url. host-relative (no scheme/host) so each site transforms through its own
+  # cloudflare zone. format=auto serves avif/webp when the browser supports it,
+  # otherwise the original format. see https://developers.cloudflare.com/images/
+  def cdn_image_url(src, width)
+    "/cdn-cgi/image/format=auto,quality=85,width=#{width}/#{src}"
+  end
+
+  # -----------------------------------------------------------------------------
+
   # render an <img> for an image referenced by id in the section's content_attrs.
   # looks up the HawthorneCore::Image and renders its attached active storage
   # file. renders nothing when the id is absent, the image is missing, or it has
   # no attached file, so a section can exist before its image is set.
-  def page_section_image_tag(section, key: 'image_id')
+  #
+  # in deployed environments the image is served through cloudflare's
+  # transformation cdn (compressed + resized per device) via a responsive
+  # srcset. locally there is no cloudflare in front of the app, so it falls back
+  # to the plain active storage url and nothing breaks in development.
+  def page_section_image_tag(section, key: 'image_id', sizes: '100vw')
     image_id = section.content_attrs[key]
     return if image_id.blank?
     image = HawthorneCore::Image.find_by(image_id: image_id)
     return if image.nil? || !image.file.attached?
-    image_tag(image.file)
+    return image_tag(image.file) if Rails.env.development? || Rails.env.test?
+    src = image.file.url
+    srcset = IMAGE_WIDTHS.map { |w| "#{cdn_image_url(src, w)} #{w}w" }.join(', ')
+    image_tag(cdn_image_url(src, IMAGE_WIDTHS.last), srcset: srcset, sizes: sizes)
   end
 
   # -----------------------------------------------------------------------------
