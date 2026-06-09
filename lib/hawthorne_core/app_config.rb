@@ -12,6 +12,10 @@ module HawthorneCore
 
     def self.mailer_send_api_token = fetch_env_attr('MAILER_SEND_API_TOKEN')
 
+    def self.r2_access_key = fetch_env_attr('R2_ACCESS_KEY')
+
+    def self.r2_secret_access_key = fetch_env_attr('R2_SECRET_ACCESS_KEY')
+
     def self.redis_cache_url = fetch_env_attr('REDIS_CACHE_URL')
 
     def self.redis_cache_namespace = site_name.downcase
