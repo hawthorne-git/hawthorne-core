@@ -10,16 +10,20 @@ module HawthorneCore::ImageHelper
   end
 
   def attach_image_helper(image:, file:, dir:)
-    puts 'here in attach_image_helper-1'
     return unless file.present?
-    puts 'here in attach_image_helper-2'
     extension = File.extname(file.original_filename)
-    image.file.attach(
+    # upload synchronously rather than relying on active storage's deferred
+    # after_commit upload, which silently no-ops under this app's split
+    # connection-pool setup (ActiveStorage::Record and the models are separate
+    # pools on the app db, so the attachment's touch: true reloads the record
+    # and the upload callback fires on an instance with no pending changes)
+    blob = ActiveStorage::Blob.create_and_upload!(
       io: file,
       filename: file.original_filename,
       content_type: file.content_type,
       key: "images/#{dir}/#{SecureRandom.uuid}#{extension}"
     )
+    image.file.attach(blob)
   end
 
 end
