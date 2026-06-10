@@ -27,6 +27,8 @@ module HawthorneCore
     # active storage only reads config/storage.yml when service_configurations is
     # unset, so defining it here removes the need for a per-app storage.yml
     initializer 'hawthorne_core.active_storage' do |app|
+      app.config.active_storage.service = :cloudflare
+      app.config.active_storage.variant_processor = :disabled
       configs = app.config.active_storage.service_configurations ||= {}
       configs[:cloudflare] = {
         service: 'S3',
@@ -39,6 +41,12 @@ module HawthorneCore
         request_checksum_calculation: 'when_required',
         response_checksum_validation: 'when_required'
       }
+    end
+
+    # all hawthorne apps run in eastern time; set this before active support
+    # reads config.time_zone into Time.zone_default
+    initializer 'hawthorne_core.time_zone', before: 'active_support.initialize_time_zone' do |app|
+      app.config.time_zone = 'Eastern Time (US & Canada)'
     end
 
     # verify that required hawthorne core env variables exist
