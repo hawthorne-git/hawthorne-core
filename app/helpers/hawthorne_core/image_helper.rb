@@ -10,7 +10,9 @@ module HawthorneCore::ImageHelper
   end
 
   def attach_image_helper(image:, file:, dir:)
+    puts 'here in attach_image_helper-1'
     return unless file.present?
+    puts 'here in attach_image_helper-2'
     extension = File.extname(file.original_filename)
     image.file.attach(
       io: file,
