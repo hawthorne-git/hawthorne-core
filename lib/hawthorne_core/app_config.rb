@@ -6,15 +6,13 @@ module HawthorneCore
 
     # -----------------------------------------------------------------------------
 
-    def self.aws_access_key = fetch_env_attr('AWS_ACCESS_KEY')
-
-    def self.aws_secret_access_key = fetch_env_attr('AWS_SECRET_ACCESS_KEY')
-
     def self.mailer_send_api_token = fetch_env_attr('MAILER_SEND_API_TOKEN')
 
     def self.r2_access_key = fetch_env_attr('R2_ACCESS_KEY')
 
-    def self.r2_bucket = fetch_env_attr('R2_BUCKET')
+    def self.r2_bucket  = fetch_env_attr('R2_BUCKET')
+
+    def self.r2_endpoint  = fetch_env_attr('R2_ENDPOINT')
 
     def self.r2_secret_access_key = fetch_env_attr('R2_SECRET_ACCESS_KEY')
 

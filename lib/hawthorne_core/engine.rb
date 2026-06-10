@@ -15,11 +15,40 @@ module HawthorneCore
       end
     end
 
+    # expose hawthorne core view helpers to the host app's views unqualified
+    # (isolate_namespace otherwise scopes these helpers to the engine only)
+    initializer 'hawthorne_core.helpers' do
+      ActiveSupport.on_load(:action_controller_base) do
+        helper HawthorneCore::ImageHelper
+      end
+    end
+
+    # provide the shared cloudflare r2 active storage service to every host app
+    # active storage only reads config/storage.yml when service_configurations is
+    # unset, so defining it here removes the need for a per-app storage.yml
+    initializer 'hawthorne_core.active_storage' do |app|
+      configs = app.config.active_storage.service_configurations ||= {}
+      configs[:cloudflare] = {
+        service: 'S3',
+        access_key_id: HawthorneCore::AppConfig.r2_access_key,
+        secret_access_key: HawthorneCore::AppConfig.r2_secret_access_key,
+        region: 'auto',
+        bucket: HawthorneCore::AppConfig.r2_bucket,
+        endpoint: HawthorneCore::AppConfig.r2_endpoint,
+        force_path_style: true,
+        request_checksum_calculation: 'when_required',
+        response_checksum_validation: 'when_required'
+      }
+    end
+
     # verify that required hawthorne core env variables exist
     initializer 'hawthorne_core.validate_env' do
-      HawthorneCore::AppConfig.aws_access_key
-      HawthorneCore::AppConfig.aws_secret_access_key
       HawthorneCore::AppConfig.mailer_send_api_token
+      HawthorneCore::AppConfig.media_host
+      HawthorneCore::AppConfig.r2_access_key
+      HawthorneCore::AppConfig.r2_bucket
+      HawthorneCore::AppConfig.r2_endpoint
+      HawthorneCore::AppConfig.r2_secret_access_key
       HawthorneCore::AppConfig.rails_env
       HawthorneCore::AppConfig.redis_cache_url
       HawthorneCore::AppConfig.redis_sidekiq_url
