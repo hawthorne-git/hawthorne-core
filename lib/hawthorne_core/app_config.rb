@@ -8,6 +8,8 @@ module HawthorneCore
 
     def self.mailer_send_api_token = fetch_env_attr('MAILER_SEND_API_TOKEN')
 
+    def self.media_host  = fetch_env_attr('MEDIA_HOST')
+
     def self.r2_access_key = fetch_env_attr('R2_ACCESS_KEY')
 
     def self.r2_bucket  = fetch_env_attr('R2_BUCKET')
