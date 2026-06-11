@@ -10,16 +10,38 @@ module HawthorneCore::ImageHelper
     end
   end
 
-  def attach_image_helper(image:, file:, dir:)
+  def attach_image_helper(image:, file:)
     return unless file.present?
     extension = File.extname(file.original_filename)
     blob = ActiveStorage::Blob.create_and_upload!(
       io: file,
       filename: file.original_filename,
       content_type: file.content_type,
-      key: "images/#{dir}/#{SecureRandom.uuid}#{extension}"
+      key: "images/#{image.image_type.slug}/#{image.token}#{extension}"
     )
     image.file.attach(blob)
+    width, height = image_dimensions(file)
+    image.update!(
+      active_storage_blob_id: blob.id,
+      file_key: blob.key,
+      content_type: blob.content_type,
+      byte_size: blob.byte_size,
+      width: width,
+      height: height
+    )
+  end
+
+  private
+
+  # active storage's image analyzer only fills in blob metadata width/height when
+  # config.active_storage.variant_processor is :vips or :mini_magick; this app sets
+  # it to :disabled (cloudflare handles transforms), so the analyzer never runs.
+  # read the dimensions straight from the uploaded file with libvips instead.
+  def image_dimensions(file)
+    vips_image = Vips::Image.new_from_file(file.path)
+    [vips_image.width, vips_image.height]
+  rescue StandardError
+    [nil, nil]
   end
 
 end

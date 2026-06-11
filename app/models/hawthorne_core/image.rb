@@ -1,8 +1,11 @@
 class HawthorneCore::Image < HawthorneCore::ActiveRecordBaseApp
 
-  include HawthorneCore::CanBeSoftDeleted
+  include HawthorneCore::CanBeSoftDeleted,
+          HawthorneCore::HasToken
 
-  has_paper_trail versions: { class_name: 'Version' }
+  # exclude :touch so active storage attaching/analyzing the file (which touches
+  # the record via the attachment's touch: true) doesn't log empty update versions
+  has_paper_trail versions: { class_name: 'Version' }, on: %i[create update destroy]
 
   has_one_attached :file
 

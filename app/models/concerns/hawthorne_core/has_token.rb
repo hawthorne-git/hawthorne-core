@@ -25,6 +25,7 @@ module HawthorneCore::HasToken
   # define the list of token lengths ... by the objects table name
   LENGTHS =
     {
+      'images' => 12,
       'users' => 12,
       'user_payment_methods' => 12,
       'user_addresses' => 12
