@@ -6,6 +6,10 @@ class HawthorneCore::Image < HawthorneCore::ActiveRecordBaseApp
 
   has_one_attached :file
 
+  # image_types live in the admin database; this association loads via a separate
+  # query on that connection rather than a cross-database join
+  belongs_to :image_type, class_name: 'HawthorneCore::ImageType'
+
   # -----------------------------------------------------------------------------
 
   self.table_name = 'images'
