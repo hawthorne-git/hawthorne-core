@@ -1,7 +1,12 @@
 module HawthorneCore::ImageHelper
 
   def media_url(attachment, width: nil, quality: 85)
-    key = attachment.blob.key
+    media_url_for_key(attachment.blob.key, width: width, quality: quality)
+  end
+
+  # build the same cloudflare media url straight from a stored blob key, avoiding
+  # an active storage blob query (images keep the key in their file_key column)
+  def media_url_for_key(key, width: nil, quality: 85)
     host = HawthorneCore::AppConfig.media_host
     if width
       "#{host}/cdn-cgi/image/width=#{width},quality=#{quality},format=auto/#{key}"

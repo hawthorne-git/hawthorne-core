@@ -1,0 +1,5 @@
+<figure class='temp-test-images__card'>
+  <% if @image.file_key.present? %>
+    <%= image_tag(src, srcset: srcset, sizes: sizes, alt: @image.alt_text, loading: 'lazy') %>
+  <% end %>
+</figure>
