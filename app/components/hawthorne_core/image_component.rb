@@ -18,7 +18,7 @@ class HawthorneCore::ImageComponent < ViewComponent::Base
   # a cloudflare-transformed candidate per preset width: "url 2000w, url 1200w"
   def srcset
     return if widths.empty?
-    widths.map { |width| "#{media_url_for_key(@image.file_key, width: width)} #{width}w" }.join(', ')
+    widths.map { |width| "#{media_url_for_key(@image.file_key, version: @image.updated_at.to_i, width: width)} #{width}w" }.join(', ')
   end
 
   # the preset's sizes attribute, telling the browser which candidate to pick.
@@ -33,8 +33,8 @@ class HawthorneCore::ImageComponent < ViewComponent::Base
 
   # default src: the largest preset width, or the untransformed original
   def src
-    return media_url_for_key(@image.file_key) if widths.empty?
-    media_url_for_key(@image.file_key, width: widths.max)
+    return media_url_for_key(@image.file_key, version: @image.updated_at.to_i) if widths.empty?
+    media_url_for_key(@image.file_key, version: @image.updated_at.to_i, width: widths.max)
   end
 
   def dimensions
