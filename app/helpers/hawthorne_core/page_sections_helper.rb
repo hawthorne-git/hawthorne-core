@@ -23,6 +23,7 @@ module HawthorneCore::PageSectionsHelper
     body
     footer_sign_up_link
     featured_fabrics
+    three_image_banner
   ].freeze
 
   # -----------------------------------------------------------------------------
@@ -89,8 +90,8 @@ module HawthorneCore::PageSectionsHelper
   # render the section's image (see page_section_image_tag) wrapped in a link
   # when content_attrs carries a link_url, otherwise the bare image. renders
   # nothing when the section has no image.
-  def page_section_linked_image(section, link_key: 'link_url', image_key: 'image_id')
-    image = page_section_image_tag(section, key: image_key)
+  def page_section_linked_image(section, link_key: 'link_url', image_key: 'image_id', sizes: '100vw')
+    image = page_section_image_tag(section, key: image_key, sizes: sizes)
     return if image.blank?
     url = section.content_attrs[link_key]
     return image if url.blank?

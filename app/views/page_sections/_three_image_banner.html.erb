@@ -1,0 +1,14 @@
+<div class='three-image-banner' style='display: flex; width: 100%; gap: 0.75rem;'>
+  <div style='flex: 1 1 0; min-width: 0;'>
+    <%= page_section_linked_image(section, image_key: 'left_image_id', link_key: 'left_link_url', sizes: '33vw') %>
+  </div>
+  <div style='flex: 1 1 0; min-width: 0;'>
+    <%= page_section_linked_image(section, image_key: 'center_image_id', link_key: 'center_link_url', sizes: '33vw') %>
+  </div>
+  <div style='flex: 1 1 0; min-width: 0;'>
+    <%= page_section_linked_image(section, image_key: 'right_image_id', link_key: 'right_link_url', sizes: '33vw') %>
+  </div>
+</div>
+<style>
+  .three-image-banner img { display: block; width: 100%; height: auto; }
+</style>
