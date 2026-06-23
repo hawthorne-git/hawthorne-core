@@ -55,14 +55,6 @@ module HawthorneCore::PageSectionsHelper
   # phones fetch small images and retina desktops fetch large ones.
   IMAGE_WIDTHS = [640, 960, 1280, 1920].freeze
 
-  # build a host-relative cloudflare image-transformation url for a source image
-  # url. host-relative (no scheme/host) so each site transforms through its own
-  # cloudflare zone. format=auto serves avif/webp when the browser supports it,
-  # otherwise the original format. see https://developers.cloudflare.com/images/
-  def cdn_image_url(src, width)
-    "/cdn-cgi/image/format=auto,quality=85,width=#{width}/#{src}"
-  end
-
   # -----------------------------------------------------------------------------
 
   # render an <img> for an image referenced by id in the section's content_attrs.
@@ -80,9 +72,8 @@ module HawthorneCore::PageSectionsHelper
     image = HawthorneCore::Image.find_by(image_id: image_id)
     return if image.nil? || !image.file.attached?
     return image_tag(image.file) if Rails.env.development? || Rails.env.test?
-    src = image.file.url
-    srcset = IMAGE_WIDTHS.map { |w| "#{cdn_image_url(src, w)} #{w}w" }.join(', ')
-    image_tag(cdn_image_url(src, IMAGE_WIDTHS.last), srcset: srcset, sizes: sizes)
+    srcset = IMAGE_WIDTHS.map { |w| "#{media_url_for_key(image.file_key, width: w, version: image.file_version)} #{w}w" }.join(', ')
+    image_tag(media_url_for_key(image.file_key, width: IMAGE_WIDTHS.last, version: image.file_version), srcset: srcset, sizes: sizes)
   end
 
   # -----------------------------------------------------------------------------
