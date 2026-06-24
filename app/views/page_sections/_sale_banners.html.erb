@@ -1,0 +1,11 @@
+<div class='sale-banners' style='display: flex; width: 100%; gap: 0.75rem;'>
+  <div style='flex: 1 1 0; min-width: 0;'>
+    <%= page_section_linked_image(section, image_key: 'left_image_id', link_key: 'left_link_url', sizes: '50vw') %>
+  </div>
+  <div style='flex: 1 1 0; min-width: 0;'>
+    <%= page_section_linked_image(section, image_key: 'right_image_id', link_key: 'right_link_url', sizes: '50vw') %>
+  </div>
+</div>
+<style>
+  .sale-banners img { display: block; width: 100%; height: auto; }
+</style>
