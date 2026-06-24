@@ -1,4 +1,4 @@
-class HawthorneCore::AiModel < HawthorneCore::ActiveRecordBaseAdmin
+class AiModel < HawthorneCore::ActiveRecordBaseAdmin
 
   include HawthorneCore::CanBeSoftDeleted
 

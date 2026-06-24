@@ -1,4 +1,4 @@
-class HawthorneCore::AiModelPrompt < HawthorneCore::ActiveRecordBaseAdmin
+class AiPrompt < HawthorneCore::ActiveRecordBaseAdmin
 
   include HawthorneCore::CanBeSoftDeleted
 
@@ -6,15 +6,14 @@ class HawthorneCore::AiModelPrompt < HawthorneCore::ActiveRecordBaseAdmin
 
   # -----------------------------------------------------------------------------
 
-  self.table_name = 'ai_model_prompts'
-  self.primary_key = 'ai_model_prompt_id'
+  self.table_name = 'ai_prompts'
+  self.primary_key = 'ai_prompt_id'
 
-  def id = ai_model_prompt_id
+  def id = ai_prompt_id
 
   # -----------------------------------------------------------------------------
 
-  belongs_to :ai_model, class_name: 'HawthorneCore::AiModel'
-  belongs_to :ai_prompt, class_name: 'HawthorneCore::AiPrompt'
+  belongs_to :ai_prompt_type, class_name: 'AiPromptType'
 
   # -----------------------------------------------------------------------------
 

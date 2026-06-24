@@ -6,4 +6,4 @@ require 'zeitwerk'
 module HawthorneCore
 end
 
-Zeitwerk::Loader.for_gem.setup
+Zeitwerk::Loader.for_gem(warn_on_extra_files: false).setup
