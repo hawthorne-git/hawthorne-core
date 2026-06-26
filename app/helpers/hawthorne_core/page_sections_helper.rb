@@ -23,7 +23,10 @@ module HawthorneCore::PageSectionsHelper
     body
     footer_sign_up_link
     featured_fabrics
-    three_image_banner
+    1_image
+    2_images
+    3_images
+    4_images
     sale_banners
   ].freeze
 
