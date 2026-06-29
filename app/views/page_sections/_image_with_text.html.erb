@@ -1,0 +1,38 @@
+<%
+  image_side = section.content_attrs['image_side'].presence || 'left'
+  background_color = section.content_attrs['background_color'].presence
+  heading = section.content_attrs['heading']
+  body = section.content_attrs['body']
+  cta_label = section.content_attrs['cta_label']
+  cta_url = section.content_attrs['cta_url']
+%>
+<div class='image-with-text image-with-text--<%= image_side %>'<%= " style=\"background-color: #{background_color};\"".html_safe if background_color %>>
+  <div class='image-with-text__media'>
+    <%= page_section_image_tag(section, sizes: '(max-width: 768px) 100vw, 50vw') %>
+  </div>
+  <div class='image-with-text__content'>
+    <% if heading.present? %>
+      <h2 class='image-with-text__heading'><%= heading %></h2>
+    <% end %>
+    <% if body.present? %>
+      <p class='image-with-text__body'><%= body %></p>
+    <% end %>
+    <% if cta_label.present? && cta_url.present? %>
+      <%= link_to cta_label, cta_url, class: 'image-with-text__cta' %>
+    <% end %>
+  </div>
+</div>
+<style>
+  .image-with-text { display: flex; align-items: center; gap: 2rem; padding: 2rem; }
+  .image-with-text--right { flex-direction: row-reverse; }
+  .image-with-text__media { flex: 1 1 0; min-width: 0; }
+  .image-with-text__content { flex: 1 1 0; min-width: 0; }
+  .image-with-text__media img { display: block; width: 100%; height: auto; }
+  .image-with-text__heading { margin: 0 0 0.5rem; }
+  .image-with-text__body { margin: 0 0 1rem; }
+  .image-with-text__cta { display: inline-block; background-color: #4a6e91; color: #fff; padding: 0.75rem 1.5rem; border-radius: 4px; font-weight: 600; text-decoration: none; }
+  .image-with-text__cta:hover { background-color: #3d5d7b; }
+  @media (max-width: 768px) {
+    .image-with-text, .image-with-text--right { flex-direction: column; gap: 1rem; }
+  }
+</style>
