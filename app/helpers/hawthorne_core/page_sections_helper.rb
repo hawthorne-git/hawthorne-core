@@ -21,6 +21,7 @@ module HawthorneCore::PageSectionsHelper
     hero_image
     header
     body
+    image_with_text
     footer_sign_up_link
     featured_fabrics
     1_image
