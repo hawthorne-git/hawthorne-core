@@ -26,6 +26,7 @@ module HawthorneCore::HasToken
   LENGTHS =
     {
       'artists' => 6,
+      'collections' => 6,
       'images' => 12,
       'users' => 12,
       'user_payment_methods' => 12,
