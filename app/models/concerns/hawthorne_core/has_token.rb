@@ -27,6 +27,7 @@ module HawthorneCore::HasToken
     {
       'artists' => 6,
       'collections' => 6,
+      'suppliers' => 3,
       'images' => 12,
       'users' => 12,
       'user_payment_methods' => 12,
