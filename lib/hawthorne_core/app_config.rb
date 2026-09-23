@@ -32,6 +32,15 @@ module HawthorneCore
 
     def self.site_base_url = fetch_env_attr('SITE_BASE_URL')
 
+    # SITE_LOCKED must be TRUE or FALSE ... raise on anything else so a typo never unlocks the site
+    def self.site_locked?
+      site_locked = fetch_env_attr('SITE_LOCKED')
+      raise "Invalid SITE_LOCKED: #{site_locked}" unless %w[TRUE FALSE].include?(site_locked)
+      site_locked == 'TRUE'
+    end
+
+    def self.site_lock_key = fetch_env_attr('SITE_LOCK_KEY')
+
     def self.smarty_auth_id = fetch_env_attr('SMARTY_AUTH_ID')
 
     def self.smarty_auth_token = fetch_env_attr('SMARTY_AUTH_TOKEN')

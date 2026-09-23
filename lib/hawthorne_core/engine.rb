@@ -63,6 +63,8 @@ module HawthorneCore
       HawthorneCore::AppConfig.sidekiq_web_password
       HawthorneCore::AppConfig.sidekiq_web_user
       HawthorneCore::AppConfig.site_base_url
+      HawthorneCore::AppConfig.site_locked?
+      HawthorneCore::AppConfig.site_lock_key
       HawthorneCore::AppConfig.site_name
       HawthorneCore::AppConfig.smarty_auth_id
       HawthorneCore::AppConfig.smarty_auth_token

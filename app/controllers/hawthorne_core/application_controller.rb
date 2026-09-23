@@ -1,6 +1,7 @@
 class HawthorneCore::ApplicationController < ::ApplicationController
 
   include HawthorneCore::Cache,
+          HawthorneCore::SiteAuthentication,
           HawthorneCore::UserAuthentication,
           HawthorneCore::UserSessionIssuer
 
@@ -11,7 +12,10 @@ class HawthorneCore::ApplicationController < ::ApplicationController
 
   # ---------------------------------------------------------------------------
 
-  # set an attribute, noting if the page is to be re-cached
+  # verify the site key - if the site is locked, and has not been unlocked
+  before_action :verify_site_key, if: proc { site_locked? && !site_unlocked? }
+
+  # set an attribute noting if the page is to be re-cached
   before_action :set_clear_cache_attr
 
   # set the sites header / footer versions in the cache
