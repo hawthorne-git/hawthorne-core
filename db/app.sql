@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict en3Rm7ujHmBYFeat1msteTL1gvK74Ytkz0rMBaptDN2o1xfzsTZ7oSAmXpCw1LY
+\restrict eYZ9nsywMnbD1scKXpbhsjfmYhLqZRCq3FcsSDLMDd1FjdWO8Lo3kEYJkLpIT3k
 
 -- Dumped from database version 18.4 (Debian 18.4-1.pgdg12+1)
 -- Dumped by pg_dump version 18.4
@@ -451,6 +451,7 @@ CREATE TABLE public.products (
     map_price numeric(8,2),
     member_price numeric(8,2),
     adhere_to_map_price boolean DEFAULT true NOT NULL,
+    description text,
     CONSTRAINT sale_price_not_above_list_price CHECK ((sale_price <= list_price))
 );
 
@@ -1283,5 +1284,5 @@ ALTER TABLE ONLY public.user_sites
 -- PostgreSQL database dump complete
 --
 
-\unrestrict en3Rm7ujHmBYFeat1msteTL1gvK74Ytkz0rMBaptDN2o1xfzsTZ7oSAmXpCw1LY
+\unrestrict eYZ9nsywMnbD1scKXpbhsjfmYhLqZRCq3FcsSDLMDd1FjdWO8Lo3kEYJkLpIT3k
 
