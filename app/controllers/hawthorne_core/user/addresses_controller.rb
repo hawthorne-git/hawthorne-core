@@ -33,7 +33,7 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
     @address.phone_number = HawthorneCore::Helpers::PhoneNumber.us_format(phone_number:)
 
     # find the selected country (by the user)
-    @selected_country = HawthorneCore::Country.ship_to_country_with_code_alpha2(code_alpha2:)
+    @selected_country = Country.ship_to_country_with_code_alpha2(code_alpha2:)
 
     # if a selected country is not present, default to cloudflare
     unless @selected_country
@@ -41,21 +41,21 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
       # get the users country (code alpha 2) via cloudflare
       # if the cloudflare country code is not found, default to US
       code_alpha2 = request.headers['CF-IPCountry']&.strip&.upcase
-      unless HawthorneCore::Country.code_alpha2_exists?(code_alpha2:)
+      unless Country.code_alpha2_exists?(code_alpha2:)
         HawthorneCore::UserAction::Log.address_failure(failure_reason: HawthorneCore::UserAction::FailureReason.unexpected_state, note: { class: 'HawthorneCore::User::AddressesController', method: 'new', message: 'Country (code alpha 2) not found with Cloudflare country code', code_alpha2: })
         code_alpha2 = 'US'
       end
 
       # if the cloudflare country is an active country shipped to, set this country as the selected country
       # else this will force the user to select a country that we ship to
-      @selected_country = HawthorneCore::Country.ship_to_country_with_code_alpha2(code_alpha2:) if HawthorneCore::Country.ship_to_code_alpha2?(code_alpha2:)
+      @selected_country = Country.ship_to_country_with_code_alpha2(code_alpha2:) if Country.ship_to_code_alpha2?(code_alpha2:)
 
     end
 
     # find all countries that we ship to,
     # and find all states that we ship to if the selected country is US
-    @ship_to_countries = HawthorneCore::Country.ship_to
-    @us_states = HawthorneCore::UsState.ship_to if @selected_country&.us?
+    @ship_to_countries = Country.ship_to
+    @us_states = UsState.ship_to if @selected_country&.us?
 
     @html_title = 'Add Address | Profile'
 
@@ -103,8 +103,8 @@ class HawthorneCore::User::AddressesController < HawthorneCore::AccountApplicati
 
     # find the selected country within the address
     # and find all states that we ship to if the selected country is US
-    @selected_country = HawthorneCore::Country.ship_to_country_with_code_alpha2(code_alpha2: @address.country_code_alpha2)
-    @us_states = HawthorneCore::UsState.ship_to if @selected_country&.us?
+    @selected_country = Country.ship_to_country_with_code_alpha2(code_alpha2: @address.country_code_alpha2)
+    @us_states = UsState.ship_to if @selected_country&.us?
 
     @html_title = 'Update Address | Profile'
 

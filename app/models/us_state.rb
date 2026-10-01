@@ -1,4 +1,4 @@
-class HawthorneCore::UsState < HawthorneCore::ActiveRecordBaseAdmin
+class UsState < HawthorneCore::ActiveRecordBaseApp
 
   include HawthorneCore::CanBeSoftDeleted
 

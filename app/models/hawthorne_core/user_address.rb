@@ -23,12 +23,12 @@ class HawthorneCore::UserAddress < HawthorneCore::ActiveRecordBaseApp
 
   # find the country handle
   # ex: code_alpha2 is 'US', return 'United States'
-  def country_handle = HawthorneCore::Country.where(code_alpha2: country_code_alpha2).pick(:handle)
+  def country_handle = Country.where(code_alpha2: country_code_alpha2).pick(:handle)
 
   # -----------------------------------------------------------------------------
 
   # determine if the country within the address is to be shipped to
-  def ship_to? = HawthorneCore::Country.ship_to_code_alpha2?(code_alpha2: country_code_alpha2)
+  def ship_to? = Country.ship_to_code_alpha2?(code_alpha2: country_code_alpha2)
 
   # -----------------------------------------------------------------------------
 

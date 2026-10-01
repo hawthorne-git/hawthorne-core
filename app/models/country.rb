@@ -1,4 +1,4 @@
-class HawthorneCore::Country < HawthorneCore::ActiveRecordBaseAdmin
+class Country < HawthorneCore::ActiveRecordBaseApp
 
   include HawthorneCore::CanBeSoftDeleted
 
