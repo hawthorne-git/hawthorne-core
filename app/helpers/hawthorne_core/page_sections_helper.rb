@@ -50,7 +50,7 @@ module HawthorneCore::PageSectionsHelper
   # block types are few and rarely change, so a single query is cheap and keeps
   # rendering decoupled from the per-environment numeric ids.
   def page_block_type_handles
-    @page_block_type_handles ||= HawthorneCore::PageBlockType.pluck(:page_block_type_id, :handle).to_h
+    @page_block_type_handles ||= PageBlockType.pluck(:page_block_type_id, :handle).to_h
   end
 
   # -----------------------------------------------------------------------------
@@ -63,7 +63,7 @@ module HawthorneCore::PageSectionsHelper
   # -----------------------------------------------------------------------------
 
   # render an <img> for an image referenced by id in the section's content_attrs.
-  # looks up the HawthorneCore::Image and renders its attached active storage
+  # looks up the Image and renders its attached active storage
   # file. renders nothing when the id is absent, the image is missing, or it has
   # no attached file, so a section can exist before its image is set.
   #
@@ -74,7 +74,7 @@ module HawthorneCore::PageSectionsHelper
   def page_section_image_tag(section, key: 'image_id', sizes: '100vw')
     image_id = section.content_attrs[key]
     return if image_id.blank?
-    image = HawthorneCore::Image.find_by(image_id: image_id)
+    image = Image.find_by(image_id: image_id)
     return if image.nil? || !image.file.attached?
     return image_tag(image.file) if Rails.env.development? || Rails.env.test?
     srcset = IMAGE_WIDTHS.map { |w| "#{media_url_for_key(image.file_key, width: w, version: image.file_version)} #{w}w" }.join(', ')

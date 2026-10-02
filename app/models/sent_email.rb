@@ -1,13 +1,13 @@
-class HawthorneCore::SentTextMessage < HawthorneCore::ActiveRecordBaseLog
+class SentEmail < ActiveRecordBaseLog
 
   include HawthorneCore::HasSiteId
 
   # -----------------------------------------------------------------------------
 
-  self.table_name = 'sent_text_messages'
-  self.primary_key = 'sent_text_message_id'
+  self.table_name = 'sent_emails'
+  self.primary_key = 'sent_email_id'
 
-  def id = sent_text_message_id
+  def id = sent_email_id
 
   # -----------------------------------------------------------------------------
 

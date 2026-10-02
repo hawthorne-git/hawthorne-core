@@ -1,4 +1,4 @@
-class HawthorneCore::FlaggedHttpUserAgent < HawthorneCore::ActiveRecordBaseAdmin
+class FlaggedHttpUserAgent < ActiveRecordBaseAdmin
 
   include HawthorneCore::CanBeSoftDeleted
 

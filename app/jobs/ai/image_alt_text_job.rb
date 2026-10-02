@@ -14,16 +14,16 @@ module Ai
                        .first
 
       unless model_prompt
-        HawthorneCore::CapturedException.log(location: 'Ai::ImageAltTextJob', note: 'no default model prompt found for Image: Alt Text')
+        CapturedException.log(location: 'Ai::ImageAltTextJob', note: 'no default model prompt found for Image: Alt Text')
         return
       end
 
       svc = Services::CaludeSvc.new
 
       images = if image_id
-                 HawthorneCore::Image.where(image_id: image_id, deleted: false, update_alt_text_with_ai: true)
+                 Image.where(image_id: image_id, deleted: false, update_alt_text_with_ai: true)
                else
-                 base = HawthorneCore::Image.where(deleted: false, update_alt_text_with_ai: true).order(:image_id).limit(100)
+                 base = Image.where(deleted: false, update_alt_text_with_ai: true).order(:image_id).limit(100)
                  if model_prompt.update_existing?
                    base.where('alt_text_ai_model_prompt_id IS DISTINCT FROM ?', model_prompt.ai_model_prompt_id)
                  else
@@ -48,7 +48,7 @@ module Ai
 
         AiGeneration.create!(
           ai_model_prompt_id: model_prompt.ai_model_prompt_id,
-          item_type: 'HawthorneCore::Image',
+          item_type: 'Image',
           item_id: image.image_id,
           input_tokens: result[:input_tokens],
           output_tokens: result[:output_tokens],
@@ -64,7 +64,7 @@ module Ai
         )
 
       rescue => e
-        HawthorneCore::CapturedException.log(location: 'Ai::ImageAltTextJob', note: { image_id: image.image_id }, e:)
+        CapturedException.log(location: 'Ai::ImageAltTextJob', note: { image_id: image.image_id }, e:)
       end
 
       nil

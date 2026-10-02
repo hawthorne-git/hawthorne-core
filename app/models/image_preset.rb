@@ -1,4 +1,4 @@
-class HawthorneCore::ImagePreset < HawthorneCore::ActiveRecordBaseAdmin
+class ImagePreset < ActiveRecordBaseApp
 
   include HawthorneCore::CanBeSoftDeleted
 
@@ -20,7 +20,7 @@ class HawthorneCore::ImagePreset < HawthorneCore::ActiveRecordBaseAdmin
   # a preset cannot be set as inactive while active image types still reference it
   def no_active_image_types_when_inactivating
     return unless deleted? && deleted_changed?
-    if HawthorneCore::ImageType.where(image_preset_id: image_preset_id, deleted: false).exists?
+    if ImageType.where(image_preset_id: image_preset_id, deleted: false).exists?
       errors.add(:base, 'Cannot be set as inactive while it has active image types')
     end
   end

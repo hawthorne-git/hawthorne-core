@@ -1,4 +1,4 @@
-class TaskComment < HawthorneCore::ActiveRecordBaseAdmin
+class TaskComment < ActiveRecordBaseAdmin
 
   include HawthorneCore::CanBeSoftDeleted
 

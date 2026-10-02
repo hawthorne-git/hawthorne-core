@@ -1,4 +1,4 @@
-class TaskSchedule < HawthorneCore::ActiveRecordBaseAdmin
+class TaskSchedule < ActiveRecordBaseAdmin
 
   include HawthorneCore::CanBeSoftDeleted
 

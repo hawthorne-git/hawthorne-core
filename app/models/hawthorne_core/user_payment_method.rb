@@ -1,4 +1,4 @@
-class HawthorneCore::UserPaymentMethod < HawthorneCore::ActiveRecordBaseApp
+class HawthorneCore::UserPaymentMethod < ActiveRecordBaseApp
 
   include HawthorneCore::CanBeSoftDeleted,
           HawthorneCore::HasToken,

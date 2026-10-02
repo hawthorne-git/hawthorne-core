@@ -1,4 +1,4 @@
-class ProductTypeAttrOption < HawthorneCore::ActiveRecordBaseAdmin
+class ProductTypeAttrOption < ActiveRecordBaseApp
 
   include HawthorneCore::CanBeSoftDeleted
 

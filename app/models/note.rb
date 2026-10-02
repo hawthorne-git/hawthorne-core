@@ -1,4 +1,4 @@
-class Note < HawthorneCore::ActiveRecordBaseAdmin
+class Note < ActiveRecordBaseAdmin
 
   include HawthorneCore::CanBeSoftDeleted
 

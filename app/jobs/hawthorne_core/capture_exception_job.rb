@@ -3,6 +3,6 @@ class HawthorneCore::CaptureExceptionJob < HawthorneCore::ApplicationJob
 
   queue_as :default
 
-  def perform(**attrs) = HawthorneCore::CapturedException.create!(**attrs)
+  def perform(**attrs) = CapturedException.create!(**attrs)
 
 end

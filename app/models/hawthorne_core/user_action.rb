@@ -1,4 +1,4 @@
-class HawthorneCore::UserAction < HawthorneCore::ActiveRecordBaseLog
+class HawthorneCore::UserAction < ActiveRecordBaseLog
 
   include HawthorneCore::HasSiteId
 

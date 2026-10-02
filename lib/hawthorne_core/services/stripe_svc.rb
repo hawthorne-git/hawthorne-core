@@ -13,7 +13,7 @@ class HawthorneCore::Services::StripeSvc
     HawthorneCore::UserAction::Log.stripe_customer_created(user_id:, note: { email:, customer_id: customer.id })
     customer.id
   rescue Stripe::StripeError => e
-    HawthorneCore::CapturedException.log(location: 'HawthorneCore::Services::StripeSvc.create_customer', note: { user_id:, email: }, e:)
+    CapturedException.log(location: 'HawthorneCore::Services::StripeSvc.create_customer', note: { user_id:, email: }, e:)
     nil
   end
 
@@ -53,7 +53,7 @@ class HawthorneCore::Services::StripeSvc
       }
     end
   rescue Stripe::StripeError => e
-    HawthorneCore::CapturedException.log(location: 'HawthorneCore::Services::StripeSvc.customer_credit_cards', note: { user_id:, customer_id: customer_id }, e:)
+    CapturedException.log(location: 'HawthorneCore::Services::StripeSvc.customer_credit_cards', note: { user_id:, customer_id: customer_id }, e:)
     nil
   end
 
@@ -64,7 +64,7 @@ class HawthorneCore::Services::StripeSvc
     Stripe::PaymentMethod.detach(payment_method_id)
     HawthorneCore::UserAction::Log.stripe_credit_card_detached(user_id:, note: { payment_method_id: })
   rescue Stripe::StripeError => e
-    HawthorneCore::CapturedException.log(location: 'HawthorneCore::Services::StripeSvc.detach_payment_method', note: { user_id:, payment_method_id: }, e:)
+    CapturedException.log(location: 'HawthorneCore::Services::StripeSvc.detach_payment_method', note: { user_id:, payment_method_id: }, e:)
   end
 
   # ----------------------------------------------------------------
@@ -74,7 +74,7 @@ class HawthorneCore::Services::StripeSvc
     client = Stripe::StripeClient.new(ENV['STRIPE_SECRET_KEY'], stripe_version: '2025-08-27.basil; fx_quote_preview=v1')
     client.v1.fx_quotes.create({ from_currency:, to_currency: })
   rescue Stripe::StripeError => e
-    HawthorneCore::CapturedException.log(location: 'HawthorneCore::Services::StripeSvc.exchange_rate', e:)
+    CapturedException.log(location: 'HawthorneCore::Services::StripeSvc.exchange_rate', e:)
     nil
   end
 
@@ -88,7 +88,7 @@ class HawthorneCore::Services::StripeSvc
   def self.payment_method(payment_method_id:)
     Stripe::PaymentMethod.retrieve(payment_method_id)
   rescue Stripe::StripeError => e
-    HawthorneCore::CapturedException.log(location: 'HawthorneCore::Services::StripeSvc.payment_method', note: { payment_method_id: }, e:)
+    CapturedException.log(location: 'HawthorneCore::Services::StripeSvc.payment_method', note: { payment_method_id: }, e:)
     nil
   end
 
@@ -105,7 +105,7 @@ class HawthorneCore::Services::StripeSvc
     HawthorneCore::UserAction::Log.stripe_setup_intent_created(user_id:, note:  { customer_id:, setup_intent_client_secret: setup_intent.client_secret })
     setup_intent.client_secret
   rescue Stripe::StripeError => e
-    HawthorneCore::CapturedException.log(location: 'HawthorneCore::Services::StripeSvc.setup_intent_client_secret', note: { customer_id:, user_id: }, e:)
+    CapturedException.log(location: 'HawthorneCore::Services::StripeSvc.setup_intent_client_secret', note: { customer_id:, user_id: }, e:)
   end
 
   # ----------------------------------------------------------------
@@ -124,7 +124,7 @@ class HawthorneCore::Services::StripeSvc
       }
     })
   rescue Stripe::StripeError => e
-    HawthorneCore::CapturedException.log(location: 'HawthorneCore::Services::StripeSvc.update_credit_card_expiry_and_zip', note: { user_id:, payment_method_id:, }, e:)
+    CapturedException.log(location: 'HawthorneCore::Services::StripeSvc.update_credit_card_expiry_and_zip', note: { user_id:, payment_method_id:, }, e:)
   end
 
   # ----------------------
@@ -134,7 +134,7 @@ class HawthorneCore::Services::StripeSvc
     Stripe::Customer.update(customer_id, { email: })
     HawthorneCore::UserAction::Log.stripe_customer_email_updated(user_id:, note: { customer_id:, email: })
   rescue Stripe::StripeError => e
-    HawthorneCore::CapturedException.log(location: 'HawthorneCore::Services::StripeSvc.update_customer_email', note: { customer_id:, user_id:, email: }, e:)
+    CapturedException.log(location: 'HawthorneCore::Services::StripeSvc.update_customer_email', note: { customer_id:, user_id:, email: }, e:)
   end
 
   # ----------------------------------------------------------------

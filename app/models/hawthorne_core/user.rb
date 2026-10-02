@@ -1,4 +1,4 @@
-class HawthorneCore::User < HawthorneCore::ActiveRecordBaseApp
+class HawthorneCore::User < ActiveRecordBaseApp
 
   include HawthorneCore::CanBeSoftDeleted,
           HawthorneCore::HasToken,

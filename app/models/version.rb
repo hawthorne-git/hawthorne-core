@@ -1,4 +1,4 @@
-class Version < HawthorneCore::ActiveRecordBaseLog
+class Version < ActiveRecordBaseLog
 
   include PaperTrail::VersionConcern
 

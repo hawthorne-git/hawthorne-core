@@ -1,4 +1,4 @@
-class AiGeneration < HawthorneCore::ActiveRecordBaseLog
+class AiGeneration < ActiveRecordBaseLog
 
   include HawthorneCore::CanBeSoftDeleted
 

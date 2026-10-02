@@ -1,4 +1,4 @@
-class HawthorneCore::PageType < HawthorneCore::ActiveRecordBaseAdmin
+class PageType < ActiveRecordBaseApp
 
   include HawthorneCore::CanBeSoftDeleted
 

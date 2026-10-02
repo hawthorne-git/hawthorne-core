@@ -1,4 +1,4 @@
-class HawthorneCore::CapturedException < HawthorneCore::ActiveRecordBaseLog
+class CapturedException < ActiveRecordBaseLog
 
   include HawthorneCore::HasSiteId
 

@@ -1,4 +1,4 @@
-class Collection < HawthorneCore::ActiveRecordBaseApp
+class Collection < ActiveRecordBaseApp
 
   include HawthorneCore::CanBeSoftDeleted,
           HawthorneCore::HasToken

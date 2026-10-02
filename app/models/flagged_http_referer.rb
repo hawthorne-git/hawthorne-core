@@ -1,4 +1,4 @@
-class HawthorneCore::FlaggedIp < HawthorneCore::ActiveRecordBaseAdmin
+class FlaggedHttpReferer < ActiveRecordBaseAdmin
 
   include HawthorneCore::CanBeSoftDeleted
 
@@ -6,10 +6,10 @@ class HawthorneCore::FlaggedIp < HawthorneCore::ActiveRecordBaseAdmin
 
   # -----------------------------------------------------------------------------
 
-  self.table_name = 'flagged_ips'
-  self.primary_key = 'flagged_ip_id'
+  self.table_name = 'flagged_http_referers'
+  self.primary_key = 'flagged_http_referer_id'
 
-  def id = flagged_ip_id
+  def id = flagged_http_referer_id
 
   # -----------------------------------------------------------------------------
 

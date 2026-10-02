@@ -1,4 +1,4 @@
-class AiModelPrompt < HawthorneCore::ActiveRecordBaseAdmin
+class AiModelPrompt < ActiveRecordBaseAdmin
 
   include HawthorneCore::CanBeSoftDeleted
 

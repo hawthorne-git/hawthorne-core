@@ -1,4 +1,4 @@
-class HawthorneCore::ActiveRecordBaseAdmin < ActiveRecord::Base
+class ActiveRecordBaseLog < ActiveRecord::Base
 
   # ----------------------------------------------------------------
 
@@ -8,18 +8,18 @@ class HawthorneCore::ActiveRecordBaseAdmin < ActiveRecord::Base
 
   connects_to database:
                 {
-                  reading: :admin_replica,
-                  writing: :admin
+                  reading: :log_replica,
+                  writing: :log
                 }
 
-  # ---------------------------------------------------------------------------------
+  # ----------------------------------------------------------------
 
   def with_reading(&block) = self.class.with_reading(&block)
   def with_writing(&block) = self.class.with_writing(&block)
 
   class << self
-    def with_reading(&block) = HawthorneCore::ActiveRecordBaseApp.connected_to(role: :reading, &block)
-    def with_writing(&block) = HawthorneCore::ActiveRecordBaseApp.connected_to(role: :writing, &block)
+    def with_reading(&block) = ActiveRecordBaseLog.connected_to(role: :reading, &block)
+    def with_writing(&block) = ActiveRecordBaseLog.connected_to(role: :writing, &block)
   end
 
   # ----------------------------------------------------------------

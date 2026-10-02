@@ -150,7 +150,7 @@ class HawthorneCore::Services::MailerSendSvc
     result = mailer_send_email(email:, subject:, template_id:, personalization:)
 
     # log the email
-    HawthorneCore::SentEmail.create!(
+    SentEmail.create!(
       user_id:,
       service: 'MAILER_SEND',
       message_type:,
@@ -170,7 +170,7 @@ class HawthorneCore::Services::MailerSendSvc
       HawthorneCore::UserAction::Log.email_sent(user_id:, note: { message_type:, email:, personalization:, mailer_send_message_id: result[:message_id] })
     else
       HawthorneCore::UserAction::Log.email_sent_failure(user_id:, failure_reason: HawthorneCore::UserAction::FailureReason.exception_caught, note: { message_type:, email:, personalization:, exception_message: result[:exception_message] })
-      HawthorneCore::CapturedException.log(location: 'HawthorneCore::Services::MailerSendSvc.send_email', note: { message_type:, user_id:, email: }, e: result[:exception])
+      CapturedException.log(location: 'HawthorneCore::Services::MailerSendSvc.send_email', note: { message_type:, user_id:, email: }, e: result[:exception])
     end
 
   end

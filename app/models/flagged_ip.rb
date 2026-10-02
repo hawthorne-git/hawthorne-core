@@ -1,4 +1,4 @@
-class HawthorneCore::PageSection < HawthorneCore::ActiveRecordBaseApp
+class FlaggedIp < ActiveRecordBaseAdmin
 
   include HawthorneCore::CanBeSoftDeleted
 
@@ -6,10 +6,10 @@ class HawthorneCore::PageSection < HawthorneCore::ActiveRecordBaseApp
 
   # -----------------------------------------------------------------------------
 
-  self.table_name = 'page_sections'
-  self.primary_key = 'page_section_id'
+  self.table_name = 'flagged_ips'
+  self.primary_key = 'flagged_ip_id'
 
-  def id = page_section_id
+  def id = flagged_ip_id
 
   # -----------------------------------------------------------------------------
 

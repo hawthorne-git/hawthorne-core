@@ -1,4 +1,4 @@
-class Supplier < HawthorneCore::ActiveRecordBaseApp
+class Supplier < ActiveRecordBaseApp
 
   include HawthorneCore::CanBeSoftDeleted,
           HawthorneCore::HasToken

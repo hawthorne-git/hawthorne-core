@@ -1,4 +1,4 @@
-class HawthorneCore::UserSite < HawthorneCore::ActiveRecordBaseApp
+class HawthorneCore::UserSite < ActiveRecordBaseApp
 
   include HawthorneCore::HasSiteId,
           HawthorneCore::UserSite::DeleteAccount,

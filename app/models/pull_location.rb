@@ -1,4 +1,4 @@
-class PullLocation < HawthorneCore::ActiveRecordBaseAdmin
+class PullLocation < ActiveRecordBaseAdmin
 
   include HawthorneCore::CanBeSoftDeleted
 

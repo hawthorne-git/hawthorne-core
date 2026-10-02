@@ -64,7 +64,7 @@ class HawthorneCore::Services::TwilioTextSvc
     )
 
     # log the text message
-    HawthorneCore::SentTextMessage.create!(
+    SentTextMessage.create!(
       user_id:,
       service: 'TWILIO',
       message_type:,
@@ -84,7 +84,7 @@ class HawthorneCore::Services::TwilioTextSvc
       HawthorneCore::UserAction::Log.text_message_sent(user_id:, note: { message_type:, phone_number:, message:, twilio_message_id: result[:sid] })
     else
       HawthorneCore::UserAction::Log.text_message_sent_failure(user_id:, failure_reason: HawthorneCore::UserAction::FailureReason.exception_caught, note: { message_type:, phone_number:, message:, exception_message: result[:exception_message] })
-      HawthorneCore::CapturedException.log(location: 'HawthorneCore::Services::TwilioTextSvc.send_text_message', note: { message_type:, user_id:, phone_number:, message: }, e: result[:exception])
+      CapturedException.log(location: 'HawthorneCore::Services::TwilioTextSvc.send_text_message', note: { message_type:, user_id:, phone_number:, message: }, e: result[:exception])
     end
 
   end

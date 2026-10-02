@@ -1,4 +1,4 @@
-class HawthorneCore::FlaggedHttpReferer < HawthorneCore::ActiveRecordBaseAdmin
+class PageLayout < ActiveRecordBaseApp
 
   include HawthorneCore::CanBeSoftDeleted
 
@@ -6,10 +6,10 @@ class HawthorneCore::FlaggedHttpReferer < HawthorneCore::ActiveRecordBaseAdmin
 
   # -----------------------------------------------------------------------------
 
-  self.table_name = 'flagged_http_referers'
-  self.primary_key = 'flagged_http_referer_id'
+  self.table_name = 'page_layouts'
+  self.primary_key = 'page_layout_id'
 
-  def id = flagged_http_referer_id
+  def id = page_layout_id
 
   # -----------------------------------------------------------------------------
 

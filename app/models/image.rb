@@ -1,4 +1,4 @@
-class HawthorneCore::Image < HawthorneCore::ActiveRecordBaseApp
+class Image < ActiveRecordBaseApp
 
   include HawthorneCore::CanBeSoftDeleted,
           HawthorneCore::HasToken
@@ -9,9 +9,7 @@ class HawthorneCore::Image < HawthorneCore::ActiveRecordBaseApp
 
   has_one_attached :file
 
-  # image_types live in the admin database; this association loads via a separate
-  # query on that connection rather than a cross-database join
-  belongs_to :image_type, class_name: 'HawthorneCore::ImageType'
+  belongs_to :image_type, class_name: 'ImageType'
 
   validate :image_type_active_when_activating
 
@@ -27,7 +25,6 @@ class HawthorneCore::Image < HawthorneCore::ActiveRecordBaseApp
   private
 
   # an inactive image cannot be set as active while its image type is inactive
-  # (image_types live in the admin database, so this is a cross-connection query)
   def image_type_active_when_activating
     return unless deleted_changed? && !deleted?
     if image_type&.deleted?

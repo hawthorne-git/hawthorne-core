@@ -1,4 +1,4 @@
-class HawthorneCore::Site < HawthorneCore::ActiveRecordBaseApp
+class HawthorneCore::Site < ActiveRecordBaseApp
 
   include HawthorneCore::CanBeSoftDeleted,
           HawthorneCore::Site::HawthorneAdmin,

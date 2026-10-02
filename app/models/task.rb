@@ -1,4 +1,4 @@
-class Task < HawthorneCore::ActiveRecordBaseAdmin
+class Task < ActiveRecordBaseAdmin
 
   include HawthorneCore::CanBeSoftDeleted
 
