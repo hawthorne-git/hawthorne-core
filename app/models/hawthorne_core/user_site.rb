@@ -16,7 +16,7 @@ class HawthorneCore::UserSite < ActiveRecordBaseApp
   # -----------------------------------------------------------------------------
 
   # for code ease, define the site id
-  def self.site_id = HawthorneCore::Site.this_site_id
+  def self.site_id = Site.this_site_id
 
   # -----------------------------------------------------------------------------
 

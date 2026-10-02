@@ -38,7 +38,7 @@ class HawthorneCore::ApplicationController < ::ApplicationController
   # ---------------------------------------------------------------------------
 
   # for code ease, define the site id
-  def site_id = HawthorneCore::Site.this_site_id
+  def site_id = Site.this_site_id
 
   # for code ease, define the user id
   def user_id = session[:user_id]

@@ -14,7 +14,7 @@ module HawthorneCore::HasSiteId
 
     # set the site id
     def set_site_id
-      self.site_id = HawthorneCore::Site.this_site_id
+      self.site_id = Site.this_site_id
     end
 
     # ---------------------------------------------------------------------------------

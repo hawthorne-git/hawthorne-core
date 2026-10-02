@@ -20,7 +20,7 @@ module HawthorneCore
 
     def self.redis_cache_url = fetch_env_attr('REDIS_CACHE_URL')
 
-    def self.redis_cache_namespace = site_name.downcase
+    def self.redis_cache_namespace = site_env_name.downcase
 
     def self.redis_sidekiq_url = fetch_env_attr('REDIS_SIDEKIQ_URL')
 
@@ -31,6 +31,9 @@ module HawthorneCore
     def self.sidekiq_web_user = fetch_env_attr('SIDEKIQ_WEB_USER')
 
     def self.site_base_url = fetch_env_attr('SITE_BASE_URL')
+
+    # matches the env handle of a site in the database, ex: HAWTHORNE_PRINT_CO
+    def self.site_env_name = fetch_env_attr('SITE_ENV_NAME')
 
     # SITE_LOCKED must be TRUE or FALSE ... raise on anything else so a typo never unlocks the site
     def self.site_locked?
@@ -58,29 +61,6 @@ module HawthorneCore
     def self.twilio_username = fetch_env_attr('TWILIO_USERNAME')
 
     def self.twilio_us_phone_number = fetch_env_attr('TWILIO_US_PHONE_NUMBER')
-
-    # ----------------------------------------------------------------------------- Site Names
-
-    HAWTHORNE_ADMIN_ENV_SITE_NAME = 'HAWTHORNE_ADMIN'
-    HAWTHORNE_ARTISTS_ENV_SITE_NAME = 'HAWTHORNE_ARTISTS'
-    HAWTHORNE_PRINT_CO_ENV_SITE_NAME = 'HAWTHORNE_PRINT_CO'
-    HAWTHORNE_SUPPLY_CO_ENV_SITE_NAME = 'HAWTHORNE_SUPPLY_CO'
-    RILEY_BLAKE_ENV_SITE_NAME = 'RILEY_BLAKE'
-
-    VALID_ENV_SITE_NAMES =
-      [
-        HAWTHORNE_ADMIN_ENV_SITE_NAME,
-        HAWTHORNE_ARTISTS_ENV_SITE_NAME,
-        HAWTHORNE_PRINT_CO_ENV_SITE_NAME,
-        HAWTHORNE_SUPPLY_CO_ENV_SITE_NAME,
-        RILEY_BLAKE_ENV_SITE_NAME
-      ].freeze
-
-    def self.site_name
-      site_name = fetch_env_attr('SITE_NAME')
-      raise "Invalid SITE_NAME: #{site_name}" unless VALID_ENV_SITE_NAMES.include?(site_name)
-      site_name
-    end
 
     # -----------------------------------------------------------------------------
 

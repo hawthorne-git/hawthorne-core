@@ -21,11 +21,11 @@ class HawthorneCore::User < ActiveRecordBaseApp
   # -----------------------------------------------------------------------------
 
   # for code ease, define the site id
-  def site_id = HawthorneCore::Site.this_site_id
-  def self.site_id = HawthorneCore::Site.this_site_id
+  def site_id = Site.this_site_id
+  def self.site_id = Site.this_site_id
 
-  # for code ease, define the site sharing scope
-  def self.site_sharing_scope = HawthorneCore::Site.this_site_sharing_scope
+  # for code ease, define the account group
+  def self.account_group = Site.this_site_account_group
 
   # -----------------------------------------------------------------------------
 
@@ -40,8 +40,8 @@ class HawthorneCore::User < ActiveRecordBaseApp
 
   # -----------------------------------------------------------------------------
 
-  # determine if an active user exists with this email for site sharing scope
-  def self.email_exists?(email:) = active.exists?(email:, site_sharing_scope:)
+  # determine if an active user exists with this email for the account group
+  def self.email_exists?(email:) = active.exists?(email:, account_group:)
 
   # determine if an active user exists with this token
   def self.token_exists?(token:) = active.exists?(token:)
@@ -51,8 +51,8 @@ class HawthorneCore::User < ActiveRecordBaseApp
   # find the token, by this user id
   def self.token(user_id:) = active.where(user_id:).pick(:token)
 
-  # find the user id, by this email with site sharing scope
-  def self.user_id_by_email(email:) = active.where(email:, site_sharing_scope:).pick(:user_id)
+  # find the user id, by this email within the account group
+  def self.user_id_by_email(email:) = active.where(email:, account_group:).pick(:user_id)
 
   # find the user id, by this token
   def self.user_id_by_token(token:) = active.where(token:).pick(:user_id)
@@ -68,13 +68,13 @@ class HawthorneCore::User < ActiveRecordBaseApp
       user_id = user_id_by_email(email:)
       HawthorneCore::UserSite.create!(user_id:) unless HawthorneCore::UserSite.user_exist?(user_id:)
     else
-      user = create!(email:, site_sharing_scope:)
+      user = create!(email:, account_group:)
       HawthorneCore::UserSite.create!(user_id: user.id, user_created_on_site: true)
-      HawthorneCore::UserAction::Log.account_created(user_id: user.id, note: { email:, site_sharing_scope: })
+      HawthorneCore::UserAction::Log.account_created(user_id: user.id, note: { email:, account_group: })
     end
 
     # return the user
-    find_by(email:, site_sharing_scope:)
+    find_by(email:, account_group:)
 
   end
   

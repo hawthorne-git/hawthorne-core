@@ -70,8 +70,8 @@ class HawthorneCore::Services::MailerSendSvc
       message_type: WELCOME_EMAIL,
       user_id:,
       email:,
-      subject: "Welcome to #{HawthorneCore::Site.this_site_name}",
-      template_id: HawthorneCore::Site.this_site_mailer_send_welcome_email_template_id,
+      subject: "Welcome to #{Site.this_site_name}",
+      template_id: Site.this_site_mailer_send_welcome_template_id,
       personalization: welcome_personalization(email:, first_name:)
     )
   end
@@ -90,13 +90,13 @@ class HawthorneCore::Services::MailerSendSvc
   # ----------------------------------------------------------------
 
   # get the from email for the site, ex: hello@hawthorneprintco.com
-  def self.from_email = HawthorneCore::Site.this_site_contact_email
+  def self.from_email = Site.this_site_contact_email
 
   # get the from name for the site, ex: Hawthorne Print Co
-  def self.from_email_name = HawthorneCore::Site.this_site_name
+  def self.from_email_name = Site.this_site_name
 
   # get the from tagline for the site, ex: Lindsay, Charlie, and your friends at Hawthorne Print Co
-  def self.from_tagline = HawthorneCore::Site.this_site_email_from_tagline
+  def self.from_tagline = Site.this_site_email_from_tagline
 
   # ----------------------------------------------------------------
 

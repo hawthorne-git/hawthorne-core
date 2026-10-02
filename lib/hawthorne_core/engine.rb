@@ -65,7 +65,7 @@ module HawthorneCore
       HawthorneCore::AppConfig.site_base_url
       HawthorneCore::AppConfig.site_locked?
       HawthorneCore::AppConfig.site_lock_key
-      HawthorneCore::AppConfig.site_name
+      HawthorneCore::AppConfig.site_env_name
       HawthorneCore::AppConfig.smarty_auth_id
       HawthorneCore::AppConfig.smarty_auth_token
       HawthorneCore::AppConfig.smarty_embedded_key

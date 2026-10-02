@@ -1,20 +1,20 @@
-module HawthorneCore::HasSiteSharingScope
+module HawthorneCore::HasAccountGroup
   extend ActiveSupport::Concern
 
   included do
 
     # ---------------------------------------------------------------------------------
 
-    # before creating a record, set the records site sharing scope attribute
-    before_validation :set_site_sharing_scope, on: :create
+    # before creating a record, set the records account group attribute
+    before_validation :set_account_group, on: :create
 
     # ---------------------------------------------------------------------------------
 
     private
 
-    # set the site id
-    def set_site_sharing_scope
-      self.site_sharing_scope = HawthorneCore::Site.this_site_sharing_scope
+    # set the account group
+    def set_account_group
+      self.account_group = Site.this_site_account_group
     end
 
     # ---------------------------------------------------------------------------------

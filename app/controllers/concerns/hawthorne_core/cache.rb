@@ -21,8 +21,8 @@ module HawthorneCore::Cache
     # set the sites header / footer versions in the cache, if needed
     def set_site_header_footer_versions_in_cache
       if @clear_cache || !Rails.cache.exist?(:header_version) || !Rails.cache.exist?(:footer_version)
-        Rails.cache.write(:header_version, HawthorneCore::Site.header_version, expires_in: 1.month)
-        Rails.cache.write(:footer_version, HawthorneCore::Site.footer_version, expires_in: 1.month)
+        Rails.cache.write(:header_version, Site.this_site_header_version, expires_in: 1.month)
+        Rails.cache.write(:footer_version, Site.this_site_footer_version, expires_in: 1.month)
       end
     end
 

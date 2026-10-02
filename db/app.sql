@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict pATQybKUtTJiyuAiMBiBbbvhlKxAcNUmdH7qmHwVz7R4wMvTNom7QIW2Rwgg9yH
+\restrict d2o6jED1q5mHev4QtMmQWkhATsQchMH2bCGVNZWDsuUxahuP2fOMxmbw8LErbp4
 
 -- Dumped from database version 18.4 (Debian 18.4-1.pgdg12+1)
 -- Dumped by pg_dump version 18.4
@@ -38,6 +38,15 @@ CREATE EXTENSION IF NOT EXISTS pg_trgm WITH SCHEMA public;
 --
 
 COMMENT ON EXTENSION pg_trgm IS 'text similarity measurement and index searching based on trigrams';
+
+
+--
+-- Name: account_group; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE public.account_group AS ENUM (
+    'HAWTHORNE'
+);
 
 
 --
@@ -101,15 +110,6 @@ CREATE TYPE public.sewing_pattern_difficulty AS ENUM (
     'INTERMEDIATE',
     'ADVANCED',
     'UNKNOWN'
-);
-
-
---
--- Name: site_sharing_scope; Type: TYPE; Schema: public; Owner: -
---
-
-CREATE TYPE public.site_sharing_scope AS ENUM (
-    'HAWTHORNE'
 );
 
 
@@ -730,12 +730,17 @@ CREATE TABLE public.sites (
     deleted boolean DEFAULT false NOT NULL,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    hawthorne_site boolean DEFAULT false NOT NULL,
     announcement_attrs jsonb,
     deleted_at timestamp with time zone,
     abbreviation text NOT NULL,
     mailer_send_domain_id text,
-    mailer_send_webhook_secret text
+    mailer_send_webhook_secret text,
+    mailer_send_welcome_template_id text,
+    contact_email text,
+    email_from_tagline text,
+    env_handle text NOT NULL,
+    checkout boolean DEFAULT true NOT NULL,
+    account_group public.account_group DEFAULT 'HAWTHORNE'::public.account_group NOT NULL
 );
 
 
@@ -958,7 +963,7 @@ CREATE TABLE public.users (
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     deleted boolean DEFAULT false NOT NULL,
     name text,
-    site_sharing_scope public.site_sharing_scope NOT NULL,
+    account_group public.account_group NOT NULL,
     deleted_at timestamp with time zone,
     stripe_customer_id text
 );
@@ -1336,6 +1341,14 @@ ALTER TABLE ONLY public.sites
 
 
 --
+-- Name: sites sites_uk_env_handle; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sites
+    ADD CONSTRAINT sites_uk_env_handle UNIQUE (env_handle);
+
+
+--
 -- Name: sites sites_uk_handle; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1472,11 +1485,11 @@ ALTER TABLE ONLY public.users
 
 
 --
--- Name: users users_uk_email_site_sharing_scope; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: users users_uk_email_account_group; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.users
-    ADD CONSTRAINT users_uk_email_site_sharing_scope UNIQUE (email, site_sharing_scope);
+    ADD CONSTRAINT users_uk_email_account_group UNIQUE (email, account_group);
 
 
 --
@@ -1804,5 +1817,5 @@ ALTER TABLE ONLY public.user_sites
 -- PostgreSQL database dump complete
 --
 
-\unrestrict pATQybKUtTJiyuAiMBiBbbvhlKxAcNUmdH7qmHwVz7R4wMvTNom7QIW2Rwgg9yH
+\unrestrict d2o6jED1q5mHev4QtMmQWkhATsQchMH2bCGVNZWDsuUxahuP2fOMxmbw8LErbp4
 

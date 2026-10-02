@@ -46,10 +46,10 @@ class HawthorneCore::Services::TwilioTextSvc
   # ----------------------------------------------------------------
 
   # define the sign-in code text message - given a code
-  def self.sign_in_code_message(code:) = "#{HawthorneCore::Site.this_site_name}\n\nYour sign-in code is #{code}"
+  def self.sign_in_code_message(code:) = "#{Site.this_site_name}\n\nYour sign-in code is #{code}"
 
   # define the code text message - given a code
-  def self.code_message(code:) = "#{HawthorneCore::Site.this_site_name}\n\nYour code is #{code}."
+  def self.code_message(code:) = "#{Site.this_site_name}\n\nYour code is #{code}."
 
   # ----------------------------------------------------------------
 
