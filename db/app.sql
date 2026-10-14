@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict epYspGDjQbW2CHNfkINKjr29zQH9OusWsLt37BDbcO5UyNkt08TD5tKGXCUaaxv
+\restrict uevYTzz11OTdJukV6DpQFHYTrprTP7DAWs9BbA5fXgGwR4ltYcBhfkpANHlcsdQ
 
 -- Dumped from database version 18.4 (Debian 18.4-1.pgdg12+1)
 -- Dumped by pg_dump version 18.4
@@ -708,7 +708,8 @@ CREATE TABLE public.product_types (
     deleted_at timestamp with time zone,
     handle text NOT NULL,
     processing_cost_per_unit numeric(4,2) DEFAULT 0.00 NOT NULL,
-    unit_as_fraction boolean DEFAULT false NOT NULL
+    unit_as_fraction boolean DEFAULT false NOT NULL,
+    waste_rate numeric(4,3) DEFAULT 0.000 NOT NULL
 );
 
 
@@ -883,6 +884,7 @@ CREATE TABLE public.supplier_product_profiles (
     refresh_landed_cost boolean DEFAULT false NOT NULL,
     loaded_cost numeric(8,2) NOT NULL,
     refresh_loaded_cost boolean DEFAULT false NOT NULL,
+    pack_quantity numeric(9,3),
     CONSTRAINT supplier_product_profiles_lwh_dimensions CHECK (((lwh AND (length_in_inches IS NOT NULL) AND (width_in_inches IS NOT NULL) AND (height_in_inches IS NOT NULL)) OR ((NOT lwh) AND (length_in_inches IS NULL) AND (width_in_inches IS NULL) AND (height_in_inches IS NULL)))),
     CONSTRAINT supplier_product_profiles_map_price_when_adhering CHECK (((NOT adhere_to_map_price) OR (map_price IS NOT NULL)))
 );
@@ -2074,5 +2076,5 @@ ALTER TABLE ONLY public.user_sites
 -- PostgreSQL database dump complete
 --
 
-\unrestrict epYspGDjQbW2CHNfkINKjr29zQH9OusWsLt37BDbcO5UyNkt08TD5tKGXCUaaxv
+\unrestrict uevYTzz11OTdJukV6DpQFHYTrprTP7DAWs9BbA5fXgGwR4ltYcBhfkpANHlcsdQ
 

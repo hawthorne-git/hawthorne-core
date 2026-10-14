@@ -26,20 +26,16 @@ class SupplierProductProfilePrice < ActiveRecordBaseApp
   # the member (logged in) price and the preorder discount are hawthorne only
   validate :hawthorne_only_prices
 
-  # the member price may not be above the price; and while adhering to MAP, may only go below
-  # MAP when the supplier allows it. only checked when it's set or changed, so automatic
-  # repricing never fails on it (a shopper gets the lowest price anyway, and if things change
-  # later the member price is held at MAP, see SupplierProductProfile#member_price_or_default)
+  # the member price may not be above the price; only checked when it's set or changed, so
+  # automatic repricing never fails on it (a shopper gets the lowest price anyway). it may be
+  # below MAP: while adhering to MAP and the supplier doesn't allow member pricing below it,
+  # members pay the MAP price instead (see SupplierProductProfile#member_price_or_default)
   validate :member_price_not_above_price, if: :member_price_changed?
-  validate :member_price_not_below_map, if: :member_price_changed?
 
-  # a preorder discount is a rate: above 0, below 1 (100%)
+  # a preorder discount is a rate: above 0, below 1 (100%). it may put the preorder price
+  # below MAP: while adhering to MAP and the supplier doesn't allow preorder pricing below it,
+  # the preorder price is held at MAP (see SupplierProductProfile#preorder_price)
   validates :preorder_discount, numericality: { greater_than: 0, less_than: 1 }, allow_nil: true
-
-  # while adhering to MAP, the preorder price may only go below it when the supplier allows
-  # it; only checked when the discount is set or changed, so automatic repricing never fails
-  # on it (if things change later, the preorder price is held at MAP, see SupplierProductProfile#preorder_price)
-  validate :preorder_price_not_below_map, if: :preorder_discount_changed?
 
   # -----------------------------------------------------------------------------
 
@@ -51,25 +47,6 @@ class SupplierProductProfilePrice < ActiveRecordBaseApp
     errors.add(:member_price, 'can only be set on Hawthorne') if member_price
     errors.add(:preorder_discount, 'can only be set on Hawthorne') if preorder_discount
   end
-
-  def preorder_price_not_below_map
-    profile = supplier_product_profile
-    return if preorder_discount.nil? || price.nil? || profile.nil? || profile.preorder_below_map_allowed?
-
-    preorder_price = profile.discounted_preorder_price(price, preorder_discount)
-    return if preorder_price >= profile.map_price
-
-    errors.add(:preorder_discount, "would put the preorder price (#{format_price(preorder_price)}) below the MAP price (#{format_price(profile.map_price)}); the supplier doesn't allow preorder pricing below MAP")
-  end
-
-  def member_price_not_below_map
-    profile = supplier_product_profile
-    return if member_price.nil? || profile.nil? || profile.member_below_map_allowed? || member_price >= profile.map_price
-
-    errors.add(:member_price, "(#{format_price(member_price)}) can't be below the MAP price (#{format_price(profile.map_price)}); the supplier doesn't allow member pricing below MAP")
-  end
-
-  def format_price(value) = ActiveSupport::NumberHelper.number_to_currency(value)
 
   def member_price_not_above_price
     return if member_price.nil? || price.nil?

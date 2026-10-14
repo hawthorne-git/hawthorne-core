@@ -15,8 +15,8 @@ class ProductType < ActiveRecordBaseApp
 
   has_many :supplier_product_profiles
 
-  # when the processing cost changes, flag this type's profiles and recalculate their loaded cost in the background
-  after_update_commit :refresh_profile_costs, if: -> { saved_change_to_processing_cost_per_unit? }
+  # when the processing cost or waste rate changes, flag this type's profiles and recalculate their loaded cost in the background
+  after_update_commit :refresh_profile_costs, if: -> { saved_change_to_processing_cost_per_unit? || saved_change_to_waste_rate? }
 
   # -----------------------------------------------------------------------------
 

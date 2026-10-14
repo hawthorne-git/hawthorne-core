@@ -70,12 +70,24 @@ class SupplierProductProfile < ActiveRecordBaseApp
     (net_cost + cc_fee + tariff + freight).round(2)
   end
 
-  # the cost once the unit is ready to sell: landed cost plus processing (by product
-  # type). calculated from current values; the loaded_cost column holds the value
-  # captured at the last save
+  # the share of what we pay that we don't get back (by product type; ex: fabric
+  # remnants sold at a deep discount); 0 when nothing is wasted (ex: sewing kits)
+  def waste_rate = product_type&.waste_rate || 0
+
+  # the waste allowance each sold unit carries: the landed cost spread over the share
+  # that isn't wasted, less the landed cost, rounded to the cent (ex: 20.00 at 1.5%
+  # waste = 20.00 / 0.985 - 20.00 = 0.30). nil when there is no landed cost yet
+  def waste_cost
+    landed = calculated_landed_cost
+    landed.nil? ? nil : (landed / (1 - waste_rate) - landed).round(2)
+  end
+
+  # the cost once the unit is ready to sell: landed cost plus the waste allowance plus
+  # processing (both by product type). calculated from current values; the
+  # loaded_cost column holds the value captured at the last save
   def calculated_loaded_cost
     landed = calculated_landed_cost
-    landed.nil? ? nil : landed + processing_cost
+    landed.nil? ? nil : landed + waste_cost + processing_cost
   end
 
   # the calculated price on a marketplace: the selling price that, after the
