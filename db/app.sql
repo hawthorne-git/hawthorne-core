@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict uevYTzz11OTdJukV6DpQFHYTrprTP7DAWs9BbA5fXgGwR4ltYcBhfkpANHlcsdQ
+\restrict ksgKPts1PTyYLN7X6y33DBJ0Yma72eyItHeWMlT7cT50FOfwAGzVlQEXwQGgMMv
 
 -- Dumped from database version 18.4 (Debian 18.4-1.pgdg12+1)
 -- Dumped by pg_dump version 18.4
@@ -885,6 +885,7 @@ CREATE TABLE public.supplier_product_profiles (
     loaded_cost numeric(8,2) NOT NULL,
     refresh_loaded_cost boolean DEFAULT false NOT NULL,
     pack_quantity numeric(9,3),
+    v2_attrs jsonb,
     CONSTRAINT supplier_product_profiles_lwh_dimensions CHECK (((lwh AND (length_in_inches IS NOT NULL) AND (width_in_inches IS NOT NULL) AND (height_in_inches IS NOT NULL)) OR ((NOT lwh) AND (length_in_inches IS NULL) AND (width_in_inches IS NULL) AND (height_in_inches IS NULL)))),
     CONSTRAINT supplier_product_profiles_map_price_when_adhering CHECK (((NOT adhere_to_map_price) OR (map_price IS NOT NULL)))
 );
@@ -1552,19 +1553,19 @@ ALTER TABLE ONLY public.supplier_product_profile_prices
 
 
 --
--- Name: supplier_product_profiles supplier_product_profiles_pk; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.supplier_product_profiles
-    ADD CONSTRAINT supplier_product_profiles_pk UNIQUE (supplier_id, product_type_id, handle);
-
-
---
 -- Name: supplier_product_profiles supplier_product_profiles_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.supplier_product_profiles
     ADD CONSTRAINT supplier_product_profiles_pkey PRIMARY KEY (supplier_product_profile_id);
+
+
+--
+-- Name: supplier_product_profiles supplier_product_profiles_uk; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.supplier_product_profiles
+    ADD CONSTRAINT supplier_product_profiles_uk UNIQUE (supplier_id, product_type_id, handle);
 
 
 --
@@ -2076,5 +2077,5 @@ ALTER TABLE ONLY public.user_sites
 -- PostgreSQL database dump complete
 --
 
-\unrestrict uevYTzz11OTdJukV6DpQFHYTrprTP7DAWs9BbA5fXgGwR4ltYcBhfkpANHlcsdQ
+\unrestrict ksgKPts1PTyYLN7X6y33DBJ0Yma72eyItHeWMlT7cT50FOfwAGzVlQEXwQGgMMv
 
