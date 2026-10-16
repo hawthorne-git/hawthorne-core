@@ -24,6 +24,11 @@ class ProductType < ActiveRecordBaseApp
 
   # -----------------------------------------------------------------------------
 
+  # the abbreviation when there is one, else the name (handle)
+  def short_name = abbreviation.presence || handle
+
+  # -----------------------------------------------------------------------------
+
   private
 
   def refresh_profile_costs

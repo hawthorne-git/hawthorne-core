@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict ksgKPts1PTyYLN7X6y33DBJ0Yma72eyItHeWMlT7cT50FOfwAGzVlQEXwQGgMMv
+\restrict bUnRdsrHgeCWPZyJZiqA5CRYry1GEqai7Hm6K7QiAPbgDkiC37bsCI7NJc1a4dq
 
 -- Dumped from database version 18.4 (Debian 18.4-1.pgdg12+1)
 -- Dumped by pg_dump version 18.4
@@ -433,8 +433,8 @@ CREATE TABLE public.marketplaces (
     deleted boolean DEFAULT false NOT NULL,
     deleted_at timestamp with time zone,
     transaction_rate numeric(4,3) NOT NULL,
-    shipping_loss_per_100_grams numeric(4,2) DEFAULT 0.00 NOT NULL,
-    margin_multiplier numeric(4,3) DEFAULT 1.000 NOT NULL
+    margin_multiplier numeric(4,3) DEFAULT 1.000 NOT NULL,
+    shipping_loss_per_100_grams numeric(4,2) DEFAULT 0.00 NOT NULL
 );
 
 
@@ -614,7 +614,7 @@ CREATE TABLE public.product_images (
     deleted boolean DEFAULT false NOT NULL,
     deleted_at timestamp with time zone,
     product_id bigint NOT NULL,
-    image_id bigint CONSTRAINT product_images_images_not_null NOT NULL,
+    image_id bigint NOT NULL,
     order_nbr smallint DEFAULT 0 NOT NULL
 );
 
@@ -709,7 +709,8 @@ CREATE TABLE public.product_types (
     handle text NOT NULL,
     processing_cost_per_unit numeric(4,2) DEFAULT 0.00 NOT NULL,
     unit_as_fraction boolean DEFAULT false NOT NULL,
-    waste_rate numeric(4,3) DEFAULT 0.000 NOT NULL
+    waste_rate numeric(4,3) DEFAULT 0.000 NOT NULL,
+    abbreviation text
 );
 
 
@@ -759,7 +760,6 @@ CREATE TABLE public.products (
     min_inventory_to_stock numeric(9,3) DEFAULT 0 NOT NULL,
     v2_attrs jsonb,
     handle text NOT NULL,
-    supplier_product_profile_id bigint,
     CONSTRAINT pick_location_or_pull_location CHECK (((pull_location_id IS NULL) OR (pick_location_id IS NULL))),
     CONSTRAINT pick_nbr_required_with_pick_location CHECK (((pick_location_id IS NULL) OR (pick_nbr IS NOT NULL))),
     CONSTRAINT pull_nbr_required_with_pull_location CHECK (((pull_location_id IS NULL) OR (pull_nbr IS NOT NULL)))
@@ -869,7 +869,7 @@ CREATE TABLE public.supplier_product_profiles (
     product_type_id bigint NOT NULL,
     supplier_list_price numeric(8,2) NOT NULL,
     note text,
-    weight_in_grams integer CONSTRAINT supplier_product_profiles_unit_weight_in_grams_not_null NOT NULL,
+    weight_in_grams integer NOT NULL,
     length_in_inches numeric(5,2),
     width_in_inches numeric(5,2),
     height_in_inches numeric(5,2),
@@ -926,7 +926,8 @@ CREATE TABLE public.suppliers (
     token text NOT NULL,
     v2_attrs jsonb,
     allow_preorder_pricing_below_map boolean DEFAULT true NOT NULL,
-    allow_member_pricing_below_map boolean DEFAULT true NOT NULL
+    allow_member_pricing_below_map boolean DEFAULT true NOT NULL,
+    abbreviation text
 );
 
 
@@ -1457,6 +1458,14 @@ ALTER TABLE ONLY public.product_types
 
 
 --
+-- Name: product_types product_types_uk_abbreviation; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.product_types
+    ADD CONSTRAINT product_types_uk_abbreviation UNIQUE (abbreviation);
+
+
+--
 -- Name: product_types product_types_uk_handle; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1574,6 +1583,14 @@ ALTER TABLE ONLY public.supplier_product_profiles
 
 ALTER TABLE ONLY public.suppliers
     ADD CONSTRAINT suppliers_pkey PRIMARY KEY (supplier_id);
+
+
+--
+-- Name: suppliers suppliers_uk_abbreviation; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.suppliers
+    ADD CONSTRAINT suppliers_uk_abbreviation UNIQUE (abbreviation);
 
 
 --
@@ -1986,14 +2003,6 @@ ALTER TABLE ONLY public.products
 
 
 --
--- Name: products products_supplier_product_profile_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.products
-    ADD CONSTRAINT products_supplier_product_profile_id_fkey FOREIGN KEY (supplier_product_profile_id) REFERENCES public.supplier_product_profiles(supplier_product_profile_id);
-
-
---
 -- Name: products products_suppliers_supplier_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2077,5 +2086,5 @@ ALTER TABLE ONLY public.user_sites
 -- PostgreSQL database dump complete
 --
 
-\unrestrict ksgKPts1PTyYLN7X6y33DBJ0Yma72eyItHeWMlT7cT50FOfwAGzVlQEXwQGgMMv
+\unrestrict bUnRdsrHgeCWPZyJZiqA5CRYry1GEqai7Hm6K7QiAPbgDkiC37bsCI7NJc1a4dq
 
