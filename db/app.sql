@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict UKbtqil8p1DIb7bRcBfDDA6vnFSocWbRaobVGsigAv9n5f2a9XOMAye4YihEsnm
+\restrict ux3KRmbmADirBbJFGG2pQmvvCkWOYY2ZXloAg7HMyOe7KCwKwk2egRE5p2BYT0V
 
 -- Dumped from database version 18.4 (Debian 18.4-1.pgdg12+1)
 -- Dumped by pg_dump version 18.4
@@ -1483,14 +1483,6 @@ ALTER TABLE ONLY public.products
 
 
 --
--- Name: products products_uk_supplier_id_supplier_sku; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.products
-    ADD CONSTRAINT products_uk_supplier_id_supplier_sku UNIQUE (supplier_id, supplier_sku);
-
-
---
 -- Name: products products_uk_token; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2093,5 +2085,5 @@ ALTER TABLE ONLY public.user_sites
 -- PostgreSQL database dump complete
 --
 
-\unrestrict UKbtqil8p1DIb7bRcBfDDA6vnFSocWbRaobVGsigAv9n5f2a9XOMAye4YihEsnm
+\unrestrict ux3KRmbmADirBbJFGG2pQmvvCkWOYY2ZXloAg7HMyOe7KCwKwk2egRE5p2BYT0V
 

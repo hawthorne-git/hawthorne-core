@@ -26,8 +26,7 @@ class Product < ActiveRecordBaseApp
 
   attr_accessor :image_file
 
-  # supplier_id / product_type_id always follow the profile (kept on products for
-  # queries and the supplier + sku unique constraint)
+  # supplier_id / product_type_id always follow the profile (kept on products for queries)
   before_validation :copy_from_supplier_product_profile
 
   # the sale price is advertised on hawthorne, so it must beat the regular price and respect MAP
