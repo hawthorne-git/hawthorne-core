@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict bUnRdsrHgeCWPZyJZiqA5CRYry1GEqai7Hm6K7QiAPbgDkiC37bsCI7NJc1a4dq
+\restrict UKbtqil8p1DIb7bRcBfDDA6vnFSocWbRaobVGsigAv9n5f2a9XOMAye4YihEsnm
 
 -- Dumped from database version 18.4 (Debian 18.4-1.pgdg12+1)
 -- Dumped by pg_dump version 18.4
@@ -760,6 +760,7 @@ CREATE TABLE public.products (
     min_inventory_to_stock numeric(9,3) DEFAULT 0 NOT NULL,
     v2_attrs jsonb,
     handle text NOT NULL,
+    supplier_product_profile_id bigint NOT NULL,
     CONSTRAINT pick_location_or_pull_location CHECK (((pull_location_id IS NULL) OR (pick_location_id IS NULL))),
     CONSTRAINT pick_nbr_required_with_pick_location CHECK (((pick_location_id IS NULL) OR (pick_nbr IS NOT NULL))),
     CONSTRAINT pull_nbr_required_with_pull_location CHECK (((pull_location_id IS NULL) OR (pull_nbr IS NOT NULL)))
@@ -1458,14 +1459,6 @@ ALTER TABLE ONLY public.product_types
 
 
 --
--- Name: product_types product_types_uk_abbreviation; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.product_types
-    ADD CONSTRAINT product_types_uk_abbreviation UNIQUE (abbreviation);
-
-
---
 -- Name: product_types product_types_uk_handle; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1583,14 +1576,6 @@ ALTER TABLE ONLY public.supplier_product_profiles
 
 ALTER TABLE ONLY public.suppliers
     ADD CONSTRAINT suppliers_pkey PRIMARY KEY (supplier_id);
-
-
---
--- Name: suppliers suppliers_uk_abbreviation; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.suppliers
-    ADD CONSTRAINT suppliers_uk_abbreviation UNIQUE (abbreviation);
 
 
 --
@@ -1754,6 +1739,20 @@ CREATE UNIQUE INDEX index_active_storage_variant_records_uniqueness ON public.ac
 --
 
 CREATE INDEX page_sections_idx_page_layout_id ON public.page_sections USING btree (page_layout_id);
+
+
+--
+-- Name: product_types_uk_abbreviation; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX product_types_uk_abbreviation ON public.product_types USING btree (lower(abbreviation));
+
+
+--
+-- Name: suppliers_uk_abbreviation; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX suppliers_uk_abbreviation ON public.suppliers USING btree (lower(abbreviation));
 
 
 --
@@ -2003,6 +2002,14 @@ ALTER TABLE ONLY public.products
 
 
 --
+-- Name: products products_supplier_product_profiles_supplier_product_profile_id_; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.products
+    ADD CONSTRAINT products_supplier_product_profiles_supplier_product_profile_id_ FOREIGN KEY (supplier_product_profile_id) REFERENCES public.supplier_product_profiles(supplier_product_profile_id);
+
+
+--
 -- Name: products products_suppliers_supplier_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2086,5 +2093,5 @@ ALTER TABLE ONLY public.user_sites
 -- PostgreSQL database dump complete
 --
 
-\unrestrict bUnRdsrHgeCWPZyJZiqA5CRYry1GEqai7Hm6K7QiAPbgDkiC37bsCI7NJc1a4dq
+\unrestrict UKbtqil8p1DIb7bRcBfDDA6vnFSocWbRaobVGsigAv9n5f2a9XOMAye4YihEsnm
 

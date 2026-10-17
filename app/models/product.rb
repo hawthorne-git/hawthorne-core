@@ -33,6 +33,9 @@ class Product < ActiveRecordBaseApp
   # the sale price is advertised on hawthorne, so it must beat the regular price and respect MAP
   validate :sale_price_allowed
 
+  # an active product needs an active profile, so activating a product activates its profile too
+  after_save :activate_supplier_product_profile, if: -> { saved_change_to_deleted?(from: true, to: false) }
+
   # -----------------------------------------------------------------------------
 
   # the first active image, by order; works off preloaded product_images when present
@@ -79,6 +82,10 @@ class Product < ActiveRecordBaseApp
 
     self.supplier_id = supplier_product_profile.supplier_id
     self.product_type_id = supplier_product_profile.product_type_id
+  end
+
+  def activate_supplier_product_profile
+    supplier_product_profile.activate if supplier_product_profile&.deleted?
   end
 
   def sale_price_allowed
