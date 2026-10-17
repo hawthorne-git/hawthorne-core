@@ -25,6 +25,9 @@ class SupplierProductProfile < ActiveRecordBaseApp
   has_many :supplier_product_profile_prices, inverse_of: :supplier_product_profile
   has_many :products
 
+  # once products use the profile, its supplier and product type can't change (products copy both from their profile)
+  validate :supplier_and_product_type_locked_once_used
+
   # landed_cost and loaded_cost are captured on every save, which also clears both refresh flags
   before_save :capture_costs
 
@@ -209,6 +212,14 @@ class SupplierProductProfile < ActiveRecordBaseApp
   # -----------------------------------------------------------------------------
 
   private
+
+  def supplier_and_product_type_locked_once_used
+    return unless persisted? && (supplier_id_changed? || product_type_id_changed?)
+    return unless products.exists?
+
+    errors.add(:supplier_id, "can't be changed: products use this profile") if supplier_id_changed?
+    errors.add(:product_type_id, "can't be changed: products use this profile") if product_type_id_changed?
+  end
 
   def capture_costs
     self.landed_cost = calculated_landed_cost
