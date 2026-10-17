@@ -29,7 +29,8 @@ class Product < ActiveRecordBaseApp
   # supplier_id / product_type_id always follow the profile (kept on products for queries)
   before_validation :copy_from_supplier_product_profile
 
-  # the sale price is advertised on hawthorne, so it must beat the regular price and respect MAP
+  # the sale price is advertised on hawthorne, so it must beat the regular price; it may go below MAP, even while
+  # adhering to it
   validate :sale_price_allowed
 
   # an active product needs an active profile, so activating a product activates its profile too
@@ -92,11 +93,6 @@ class Product < ActiveRecordBaseApp
 
     regular = hawthorne_price
     errors.add(:sale_price, "must be below the regular price (#{format_price(regular)})") if regular && sale_price >= regular
-
-    profile = supplier_product_profile
-    if profile.adhere_to_map_price? && profile.map_price && sale_price < profile.map_price
-      errors.add(:sale_price, "can't be below the MAP price (#{format_price(profile.map_price)}) while adhering to it")
-    end
   end
 
   def format_price(value) = ActiveSupport::NumberHelper.number_to_currency(value)
