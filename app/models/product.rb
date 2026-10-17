@@ -5,6 +5,13 @@ class Product < ActiveRecordBaseApp
 
   has_paper_trail versions: { class_name: 'Version' }
 
+  # a product image's role comes from its image type (by handle): one main image (what hawthorne shows, ex: a lifestyle
+  # photo), at most one supplier main image (the supplier's own, ex: a flat image), and any number of additional images
+  # in order (product_images.order_nbr)
+  MAIN_IMAGE_TYPE = 'Product / Main'
+  SUPPLIER_MAIN_IMAGE_TYPE = 'Product / Main / Supplier'
+  ADDITIONAL_IMAGE_TYPE = 'Product / Additional'
+
   # -----------------------------------------------------------------------------
 
   self.table_name = 'products'
@@ -24,7 +31,8 @@ class Product < ActiveRecordBaseApp
   has_many :product_images, -> { order(:order_nbr) }
   has_many :images, through: :product_images
 
-  attr_accessor :image_file
+  # the product form's image uploads (not stored on products; see the image roles above)
+  attr_accessor :main_image_file, :supplier_main_image_file, :additional_image_files
 
   # supplier_id / product_type_id always follow the profile (kept on products for queries)
   before_validation :copy_from_supplier_product_profile
@@ -33,13 +41,27 @@ class Product < ActiveRecordBaseApp
   # adhering to it
   validate :sale_price_allowed
 
+  # attrs holds the product type's attributes (see ProductTypeAttr), keyed by attr key; each value must fit its data type
+  validate :attrs_match_product_type
+
   # an active product needs an active profile, so activating a product activates its profile too
   after_save :activate_supplier_product_profile, if: -> { saved_change_to_deleted?(from: true, to: false) }
 
   # -----------------------------------------------------------------------------
 
-  # the first active image, by order; works off preloaded product_images when present
-  def main_image = product_images.find { |product_image| product_image.active? && product_image.image.active? }&.image
+  # the images by role (see MAIN_IMAGE_TYPE); each works off preloaded product_images: { image: :image_type } when present
+  def main_image = product_images_of_type(MAIN_IMAGE_TYPE).first&.image
+
+  def supplier_main_image = product_images_of_type(SUPPLIER_MAIN_IMAGE_TYPE).first&.image
+
+  def additional_images = product_images_of_type(ADDITIONAL_IMAGE_TYPE).map(&:image)
+
+  # the active product images (with active images) of an image type, by order
+  def product_images_of_type(image_type_handle)
+    product_images.select do |product_image|
+      product_image.active? && product_image.image.active? && product_image.image.image_type&.handle == image_type_handle
+    end
+  end
 
   # -----------------------------------------------------------------------------
 
@@ -75,7 +97,75 @@ class Product < ActiveRecordBaseApp
 
   # -----------------------------------------------------------------------------
 
+  # a product type attribute's value (ex: attr_value(:width) => 42.5); nil when not set
+  def attr_value(key) = (attrs || {})[key.to_s]
+
+  # set attrs from a form's values (strings, keyed by attr key), typed for each of the product type's attributes:
+  # "42.5" => 42.5, "1" => true, a MultiSelect's list of values; a blank value is left out. a value that isn't valid
+  # for its type is kept as typed, so validation reports it
+  def assign_form_attrs(form_values)
+    form_values = form_values.to_h.stringify_keys
+    self.attrs = (product_type&.product_type_attrs&.includes(:product_attr) || []).each_with_object({}) do |type_attr, result|
+      value = cast_form_attr(type_attr.data_type, form_values[type_attr.key])
+      result[type_attr.key] = value unless value.nil?
+    end
+  end
+
+  # -----------------------------------------------------------------------------
+
   private
+
+  def cast_form_attr(data_type, raw)
+    return nil if raw.nil?
+
+    case data_type
+    when 'Boolean' then ActiveModel::Type::Boolean.new.cast(raw) || false
+    when 'MultiSelect' then Array(raw).map(&:to_s).compact_blank.uniq.presence
+    else
+      text = raw.to_s.strip
+      return nil if text.empty?
+
+      case data_type
+      when 'Integer', 'Reference' then Integer(text, 10, exception: false) || text
+      when 'Decimal' then Float(text, exception: false) || text
+      else text
+      end
+    end
+  end
+
+  def attrs_match_product_type
+    return if product_type.nil?
+
+    values = attrs || {}
+    type_attrs = product_type.product_type_attrs.includes(:product_attr, :product_type_attr_options).index_by(&:key)
+
+    (values.keys - type_attrs.keys).each { |key| errors.add(:attrs, "#{key} isn't an attribute of #{product_type.handle}") }
+
+    type_attrs.each do |key, type_attr|
+      value = values[key]
+      if value.nil? || value == '' || value == []
+        errors.add(:attrs, "#{type_attr.handle} is required") if type_attr.required?
+        next
+      end
+
+      problem = attr_value_problem(type_attr, value)
+      errors.add(:attrs, "#{type_attr.handle} #{problem}") if problem
+    end
+  end
+
+  # what's wrong with a value for its attr's data type (nil when it's fine)
+  def attr_value_problem(type_attr, value)
+    case type_attr.data_type
+    when 'Text' then 'must be text' unless value.is_a?(String)
+    when 'Boolean' then 'must be yes or no' unless [true, false].include?(value)
+    when 'Integer' then 'must be a whole number' unless value.is_a?(Integer)
+    when 'Decimal' then 'must be a number' unless value.is_a?(Numeric)
+    when 'Select' then "must be one of: #{type_attr.option_values.join(', ')}" unless type_attr.option_values.include?(value)
+    when 'MultiSelect'
+      "must be a list of: #{type_attr.option_values.join(', ')}" unless value.is_a?(Array) && value == value.uniq && (value - type_attr.option_values).empty?
+    when 'Reference' then 'must be an existing record' unless value.is_a?(Integer) && type_attr.reference_model&.exists?(value)
+    end
+  end
 
   def copy_from_supplier_product_profile
     return if supplier_product_profile.nil?

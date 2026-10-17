@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict ux3KRmbmADirBbJFGG2pQmvvCkWOYY2ZXloAg7HMyOe7KCwKwk2egRE5p2BYT0V
+\restrict kCM2hkX03H3rJbPm2lhf5hwJgmftp9KxZRnUKJMlwUOuwbts67U2DahHzA1PU37
 
 -- Dumped from database version 18.4 (Debian 18.4-1.pgdg12+1)
 -- Dumped by pg_dump version 18.4
@@ -97,7 +97,8 @@ CREATE TYPE public.product_attr_data_type AS ENUM (
     'Integer',
     'Decimal',
     'Select',
-    'Reference'
+    'Reference',
+    'MultiSelect'
 );
 
 
@@ -678,7 +679,8 @@ CREATE TABLE public.product_type_attrs (
     product_attr_id bigint NOT NULL,
     unit text,
     required boolean DEFAULT false NOT NULL,
-    reference_table text
+    reference_table text,
+    order_nbr smallint DEFAULT 0 NOT NULL
 );
 
 
@@ -761,6 +763,7 @@ CREATE TABLE public.products (
     v2_attrs jsonb,
     handle text NOT NULL,
     supplier_product_profile_id bigint NOT NULL,
+    attrs jsonb DEFAULT '{}'::jsonb NOT NULL,
     CONSTRAINT pick_location_or_pull_location CHECK (((pull_location_id IS NULL) OR (pick_location_id IS NULL))),
     CONSTRAINT pick_nbr_required_with_pick_location CHECK (((pick_location_id IS NULL) OR (pick_nbr IS NOT NULL))),
     CONSTRAINT pull_nbr_required_with_pull_location CHECK (((pull_location_id IS NULL) OR (pull_nbr IS NOT NULL)))
@@ -1741,6 +1744,13 @@ CREATE UNIQUE INDEX product_types_uk_abbreviation ON public.product_types USING 
 
 
 --
+-- Name: products_idx_attrs; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX products_idx_attrs ON public.products USING gin (attrs jsonb_path_ops);
+
+
+--
 -- Name: suppliers_uk_abbreviation; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -2085,5 +2095,5 @@ ALTER TABLE ONLY public.user_sites
 -- PostgreSQL database dump complete
 --
 
-\unrestrict ux3KRmbmADirBbJFGG2pQmvvCkWOYY2ZXloAg7HMyOe7KCwKwk2egRE5p2BYT0V
+\unrestrict kCM2hkX03H3rJbPm2lhf5hwJgmftp9KxZRnUKJMlwUOuwbts67U2DahHzA1PU37
 

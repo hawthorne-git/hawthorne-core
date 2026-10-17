@@ -16,6 +16,9 @@ class ProductImage < ActiveRecordBaseApp
   belongs_to :product
   belongs_to :image
 
+  # the image type sets the product image's role (see Product::MAIN_IMAGE_TYPE)
+  delegate :image_type, to: :image
+
   # -----------------------------------------------------------------------------
 
 end
