@@ -21,8 +21,7 @@ class Product < ActiveRecordBaseApp
 
   # -----------------------------------------------------------------------------
 
-  # pricing comes from the profile; optional until every product has one
-  # (then products.supplier_product_profile_id is set NOT NULL)
+  # pricing comes from the profile (required: see the validation below, which names it on the form)
   belongs_to :supplier_product_profile, optional: true
   belongs_to :product_type
   belongs_to :supplier
@@ -37,12 +36,24 @@ class Product < ActiveRecordBaseApp
   # supplier_id / product_type_id always follow the profile (kept on products for queries)
   before_validation :copy_from_supplier_product_profile
 
+  # rules that depend on other records (the profile's current price, the type's current attributes) are only checked
+  # when this product's own values change, so a later price drop or a newly required attribute never blocks an
+  # unrelated save (ex: inactivating it, or changing its inventory)
+
+  validates :supplier_product_profile, presence: true
+
+  # choosing a profile for an active product: it must be active (activating a product activates its profile instead)
+  validate :supplier_product_profile_active, if: -> { active? && supplier_product_profile_id_changed? }
+
   # the sale price is advertised on hawthorne, so it must beat the regular price; it may go below MAP, even while
   # adhering to it
-  validate :sale_price_allowed
+  validate :sale_price_allowed, if: -> { sale_price_changed? || supplier_product_profile_id_changed? }
 
   # attrs holds the product type's attributes (see ProductTypeAttr), keyed by attr key; each value must fit its data type
-  validate :attrs_match_product_type
+  validate :attrs_match_product_type, if: -> { attrs_changed? || product_type_id_changed? }
+
+  # a GTIN identifies one product (products_uk_gtin)
+  validate :gtin_unique, if: -> { gtin.present? && gtin_changed? }
 
   # an active product needs an active profile, so activating a product activates its profile too
   after_save :activate_supplier_product_profile, if: -> { saved_change_to_deleted?(from: true, to: false) }
@@ -178,11 +189,19 @@ class Product < ActiveRecordBaseApp
     supplier_product_profile.activate if supplier_product_profile&.deleted?
   end
 
+  def supplier_product_profile_active
+    errors.add(:supplier_product_profile, 'is inactive') if supplier_product_profile&.deleted?
+  end
+
   def sale_price_allowed
     return if sale_price.nil? || supplier_product_profile.nil?
 
     regular = hawthorne_price
-    errors.add(:sale_price, "must be below the regular price (#{format_price(regular)})") if regular && sale_price >= regular
+    errors.add(:sale_price, "must be below the regular Hawthorne price (#{format_price(regular)})") if regular && sale_price >= regular
+  end
+
+  def gtin_unique
+    errors.add(:base, 'GTIN already exists') if Product.where(gtin:).where.not(product_id:).exists?
   end
 
   def format_price(value) = ActiveSupport::NumberHelper.number_to_currency(value)

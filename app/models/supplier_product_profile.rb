@@ -28,6 +28,9 @@ class SupplierProductProfile < ActiveRecordBaseApp
   # once products use the profile, its supplier and product type can't change (products copy both from their profile)
   validate :supplier_and_product_type_locked_once_used
 
+  # an active product needs an active profile, so a profile can't be inactivated while active products use it
+  validate :no_active_products_when_inactivating
+
   # landed_cost and loaded_cost are captured on every save, which also clears both refresh flags
   before_save :capture_costs
 
@@ -212,6 +215,13 @@ class SupplierProductProfile < ActiveRecordBaseApp
   # -----------------------------------------------------------------------------
 
   private
+
+  def no_active_products_when_inactivating
+    return unless persisted? && deleted? && deleted_changed?
+
+    count = products.where(deleted: false).count
+    errors.add(:base, "Cannot be set as inactive while #{count} active #{'product'.pluralize(count)} #{count == 1 ? 'uses' : 'use'} it") if count.positive?
+  end
 
   def supplier_and_product_type_locked_once_used
     return unless persisted? && (supplier_id_changed? || product_type_id_changed?)
