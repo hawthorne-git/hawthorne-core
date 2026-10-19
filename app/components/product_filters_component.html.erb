@@ -1,0 +1,180 @@
+<%= form_with url: @url, method: :get, class: 'product-filters', data: { turbo: false } do %>
+  <%# applying a filter keeps the current sort %>
+  <% unless @filter.default_sort? %>
+    <input type='hidden' name='sort' value='<%= @filter.sort %>'>
+  <% end %>
+  <div class='product-filters__left'>
+    <button type='button' class='product-filters__chip' commandfor='filter-drawer' command='show-modal'>
+      <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' aria-hidden='true'>
+        <path d='M3 6h9M15 6h2M3 14h2M8 14h9' />
+        <circle cx='13.5' cy='6' r='1.5' />
+        <circle cx='6.5' cy='14' r='1.5' />
+      </svg>
+      Filter
+    </button>
+
+    <details class='product-filters__dropdown'>
+      <summary class='product-filters__chip<%= ' product-filters__chip--active' if @filter.selected_supplier_tokens.any? %>'>
+        <%= label('Supplier', @filter.selected_supplier_tokens) %>
+        <svg class='product-filters__chevron' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'>
+          <path d='M5 8l5 5 5-5' />
+        </svg>
+      </summary>
+      <div class='product-filters__panel'>
+        <% @filter.supplier_options.each do |supplier, count| %>
+          <label class='product-filters__option'>
+            <input type='checkbox' name='supplier[]' value='<%= supplier.token %>'<%= ' checked' if @filter.selected_supplier_tokens.include?(supplier.token) %>>
+            <span><%= supplier.handle %></span>
+            <span class='product-filters__count'><%= count %></span>
+          </label>
+        <% end %>
+        <button type='submit' class='product-filters__apply'>Apply</button>
+      </div>
+    </details>
+
+    <details class='product-filters__dropdown'>
+      <summary class='product-filters__chip<%= ' product-filters__chip--active' if @filter.selected_price_ranges.any? %>'>
+        <%= label('Price Range', @filter.selected_price_ranges) %>
+        <svg class='product-filters__chevron' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'>
+          <path d='M5 8l5 5 5-5' />
+        </svg>
+      </summary>
+      <div class='product-filters__panel'>
+        <% @filter.price_range_options.each do |key, text, count| %>
+          <label class='product-filters__option'>
+            <input type='checkbox' name='price[]' value='<%= key %>'<%= ' checked' if @filter.selected_price_ranges.include?(key) %>>
+            <span><%= text %></span>
+            <span class='product-filters__count'><%= count %></span>
+          </label>
+        <% end %>
+        <button type='submit' class='product-filters__apply'>Apply</button>
+      </div>
+    </details>
+
+    <% if @filter.any_selected? %>
+      <%= link_to 'Clear all', listing_path(supplier: [], price: []), class: 'product-filters__clear' %>
+    <% end %>
+  </div>
+
+  <div class='product-filters__right'>
+    <span class='product-filters__total'><%= pluralize(@filter.products.size, 'item') %></span>
+    <details class='product-filters__dropdown'>
+      <summary class='product-filters__chip<%= ' product-filters__chip--active' unless @filter.default_sort? %>'>
+        Sort By
+        <svg class='product-filters__chevron' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'>
+          <path d='M5 8l5 5 5-5' />
+        </svg>
+      </summary>
+      <div class='product-filters__panel product-filters__panel--right'>
+        <% ProductFilter::SORTS.each do |key, text| %>
+          <% selected = key == @filter.sort %>
+          <%= link_to listing_path(sort: key), class: "product-filters__sort#{' product-filters__sort--selected' if selected}", 'aria-current': (true if selected) do %>
+            <span><%= text %></span>
+            <% if selected %>
+              <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'>
+                <path d='M4 10l4 4 8-8' />
+              </svg>
+            <% end %>
+          <% end %>
+        <% end %>
+      </div>
+    </details>
+  </div>
+<% end %>
+
+<%# the filter drawer: every filter in one window on the left, opened by the filter button; nothing applies until view %>
+<dialog id='filter-drawer' class='filter-drawer' aria-label='Filter'>
+  <%= form_with url: @url, method: :get, class: 'filter-drawer__form', data: { turbo: false, facets: @filter.facets.to_json } do %>
+    <% unless @filter.default_sort? %>
+      <input type='hidden' name='sort' value='<%= @filter.sort %>'>
+    <% end %>
+    <div class='filter-drawer__header'>
+      <h2 class='filter-drawer__title'>Filter</h2>
+      <button type='button' class='filter-drawer__close' commandfor='filter-drawer' command='close' aria-label='Close'>&times;</button>
+    </div>
+
+    <div class='filter-drawer__body'>
+      <details class='filter-drawer__section' open>
+        <summary>
+          Supplier
+          <svg class='product-filters__chevron' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'>
+            <path d='M5 8l5 5 5-5' />
+          </svg>
+        </summary>
+        <% @filter.suppliers.each do |supplier| %>
+          <label class='product-filters__option'>
+            <input type='checkbox' name='supplier[]' value='<%= supplier.token %>'<%= ' checked' if @filter.selected_supplier_tokens.include?(supplier.token) %>>
+            <span><%= supplier.handle %></span>
+          </label>
+        <% end %>
+      </details>
+
+      <details class='filter-drawer__section' open>
+        <summary>
+          Price Range
+          <svg class='product-filters__chevron' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'>
+            <path d='M5 8l5 5 5-5' />
+          </svg>
+        </summary>
+        <% ProductFilter::PRICE_RANGES.each do |key, (text, _, _)| %>
+          <label class='product-filters__option'>
+            <input type='checkbox' name='price[]' value='<%= key %>'<%= ' checked' if @filter.selected_price_ranges.include?(key) %>>
+            <span><%= text %></span>
+          </label>
+        <% end %>
+      </details>
+    </div>
+
+    <div class='filter-drawer__footer'>
+      <button type='button' class='filter-drawer__clear' data-filter-clear>Clear</button>
+      <button type='submit' class='filter-drawer__view'>View (<span data-filter-total><%= @filter.products.size %></span>)</button>
+    </div>
+  <% end %>
+</dialog>
+
+<script>
+  // registered once per page:
+  // - one filter dropdown open at a time, and a click outside closes it
+  // - the filter drawer closes on a backdrop click, opens / closes for browsers without invoker commands, and its
+  //   view button counts the products matching the checked boxes (from the form's data-facets), as they change
+  if (!window.productFiltersReady) {
+    window.productFiltersReady = true;
+
+    const updateTotal = (form) => {
+      const checked = (name) => [...form.querySelectorAll(`input[name="${name}[]"]:checked`)].map((input) => input.value);
+      const suppliers = checked('supplier');
+      const prices = checked('price');
+      const total = JSON.parse(form.dataset.facets).filter(([supplier, price]) => {
+        return (suppliers.length === 0 || suppliers.includes(supplier)) && (prices.length === 0 || prices.includes(price));
+      }).length;
+      form.querySelector('[data-filter-total]').textContent = total;
+    };
+
+    document.addEventListener('click', (event) => {
+      document.querySelectorAll('.product-filters__dropdown[open]').forEach((dropdown) => {
+        if (!dropdown.contains(event.target)) dropdown.open = false;
+      });
+      if (event.target.matches('dialog.filter-drawer')) {
+        event.target.close();
+        return;
+      }
+      const clear = event.target.closest('[data-filter-clear]');
+      if (clear) {
+        const form = clear.closest('form');
+        form.querySelectorAll('input[type="checkbox"]').forEach((input) => { input.checked = false; });
+        updateTotal(form);
+        return;
+      }
+      const invoker = event.target.closest('button[commandfor="filter-drawer"]');
+      if (invoker && !('command' in HTMLButtonElement.prototype)) {
+        const drawer = document.getElementById('filter-drawer');
+        invoker.getAttribute('command') === 'show-modal' ? drawer.showModal() : drawer.close();
+      }
+    });
+
+    document.addEventListener('change', (event) => {
+      const form = event.target.closest('.filter-drawer__form');
+      if (form) updateTotal(form);
+    });
+  }
+</script>

@@ -19,6 +19,10 @@ class Product < ActiveRecordBaseApp
 
   def id = product_id
 
+  # the storefront url's path segment: the name for people / search engines, then the token, which does the lookup
+  # (ex: acorn-and-amber-oak-grove-quilt-kit-rtym372n6r9t). not to_param, which stays the id for the admin's routes
+  def url_slug = "#{handle.parameterize}-#{token.downcase}"
+
   # -----------------------------------------------------------------------------
 
   # pricing comes from the profile (required: see the validation below, which names it on the form)

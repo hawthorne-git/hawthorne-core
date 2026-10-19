@@ -62,23 +62,17 @@ module HawthorneCore::PageSectionsHelper
 
   # -----------------------------------------------------------------------------
 
-  # render an <img> for an image referenced by id in the section's content_attrs.
-  # looks up the Image and renders its attached active storage
-  # file. renders nothing when the id is absent, the image is missing, or it has
-  # no attached file, so a section can exist before its image is set.
-  #
-  # in deployed environments the image is served through cloudflare's
-  # transformation cdn (compressed + resized per device) via a responsive
-  # srcset. locally there is no cloudflare in front of the app, so it falls back
-  # to the plain active storage url and nothing breaks in development.
+  # render an <img> (see ImageComponent) for an image referenced by id in the
+  # section's content_attrs, served through cloudflare's transformation cdn
+  # (compressed + resized per device) via a responsive srcset. renders nothing
+  # when the id is absent, the image is missing, or it has no stored file, so a
+  # section can exist before its image is set.
   def page_section_image_tag(section, key: 'image_id', sizes: '100vw')
     image_id = section.content_attrs[key]
     return if image_id.blank?
     image = Image.find_by(image_id: image_id)
-    return if image.nil? || !image.file.attached?
-    return image_tag(image.file) if Rails.env.development? || Rails.env.test?
-    srcset = IMAGE_WIDTHS.map { |w| "#{media_url_for_key(image.file_key, width: w, version: image.file_version)} #{w}w" }.join(', ')
-    image_tag(media_url_for_key(image.file_key, width: IMAGE_WIDTHS.last, version: image.file_version), srcset: srcset, sizes: sizes)
+    return if image&.file_key.blank?
+    render(ImageComponent.new(image: image, widths: IMAGE_WIDTHS, sizes: sizes, loading: nil))
   end
 
   # -----------------------------------------------------------------------------

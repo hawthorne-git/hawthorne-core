@@ -29,7 +29,7 @@
   start_over_message = "Need to change your email? #{link_to 'Start over', sign_in_path, data: { turbo: :false }}"
 %>
 
-<%= render HawthorneCore::TitleComponent.new(title:) %>
+<%= render TitleComponent.new(title:) %>
 <%= render HawthorneCore::Form::FormWrapperComponent.new(instruction_message:) do %>
   <%= render partial: '/hawthorne_core/user/verify_code_failed', locals: { code_not_set:, code_expired:, code_max_failed_attempts_reached:, code_not_match: } if from_magic_link %>
   <%= form_with url: do |form| %>

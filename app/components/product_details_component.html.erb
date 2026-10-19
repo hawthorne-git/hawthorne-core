@@ -1,0 +1,70 @@
+<%
+  regular = regular_price
+  shopper = shopper_price
+  savings = savings_percent(regular, shopper)
+  gallery = images
+%>
+<div class='product-details<%= ' product-details--page' if @full_page %>'>
+  <div class='product-details__gallery'>
+    <% if gallery.empty? %>
+      <div class='product-details__no-image'>No image</div>
+    <% else %>
+      <div class='product-details__track'>
+        <% gallery.each do |gallery_image| %>
+          <div class='product-details__slide'><%= image(gallery_image) %></div>
+        <% end %>
+      </div>
+      <% if gallery.size > 1 %>
+        <div class='product-details__arrows'>
+          <button type='button' class='product-details__arrow' data-gallery-step='-1' aria-label='Previous image'>&larr;</button>
+          <button type='button' class='product-details__arrow' data-gallery-step='1' aria-label='Next image'>&rarr;</button>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+  <div class='product-details__info'>
+    <% unless @full_page %>
+      <button type='button' class='product-details__close' commandfor='<%= @dialog_id %>' command='close' aria-label='Close' autofocus>&times;</button>
+    <% end %>
+    <%= content_tag(@full_page ? :h1 : :h2, @product.handle, class: 'product-details__name') %>
+    <p class='product-card__supplier product-details__supplier'><%= @product.supplier_product_profile.supplier.handle %></p>
+    <% if shopper %>
+      <div class='product-details__prices'>
+        <div>
+          <p class='product-details__price<%= ' product-details__price--now' if savings %>'><%= number_to_currency(shopper) %></p>
+          <% if savings %>
+            <p class='product-details__price-note'>You save <%= savings %>%</p>
+          <% end %>
+        </div>
+        <% if savings %>
+          <div>
+            <s class='product-details__price product-details__price--was'><%= number_to_currency(regular) %></s>
+            <p class='product-details__price-note'>Regular price</p>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+    <% if @product.description.present? %>
+      <p class='product-details__description'><%= description %></p>
+    <% end %>
+    <%# placeholder until the cart exists %>
+    <button type='button' class='product-details__add' disabled>Add to cart</button>
+    <p class='product-details__coming-soon'>Shopping cart coming soon</p>
+    <% unless @full_page %>
+      <%= link_to 'View full product details', product_path, class: 'product-details__full-link' %>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  // gallery arrows: scroll the image track one image left / right. registered once per page
+  if (!window.productGalleryReady) {
+    window.productGalleryReady = true;
+    document.addEventListener('click', (event) => {
+      const step = event.target.closest('[data-gallery-step]');
+      if (!step) return;
+      const track = step.closest('.product-details__gallery').querySelector('.product-details__track');
+      track.scrollBy({ left: track.clientWidth * Number(step.dataset.galleryStep), behavior: 'smooth' });
+    });
+  }
+</script>

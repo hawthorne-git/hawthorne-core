@@ -1,0 +1,5 @@
+<% if image? %>
+  <%= image_tag(src, **image_options) %>
+<% else %>
+  <%= @empty %>
+<% end %>

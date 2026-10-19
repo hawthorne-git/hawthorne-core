@@ -15,15 +15,19 @@ class Marketplace < ActiveRecordBaseApp
   def id = marketplace_id
 
   # our own site; the only marketplace with sale and member prices
-  HAWTHORNE_HANDLE = 'Hawthorne'
+  HAWTHORNE_ID = 1
 
-  def self.hawthorne = find_by(handle: HAWTHORNE_HANDLE)
+  # looked up once per process (the id never changes); saving the hawthorne marketplace clears it in the process
+  # that saved it, so its rates stay current there. other running apps keep the loaded rates until restarted
+  def self.hawthorne = @hawthorne ||= find_by(marketplace_id: HAWTHORNE_ID)
 
-  def hawthorne? = handle == HAWTHORNE_HANDLE
+  def hawthorne? = id == HAWTHORNE_ID
 
   # -----------------------------------------------------------------------------
 
   has_many :supplier_product_profile_prices
+
+  after_commit :clear_hawthorne, if: :hawthorne?
 
   # when a marketplace is added, reactivated, or a price rate changes, recalculate
   # every profile's price on it in the background (one after_commit for both events;
@@ -35,6 +39,8 @@ class Marketplace < ActiveRecordBaseApp
   private
 
   def refresh_prices = RefreshMarketplacePricesJob.perform_later(marketplace_id:)
+
+  def clear_hawthorne = self.class.instance_variable_set(:@hawthorne, nil)
 
   # -----------------------------------------------------------------------------
 

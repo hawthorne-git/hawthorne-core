@@ -1,0 +1,60 @@
+<% if @products.empty? %>
+  <p class='product-list__empty'>No products are available right now.</p>
+<% else %>
+  <ul class='product-list__grid'>
+    <% @products.each do |product| %>
+      <%
+        regular = regular_price(product)
+        shopper = shopper_price(product)
+      %>
+      <li class='product-card'>
+        <div class='product-card__media'>
+          <%= link_to image_for(product), product_path(product), class: 'product-card__image-link', tabindex: -1, 'aria-hidden': true %>
+          <button type='button' class='product-card__quick-view' commandfor='<%= quick_view_id(product) %>' command='show-modal' aria-label='Quick view: <%= product.handle %>'>
+            <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' aria-hidden='true'>
+              <path d='M12 6v12M6 12h12' />
+            </svg>
+          </button>
+        </div>
+        <div class='product-card__body'>
+          <p class='product-card__supplier'><%= product.supplier_product_profile.supplier.handle %></p>
+          <div class='product-card__row'>
+            <h2 class='product-card__name'><%= link_to product.handle, product_path(product) %></h2>
+            <p class='product-card__price'>
+              <% if shopper && regular && shopper < regular %>
+                <span class='product-card__price--now'><%= number_to_currency(shopper) %></span>
+                <s class='product-card__price--was'><%= number_to_currency(regular) %></s>
+              <% elsif shopper %>
+                <%= number_to_currency(shopper) %>
+              <% end %>
+            </p>
+          </div>
+        </div>
+
+        <%# quick view: opened by the plus button above; closed by the x, escape, or a click on the backdrop %>
+        <dialog id='<%= quick_view_id(product) %>' class='quick-view' aria-label='<%= product.handle %>'>
+          <%= render ProductDetailsComponent.new(product:, logged_in: @logged_in, dialog_id: quick_view_id(product)) %>
+        </dialog>
+      </li>
+    <% end %>
+  </ul>
+
+  <script>
+    // quick view behavior the browser doesn't provide: closing on a backdrop click, and opening / closing for browsers
+    // without invoker commands (commandfor / command). registered once per page.
+    if (!window.quickViewReady) {
+      window.quickViewReady = true;
+      document.addEventListener('click', (event) => {
+        if (event.target.matches('dialog.quick-view')) {
+          event.target.close();
+          return;
+        }
+        const invoker = event.target.closest('.product-list__grid button[commandfor]');
+        if (invoker && !('command' in HTMLButtonElement.prototype)) {
+          const dialog = document.getElementById(invoker.getAttribute('commandfor'));
+          invoker.getAttribute('command') === 'show-modal' ? dialog.showModal() : dialog.close();
+        }
+      });
+    }
+  </script>
+<% end %>
