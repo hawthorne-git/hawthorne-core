@@ -15,13 +15,13 @@ class Marketplace < ActiveRecordBaseApp
   def id = marketplace_id
 
   # our own site; the only marketplace with sale and member prices
-  HAWTHORNE_ID = 1
+  HAWTHORNE_HANDLE = 'Hawthorne'
 
   # looked up once per process (the id never changes); saving the hawthorne marketplace clears it in the process
   # that saved it, so its rates stay current there. other running apps keep the loaded rates until restarted
-  def self.hawthorne = @hawthorne ||= find_by(marketplace_id: HAWTHORNE_ID)
+  def self.hawthorne = @hawthorne ||= find_by(handle: HAWTHORNE_HANDLE)
 
-  def hawthorne? = id == HAWTHORNE_ID
+  def hawthorne? = handle == HAWTHORNE_HANDLE
 
   # -----------------------------------------------------------------------------
 
