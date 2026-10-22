@@ -62,10 +62,9 @@ class Product < ActiveRecordBaseApp
   # an active product needs an active profile, so activating a product activates its profile too
   after_save :activate_supplier_product_profile, if: -> { saved_change_to_deleted?(from: true, to: false) }
 
-  # an active sewing kit with no Project set gets one from its supplier main image (see Ai::SewingKitProjectJob). the
-  # wait lets a form attach its images first, since they're saved after the product
-  after_commit -> { Ai::SewingKitProjectJob.set(wait: 1.minute).perform_later(product_id:) }, on: [:create, :update],
-               if: -> { active? && product_type_id == ProductType.sewing_kit_id && attr_value(:project).blank? }
+  # an active sewing kit with no Project set gets one from its supplier main image (see Ai::SewingKitProjectJob); also
+  # queued as a supplier main image is added (see ProductImage), since a form saves its images after the product
+  after_commit -> { Ai::SewingKitProjectJob.perform_later(product_id:) }, on: [:create, :update], if: :project_classifiable?
 
   # -----------------------------------------------------------------------------
 
@@ -116,6 +115,9 @@ class Product < ActiveRecordBaseApp
   end
 
   # -----------------------------------------------------------------------------
+
+  # an active sewing kit with no Project set, so one can be set from its supplier main image (see Ai::SewingKitProjectJob)
+  def project_classifiable? = active? && product_type_id == ProductType.sewing_kit_id && attr_value(:project).blank?
 
   # a product type attribute's value (ex: attr_value(:width) => 42.5); nil when not set
   def attr_value(key) = (attrs || {})[key.to_s]

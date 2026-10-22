@@ -19,6 +19,10 @@ class ProductImage < ActiveRecordBaseApp
   # the image type sets the product image's role (see Product::MAIN_IMAGE_TYPE)
   delegate :image_type, to: :image
 
+  # a sewing kit with no Project set gets one from a supplier main image as soon as it's added (see Ai::SewingKitProjectJob)
+  after_commit -> { Ai::SewingKitProjectJob.perform_later(product_id:) }, on: :create,
+               if: -> { image.image_type&.handle == Product::SUPPLIER_MAIN_IMAGE_TYPE && product.project_classifiable? }
+
   # -----------------------------------------------------------------------------
 
 end

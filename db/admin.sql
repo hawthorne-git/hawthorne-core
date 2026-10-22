@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict VFvPFfaSwOZwSaZWCH79J69lxgfquhi0YyL7Y1ILgiAnvL40HWgm6z24EB37YgI
+\restrict UTpZh25wVpgRYR1bzE8GhOetWoyCukIB0rNQJsQcdi6ynulyEGX7w0uoF74DhZT
 
 -- Dumped from database version 18.4 (Debian 18.4-1.pgdg12+1)
 -- Dumped by pg_dump version 18.4
@@ -33,7 +33,8 @@ SET row_security = off;
 CREATE TYPE public.ai_vendor AS ENUM (
     'Anthropic',
     'OpenAI',
-    'Google'
+    'Google',
+    'TypeSafe'
 );
 
 
@@ -961,5 +962,5 @@ ALTER TABLE ONLY public.tasks
 -- PostgreSQL database dump complete
 --
 
-\unrestrict VFvPFfaSwOZwSaZWCH79J69lxgfquhi0YyL7Y1ILgiAnvL40HWgm6z24EB37YgI
+\unrestrict UTpZh25wVpgRYR1bzE8GhOetWoyCukIB0rNQJsQcdi6ynulyEGX7w0uoF74DhZT
 
