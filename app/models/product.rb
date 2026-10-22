@@ -6,11 +6,12 @@ class Product < ActiveRecordBaseApp
   has_paper_trail versions: { class_name: 'Version' }
 
   # a product image's role comes from its image type (by handle): one main image (what hawthorne shows, ex: a lifestyle
-  # photo), at most one supplier main image (the supplier's own, ex: a flat image), and any number of additional images
-  # in order (product_images.order_nbr)
+  # photo), at most one supplier main image (the supplier's own, ex: a flat image), any number of additional images in
+  # order (product_images.order_nbr), and for a sewing kit, at most one requirements image (what's needed to make it)
   MAIN_IMAGE_TYPE = 'Product / Main'
   SUPPLIER_MAIN_IMAGE_TYPE = 'Product / Main / Supplier'
   ADDITIONAL_IMAGE_TYPE = 'Product / Additional'
+  SEWING_KIT_REQUIREMENTS_IMAGE_TYPE = 'Product / Sewing Kit / Requirements'
 
   # -----------------------------------------------------------------------------
 
@@ -35,7 +36,7 @@ class Product < ActiveRecordBaseApp
   has_many :images, through: :product_images
 
   # the product form's image uploads (not stored on products; see the image roles above)
-  attr_accessor :main_image_file, :supplier_main_image_file, :additional_image_files
+  attr_accessor :main_image_file, :supplier_main_image_file, :additional_image_files, :sewing_kit_requirements_image_file
 
   # supplier_id / product_type_id always follow the profile (kept on products for queries)
   before_validation :copy_from_supplier_product_profile
@@ -74,6 +75,8 @@ class Product < ActiveRecordBaseApp
   def supplier_main_image = product_images_of_type(SUPPLIER_MAIN_IMAGE_TYPE).first&.image
 
   def additional_images = product_images_of_type(ADDITIONAL_IMAGE_TYPE).map(&:image)
+
+  def sewing_kit_requirements_image = product_images_of_type(SEWING_KIT_REQUIREMENTS_IMAGE_TYPE).first&.image
 
   # the active product images (with active images) of an image type, by order
   def product_images_of_type(image_type_handle)
@@ -116,8 +119,10 @@ class Product < ActiveRecordBaseApp
 
   # -----------------------------------------------------------------------------
 
+  def sewing_kit? = product_type_id == ProductType.sewing_kit_id
+
   # an active sewing kit with no Project set, so one can be set from its supplier main image (see Ai::SewingKitProjectJob)
-  def project_classifiable? = active? && product_type_id == ProductType.sewing_kit_id && attr_value(:project).blank?
+  def project_classifiable? = active? && sewing_kit? && attr_value(:project).blank?
 
   # a product type attribute's value (ex: attr_value(:width) => 42.5); nil when not set
   def attr_value(key) = (attrs || {})[key.to_s]
