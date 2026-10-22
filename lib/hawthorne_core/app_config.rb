@@ -62,6 +62,8 @@ module HawthorneCore
 
     def self.twilio_us_phone_number = fetch_env_attr('TWILIO_US_PHONE_NUMBER')
 
+    def self.typesafe_api_key = fetch_env_attr('TYPESAFE_API_KEY')
+
     # -----------------------------------------------------------------------------
 
     private
