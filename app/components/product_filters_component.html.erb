@@ -70,13 +70,14 @@
 
     <% if @filter.quilt_size_filter? %>
       <details class='product-filters__dropdown'>
-        <summary class='product-filters__chip<%= ' product-filters__chip--active' if @filter.selected_quilt_sizes.any? %>'>
-          <%= label('Size', @filter.selected_quilt_sizes) %>
+        <summary class='product-filters__chip<%= ' product-filters__chip--active' if @filter.selected_quilt_sizes.any? || @filter.custom_quilt_size? %>'>
+          <%= quilt_size_label %>
           <svg class='product-filters__chevron' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'>
             <path d='M5 8l5 5 5-5' />
           </svg>
         </summary>
-        <div class='product-filters__panel'>
+        <%# wider, so the width / length boxes have room beside their labels %>
+        <div class='product-filters__panel product-filters__panel--wide'>
           <% @filter.quilt_size_options.each do |key, text, count| %>
             <label class='product-filters__option'>
               <input type='checkbox' name='size[]' value='<%= key %>'<%= ' checked' if @filter.selected_quilt_sizes.include?(key) %>>
@@ -84,6 +85,23 @@
               <span class='product-filters__count'><%= count %></span>
             </label>
           <% end %>
+          <div class='product-filters__custom-price'>
+            <span class='product-filters__custom-price-or'>or</span>
+            <% quilt_size_sides.each do |side, text, min, max| %>
+              <div class='product-filters__custom-price-boxes product-filters__custom-size-boxes'>
+                <span class='product-filters__custom-size-side'><%= text %></span>
+                <label class='product-filters__price-box'>
+                  <input type='number' name='min_<%= side %>' value='<%= number_box_value(min) %>' min='0' step='any' inputmode='decimal' placeholder='Min' aria-label='Minimum <%= side %>, in inches' data-filter-custom-size>
+                  <span>″</span>
+                </label>
+                <span>to</span>
+                <label class='product-filters__price-box'>
+                  <input type='number' name='max_<%= side %>' value='<%= number_box_value(max) %>' min='0' step='any' inputmode='decimal' placeholder='Max' aria-label='Maximum <%= side %>, in inches' data-filter-custom-size>
+                  <span>″</span>
+                </label>
+              </div>
+            <% end %>
+          </div>
           <button type='submit' class='product-filters__apply'>Apply</button>
         </div>
       </details>
@@ -149,12 +167,12 @@
           <div class='product-filters__custom-price-boxes'>
             <label class='product-filters__price-box'>
               <span>$</span>
-              <input type='number' name='min_price' value='<%= price_box_value(@filter.min_price) %>' min='0' step='<%= @price_step || 'any' %>' inputmode='decimal' placeholder='Min' aria-label='Minimum price' data-filter-custom-price>
+              <input type='number' name='min_price' value='<%= number_box_value(@filter.min_price) %>' min='0' step='<%= @price_step || 'any' %>' inputmode='decimal' placeholder='Min' aria-label='Minimum price' data-filter-custom-price>
             </label>
             <span>to</span>
             <label class='product-filters__price-box'>
               <span>$</span>
-              <input type='number' name='max_price' value='<%= price_box_value(@filter.max_price) %>' min='0' step='<%= @price_step || 'any' %>' inputmode='decimal' placeholder='Max' aria-label='Maximum price' data-filter-custom-price>
+              <input type='number' name='max_price' value='<%= number_box_value(@filter.max_price) %>' min='0' step='<%= @price_step || 'any' %>' inputmode='decimal' placeholder='Max' aria-label='Maximum price' data-filter-custom-price>
             </label>
           </div>
         </div>
@@ -182,7 +200,7 @@
     </details>
 
     <% if @filter.any_selected? %>
-      <%= link_to 'Clear all', listing_path(type: [], size: [], difficulty: [], supplier: [], price: [], min_price: nil, max_price: nil, stock: []), class: 'product-filters__clear' %>
+      <%= link_to 'Clear all', listing_path(type: [], size: [], min_width: nil, max_width: nil, min_length: nil, max_length: nil, difficulty: [], supplier: [], price: [], min_price: nil, max_price: nil, stock: []), class: 'product-filters__clear' %>
     <% end %>
   </div>
 
@@ -257,6 +275,23 @@
               <span><%= text %></span>
             </label>
           <% end %>
+          <div class='product-filters__custom-price'>
+            <span class='product-filters__custom-price-or'>or</span>
+            <% quilt_size_sides.each do |side, text, min, max| %>
+              <div class='product-filters__custom-price-boxes product-filters__custom-size-boxes'>
+                <span class='product-filters__custom-size-side'><%= text %></span>
+                <label class='product-filters__price-box'>
+                  <input type='number' name='min_<%= side %>' value='<%= number_box_value(min) %>' min='0' step='any' inputmode='decimal' placeholder='Min' aria-label='Minimum <%= side %>, in inches' data-filter-custom-size>
+                  <span>″</span>
+                </label>
+                <span>to</span>
+                <label class='product-filters__price-box'>
+                  <input type='number' name='max_<%= side %>' value='<%= number_box_value(max) %>' min='0' step='any' inputmode='decimal' placeholder='Max' aria-label='Maximum <%= side %>, in inches' data-filter-custom-size>
+                  <span>″</span>
+                </label>
+              </div>
+            <% end %>
+          </div>
         </details>
       <% end %>
 
@@ -310,12 +345,12 @@
           <div class='product-filters__custom-price-boxes'>
             <label class='product-filters__price-box'>
               <span>$</span>
-              <input type='number' name='min_price' value='<%= price_box_value(@filter.min_price) %>' min='0' step='<%= @price_step || 'any' %>' inputmode='decimal' placeholder='Min' aria-label='Minimum price' data-filter-custom-price>
+              <input type='number' name='min_price' value='<%= number_box_value(@filter.min_price) %>' min='0' step='<%= @price_step || 'any' %>' inputmode='decimal' placeholder='Min' aria-label='Minimum price' data-filter-custom-price>
             </label>
             <span>to</span>
             <label class='product-filters__price-box'>
               <span>$</span>
-              <input type='number' name='max_price' value='<%= price_box_value(@filter.max_price) %>' min='0' step='<%= @price_step || 'any' %>' inputmode='decimal' placeholder='Max' aria-label='Maximum price' data-filter-custom-price>
+              <input type='number' name='max_price' value='<%= number_box_value(@filter.max_price) %>' min='0' step='<%= @price_step || 'any' %>' inputmode='decimal' placeholder='Max' aria-label='Maximum price' data-filter-custom-price>
             </label>
           </div>
         </div>
@@ -353,16 +388,23 @@
   // - a drawer section for one type (data-filter-when-type, ex: quilt size) shows only while that type is checked, and
   //   is cleared when it hides
   // - the price filter is price ranges or a custom min / max price (data-filter-custom-price), not both: checking a
-  //   range clears the custom price, and typing a custom price unchecks the ranges. empty price boxes aren't submitted
+  //   range clears the custom price, and typing a custom price unchecks the ranges. likewise the quilt size filter is
+  //   quilt sizes or a custom min / max width and length (data-filter-custom-size). empty boxes aren't submitted
   // - voice search (data-search-voice), in browsers that turn speech into text (Chrome, Edge, Safari; not Firefox):
   //   tapping the mic listens, writing what's heard into the search box as it's said, then searches (with voice=1, so
-  //   the search is saved as spoken) when the shopper stops talking; tapping it again stops listening
+  //   the search is saved as spoken) once the shopper pauses for a second; tapping it again stops listening
+  // - a search submits once: its buttons are disabled (the search button reads "Searching…") until the results load,
+  //   since Claude takes a second or two to answer and shoppers click again (often search, after a voice search)
   if (window.SpeechRecognition || window.webkitSpeechRecognition) {
     document.querySelectorAll('[data-search-voice]').forEach((button) => { button.hidden = false; });
   }
 
   if (!window.productFiltersReady) {
     window.productFiltersReady = true;
+
+    // how long a voice search waits, in milliseconds: for the shopper to finish once they pause, and to start talking
+    const VOICE_PAUSE = 1000;
+    const VOICE_START = 8000;
 
     let recognition = null;
 
@@ -380,18 +422,30 @@
       const placeholder = input.placeholder;
       let heard = '';
       let blocked = false;
+      let silence = null;
+
+      // stops listening after the given milliseconds without hearing anything new
+      const stopAfter = (wait) => {
+        clearTimeout(silence);
+        silence = setTimeout(() => recognition?.stop(), wait);
+      };
 
       recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
       recognition.lang = document.documentElement.lang || 'en-US';
       recognition.interimResults = true;
+      // the browser's own end of speech comes at the first short pause, so it listens continuously and stops itself
+      // once the shopper pauses for VOICE_PAUSE (or says nothing for VOICE_START)
+      recognition.continuous = true;
       recognition.onresult = (result) => {
-        heard = [...result.results].map((alternatives) => alternatives[0].transcript).join('').trim();
+        heard = [...result.results].map((alternatives) => alternatives[0].transcript).join(' ').replace(/\s+/g, ' ').trim();
         input.value = heard;
+        stopAfter(VOICE_PAUSE);
       };
       recognition.onerror = (error) => {
         blocked = error.error === 'not-allowed' || error.error === 'service-not-allowed';
       };
       recognition.onend = () => {
+        clearTimeout(silence);
         recognition = null;
         form.classList.remove('product-search--listening');
         button.setAttribute('aria-pressed', 'false');
@@ -414,6 +468,7 @@
       input.value = '';
       input.placeholder = 'Listening…';
       recognition.start();
+      stopAfter(VOICE_START);
     });
 
     const updateTotal = (form) => {
@@ -421,24 +476,41 @@
       const types = checked('type');
       form.querySelectorAll('[data-filter-when-type]').forEach((section) => {
         section.hidden = !types.includes(section.dataset.filterWhenType);
-        if (section.hidden) section.querySelectorAll('input').forEach((input) => { input.checked = false; });
+        if (section.hidden) {
+          section.querySelectorAll('input[type="checkbox"]').forEach((input) => { input.checked = false; });
+          section.querySelectorAll('[data-filter-custom-size]').forEach((input) => { input.value = ''; });
+        }
       });
       const suppliers = checked('supplier');
       const prices = checked('price');
       const sizes = checked('size');
       const difficulties = checked('difficulty');
       const stock = checked('stock');
-      const customPrice = (name) => parseFloat(form.querySelector(`input[name="${name}"]`)?.value);
-      let min = customPrice('min_price');
-      let max = customPrice('max_price');
-      if (min > max) [min, max] = [max, min];
-      const priceMatch = (key, amount) => {
-        if (isNaN(min) && isNaN(max)) return prices.length === 0 || prices.includes(key);
-        return amount !== null && (isNaN(min) || amount >= min) && (isNaN(max) || amount <= max);
+      // a custom min / max pair's limits (NaN when blank), swapped when the min is over the max
+      const customRange = (name) => {
+        const limit = (bound) => parseFloat(form.querySelector(`input[name="${bound}_${name}"]`)?.value);
+        const [min, max] = [limit('min'), limit('max')];
+        return min > max ? [max, min] : [min, max];
       };
-      const total = JSON.parse(form.dataset.facets).filter(([supplier, price, type, size, difficulty, amount, stocked]) => {
+      const custom = ([min, max]) => !isNaN(min) || !isNaN(max);
+      const within = (value, [min, max]) => {
+        if (!custom([min, max])) return true;
+        return value !== null && (isNaN(min) || value >= min) && (isNaN(max) || value <= max);
+      };
+      const priceRange = customRange('price');
+      const widthRange = customRange('width');
+      const lengthRange = customRange('length');
+      const priceMatch = (key, amount) => {
+        if (!custom(priceRange)) return prices.length === 0 || prices.includes(key);
+        return within(amount, priceRange);
+      };
+      const sizeMatch = (key, width, length) => {
+        if (!custom(widthRange) && !custom(lengthRange)) return sizes.length === 0 || sizes.includes(key);
+        return within(width, widthRange) && within(length, lengthRange);
+      };
+      const total = JSON.parse(form.dataset.facets).filter(([supplier, price, type, size, difficulty, amount, stocked, width, length]) => {
         return (suppliers.length === 0 || suppliers.includes(supplier)) && priceMatch(price, amount) &&
-          (types.length === 0 || types.includes(type)) && (sizes.length === 0 || sizes.includes(size)) &&
+          (types.length === 0 || types.includes(type)) && sizeMatch(size, width, length) &&
           (difficulties.length === 0 || difficulties.includes(difficulty)) && (stock.length === 0 || stock.includes(stocked));
       }).length;
       form.querySelector('[data-filter-total]').textContent = total;
@@ -456,7 +528,7 @@
       if (clear) {
         const form = clear.closest('form');
         form.querySelectorAll('input[type="checkbox"]').forEach((input) => { input.checked = false; });
-        form.querySelectorAll('[data-filter-custom-price]').forEach((input) => { input.value = ''; });
+        form.querySelectorAll('[data-filter-custom-price], [data-filter-custom-size]').forEach((input) => { input.value = ''; });
         updateTotal(form);
         return;
       }
@@ -476,28 +548,45 @@
       if (event.target.matches('input[name="price[]"]') && event.target.checked) {
         event.target.form.querySelectorAll('[data-filter-custom-price]').forEach((input) => { input.value = ''; });
       }
+      if (event.target.matches('input[name="size[]"]') && event.target.checked) {
+        event.target.form.querySelectorAll('[data-filter-custom-size]').forEach((input) => { input.value = ''; });
+      }
       const form = event.target.closest('.filter-drawer__form');
       if (form) updateTotal(form);
     });
 
     document.addEventListener('input', (event) => {
-      if (!event.target.matches('[data-filter-custom-price]')) return;
+      const ranges = event.target.matches('[data-filter-custom-price]') ? 'price' : event.target.matches('[data-filter-custom-size]') ? 'size' : null;
+      if (!ranges) return;
       if (event.target.value !== '') {
-        event.target.form.querySelectorAll('input[name="price[]"]').forEach((input) => { input.checked = false; });
+        event.target.form.querySelectorAll(`input[name="${ranges}[]"]`).forEach((input) => { input.checked = false; });
       }
       const form = event.target.closest('.filter-drawer__form');
       if (form) updateTotal(form);
     });
 
     document.addEventListener('submit', (event) => {
-      event.target.querySelectorAll('[data-filter-custom-price]').forEach((input) => { input.disabled = input.value === ''; });
+      event.target.querySelectorAll('[data-filter-custom-price], [data-filter-custom-size]').forEach((input) => { input.disabled = input.value === ''; });
+      if (!event.target.matches('.product-search')) return;
+      if (event.target.dataset.searching) {
+        event.preventDefault();
+        return;
+      }
+      event.target.dataset.searching = 'true';
+      event.target.querySelectorAll('button').forEach((button) => { button.disabled = true; });
+      event.target.querySelector('.product-search__button').textContent = 'Searching…';
     });
 
-    // a page restored by the back button keeps the boxes disabled on submit, so they're turned back on, and a voice
-    // search's flag, so a typed search from it isn't saved as spoken
+    // a page restored by the back button keeps the boxes and search buttons disabled on submit, so they're turned back
+    // on, and a voice search's flag, so a typed search from it isn't saved as spoken
     window.addEventListener('pageshow', () => {
-      document.querySelectorAll('[data-filter-custom-price]').forEach((input) => { input.disabled = false; });
+      document.querySelectorAll('[data-filter-custom-price], [data-filter-custom-size]').forEach((input) => { input.disabled = false; });
       document.querySelectorAll('[data-search-voice-flag]').forEach((input) => { input.remove(); });
+      document.querySelectorAll('.product-search[data-searching]').forEach((form) => {
+        delete form.dataset.searching;
+        form.querySelectorAll('button').forEach((button) => { button.disabled = false; });
+        form.querySelector('.product-search__button').textContent = 'Search';
+      });
     });
   }
 </script>

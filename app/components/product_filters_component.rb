@@ -47,14 +47,43 @@ class ProductFiltersComponent < ViewComponent::Base
   def price_range_label
     return label('Price Range', @filter.selected_price_ranges) unless @filter.custom_price?
     min, max = [@filter.min_price, @filter.max_price].map { |price| price && number_to_currency(price, precision: (price % 1).zero? ? 0 : 2) }
-    text = if min && max then "#{min} – #{max}"
-           elsif max then "Up to #{max}"
-           else "#{min} & up"
-           end
-    "Price Range: #{text}"
+    "Price Range: #{range_text(min, max)}"
   end
 
-  # a custom price box's value (ex: 90 rather than 90.0; blank without one)
-  def price_box_value(price) = price && ((price % 1).zero? ? price.to_i : price)
+  # the quilt size button's label: the custom size when there is one (ex: "Size: W 50″ – 70″, L 60″ & up"), else how
+  # many quilt sizes are checked
+  def quilt_size_label
+    return label('Size', @filter.selected_quilt_sizes) unless @filter.custom_quilt_size?
+    sides = [['W', @filter.min_width, @filter.max_width], ['L', @filter.min_length, @filter.max_length]]
+    parts = sides.filter_map do |side, min, max|
+      "#{side} #{range_text(inches_text(min), inches_text(max))}" if min || max
+    end
+    "Size: #{parts.join(', ')}"
+  end
+
+  # the custom quilt size's rows of min / max boxes: [side, label, min, max] (length only when the filter has one)
+  def quilt_size_sides
+    sides = [['width', 'Width', @filter.min_width, @filter.max_width]]
+    sides << ['length', 'Length', @filter.min_length, @filter.max_length] if @filter.quilt_lengths?
+    sides
+  end
+
+  # a custom price / size box's value (ex: 90 rather than 90.0; blank without one)
+  def number_box_value(number) = number && ((number % 1).zero? ? number.to_i : number)
+
+  # -----------------------------------------------------------------------------
+
+  private
+
+  # a min / max as text (ex: "$50 – $90", "Up to $90", "$50 & up"); at least one is given
+  def range_text(min, max)
+    if min && max then "#{min} – #{max}"
+    elsif max then "Up to #{max}"
+    else "#{min} & up"
+    end
+  end
+
+  # inches as text (ex: 60″, 81.5″; nil without any)
+  def inches_text(inches) = inches && "#{number_box_value(inches)}″"
 
 end

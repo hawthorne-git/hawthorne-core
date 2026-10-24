@@ -35,6 +35,9 @@ class ProductSearch
   # the stock value the answer uses for either
   ANY_STOCK = 'any'
 
+  # the answer's quilt width / length limits, in inches (the same names as ProductFilter's params)
+  QUILT_SIZE_LIMITS = %w[min_width max_width min_length max_length].freeze
+
   # -----------------------------------------------------------------------------
 
   # text: what the shopper typed
@@ -48,8 +51,8 @@ class ProductSearch
     @voice = voice
   end
 
-  # the listing's params for this search: search (the text, shown in the search box), plus the filters, price limits
-  # and keywords it asked for. the search is saved (when there is one) with how long it took to answer, then Claude's
+  # the listing's params for this search: search (the text, shown in the search box), plus the filters, price limits,
+  # quilt width / length limits and keywords it asked for. the search is saved (when there is one) with how long it took to answer, then Claude's
   # call (when it was asked) is logged
   def params
     return @params if defined?(@params)
@@ -83,7 +86,7 @@ class ProductSearch
       difficulty: answer['difficulties'],
       supplier: answer['suppliers'],
       stock: [answer['stock']].compact - [ANY_STOCK]
-    }.merge(price_params(answer['min_price'], answer['max_price'])).compact_blank
+    }.merge(price_params(answer['min_price'], answer['max_price']), quilt_size_params(answer)).compact_blank
   end
 
   # saves the search, with how long it took to answer in milliseconds (the cache lookup, plus the call to Claude or the
@@ -176,6 +179,13 @@ class ProductSearch
     { price: ranges.keys }
   end
 
+  # the search's quilt width / length limits, in inches (ex: at least 30" wide); these win over quilt sizes, which are
+  # left out when there are any
+  def quilt_size_params(answer)
+    limits = QUILT_SIZE_LIMITS.to_h { |key| [key.to_sym, answer[key]] }.select { |_, inches| inches&.positive? }
+    limits.any? ? limits.merge(size: nil) : {}
+  end
+
   # the search's own words as keywords, for when Claude can't answer: each as typed, or singular when only that is in a
   # product's name or description (ex: fabrics => fabric), leaving out short and generic words, and words in no
   # product's name or description (ex: difficult), so one stray word doesn't empty the listing
@@ -201,6 +211,7 @@ class ProductSearch
       }
       properties[:type] = { type: 'string', enum: @filter.types + [ANY_TYPE] } if @filter.type_filter?
       properties[:sizes] = { type: 'array', items: { type: 'string', enum: ProductFilter::QUILT_SIZES.keys } } if @filter.quilt_sizes?
+      quilt_size_limits.each { |key| properties[key.to_sym] = { anyOf: [{ type: 'number' }, { type: 'null' }] } }
       properties[:difficulties] = { type: 'array', items: { type: 'string', enum: @filter.difficulties } } if @filter.difficulty_filter?
       properties[:suppliers] = { type: 'array', items: { type: 'string', enum: @filter.suppliers.map(&:token) } } if @filter.suppliers.any?
       { type: 'object', properties: properties, required: properties.keys, additionalProperties: false }
@@ -215,6 +226,7 @@ class ProductSearch
       "The store's options:\n",
       (option_list("Type (pick one, or \"#{ANY_TYPE}\")", @filter.types.map { |value| [value, @filter.type_label(value)] }) if @filter.type_filter?),
       (option_list('Quilt size (only for quilts; pick every size that fits), by the quilt\'s width', quilt_size_options) if @filter.quilt_sizes?),
+      quilt_size_limits_note,
       (option_list('Difficulty (pick every level that fits)', @filter.difficulties.map { |value| [value, @filter.difficulty_label(value)] }) if @filter.difficulty_filter?),
       (option_list('Supplier (pick every one the shopper names)', @filter.suppliers.map { |supplier| [supplier.token, supplier.handle] }) if @filter.suppliers.any?),
       option_list("Stock (pick one, or \"#{ANY_STOCK}\")", ProductFilter::STOCK_STATUSES.to_a)
@@ -223,6 +235,25 @@ class ProductSearch
 
   def option_list(heading, options)
     "#{heading}:\n#{options.map { |value, label| "- #{value}: #{label}" }.join("\n")}\n"
+  end
+
+  # the quilt width / length limits the listing offers: width with the quilt size filter, and length when it has one
+  def quilt_size_limits
+    return [] unless @filter.quilt_sizes?
+    @filter.quilt_lengths? ? QUILT_SIZE_LIMITS : QUILT_SIZE_LIMITS.grep(/width/)
+  end
+
+  # how to read the shopper's measurements into the quilt width / length limits (nil without them)
+  def quilt_size_limits_note
+    return if quilt_size_limits.empty?
+    dimensions = @filter.quilt_lengths? ? 'width and length' : 'width'
+    <<~NOTE
+      Quilt #{dimensions}, in inches (#{quilt_size_limits.join(', ')}; the width is the shorter side):
+      - Use these only when the shopper gives a measurement in inches (or feet, times 12); a named size (king, throw, baby) is a quilt size above. With a measurement, leave sizes empty and set the type to quilt.
+      - "at least 30 inches wide" or "30\" wide or more" is min_width 30; "no wider than 60 inches" is max_width 60; "between 50 and 70 inches wide" is min_width 50 and max_width 70.
+      - A measurement without a side (ex: "at least 60 inches") is the width. "60 x 80" or "60 by 80" is about width 60 and length 80: min / max 5 inches either side (min_width 55, max_width 65, min_length 75, max_length 85).
+      - With no measurement mentioned, these are all null.
+    NOTE
   end
 
   # the quilt sizes with their widths (ex: Lap & Throw, 50" to 68" wide)

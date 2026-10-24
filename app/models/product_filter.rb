@@ -1,7 +1,8 @@
 # the type / quilt size / difficulty / supplier / price range / stock filters on a product listing page (see
 # ProductFiltersComponent), applied to a scope of products. a search (see ProductSearch) narrows the products first, by
 # keywords matched against their names / descriptions. the price filter is either price ranges or a custom min / max
-# price, not both. prices are per shopper (sale / member prices), so they are filtered in ruby rather than in sql
+# price, not both; likewise the quilt size filter is either quilt sizes or a custom min / max width and length. prices
+# are per shopper (sale / member prices), so they are filtered in ruby rather than in sql
 class ProductFilter
 
   # the price range options, by param value: [label, min (inclusive), max (exclusive)]
@@ -41,34 +42,42 @@ class ProductFilter
   # the most keywords a search matches on
   MAX_KEYWORDS = 5
 
-  attr_reader :search, :keywords, :min_price, :max_price, :selected_types, :selected_quilt_sizes,
-              :selected_difficulties, :selected_supplier_tokens, :selected_price_ranges, :selected_stock, :sort
+  attr_reader :search, :keywords, :min_price, :max_price, :min_width, :max_width, :min_length, :max_length,
+              :selected_types, :selected_quilt_sizes, :selected_difficulties, :selected_supplier_tokens,
+              :selected_price_ranges, :selected_stock, :sort
 
   # scope: the listing's products; preload supplier_product_profile: [:supplier, :supplier_product_profile_prices]
   # params: the request's params (search = what the shopper typed, shown in the search box; keywords[] = words every
   #   product's name or description must contain; type[] = a type attr value, only one at a time; size[] = QUILT_SIZES
-  #   keys; difficulty[] = difficulty attr values; supplier[] = supplier tokens; price[] = PRICE_RANGES keys, or
+  #   keys, or min_width / max_width / min_length / max_length = a custom quilt size in inches, inclusive (which wins
+  #   over size[]); difficulty[] = difficulty attr values; supplier[] = supplier tokens; price[] = PRICE_RANGES keys, or
   #   min_price / max_price = a custom price range, inclusive (which wins over price[]); stock[] = a STOCK_STATUSES
   #   key, only one at a time; sort = a SORTS key)
   # logged_in: whether the shopper is signed in, so members are filtered / sorted by their member price
   # type_attr: the key of the product attr the type filter looks at (ex: 'project'); nil for no type filter
   # quilt_size_attr: the key of the product attr holding a quilt's width in inches (ex: 'width'), which the quilt size
   #   filter groups by while the QUILT_TYPE type is selected; nil for no quilt size filter
+  # quilt_length_attr: the key of the product attr holding a quilt's length in inches (ex: 'length'), for the custom
+  #   quilt size's min / max length; nil for a custom quilt size by width only
   # difficulty_attr: the key of the product attr the difficulty filter looks at (ex: 'difficulty'); nil for no
   #   difficulty filter
-  def initialize(scope, params:, logged_in:, type_attr: nil, quilt_size_attr: nil, difficulty_attr: nil)
+  def initialize(scope, params:, logged_in:, type_attr: nil, quilt_size_attr: nil, quilt_length_attr: nil,
+                 difficulty_attr: nil)
     @logged_in = logged_in
     @search = params[:search].to_s.squish.presence
     @keywords = Array(params[:keywords]).map { |keyword| keyword.to_s.squish.downcase }.compact_blank.uniq.first(MAX_KEYWORDS)
-    @min_price = price_param(params[:min_price])
-    @max_price = price_param(params[:max_price])
-    @min_price, @max_price = @max_price, @min_price if @min_price && @max_price && @min_price > @max_price
+    @min_price, @max_price = number_range_params(params[:min_price], params[:max_price])
     @products = scope.to_a.select { |product| keyword_match?(product) }
     @type_attr = type_attr&.to_s
     @quilt_size_attr = quilt_size_attr&.to_s
+    @quilt_length_attr = quilt_length_attr&.to_s
     @difficulty_attr = difficulty_attr&.to_s
     @selected_types = (Array(params[:type]).map(&:to_s) & types).first(1)
-    @selected_quilt_sizes = quilt_size_filter? ? Array(params[:size]).map(&:to_s) & QUILT_SIZES.keys : []
+    if quilt_size_filter?
+      @min_width, @max_width = number_range_params(params[:min_width], params[:max_width])
+      @min_length, @max_length = number_range_params(params[:min_length], params[:max_length]) if quilt_lengths?
+    end
+    @selected_quilt_sizes = quilt_size_filter? && !custom_quilt_size? ? Array(params[:size]).map(&:to_s) & QUILT_SIZES.keys : []
     @selected_difficulties = Array(params[:difficulty]).map(&:to_s) & difficulties
     @selected_supplier_tokens = Array(params[:supplier]).map(&:to_s) & supplier_tokens
     @selected_price_ranges = custom_price? ? [] : Array(params[:price]).map(&:to_s) & PRICE_RANGES.keys
@@ -87,8 +96,10 @@ class ProductFilter
 
   # the params for this listing with the given changes (ex: a different sort), leaving out empty / default values
   def params_with(**changes)
-    { search: @search, keywords: @keywords, min_price: price_value(@min_price), max_price: price_value(@max_price),
-      type: @selected_types, size: @selected_quilt_sizes, difficulty: @selected_difficulties,
+    { search: @search, keywords: @keywords, min_price: number_value(@min_price), max_price: number_value(@max_price),
+      type: @selected_types, size: @selected_quilt_sizes, min_width: number_value(@min_width),
+      max_width: number_value(@max_width), min_length: number_value(@min_length), max_length: number_value(@max_length),
+      difficulty: @selected_difficulties,
       supplier: @selected_supplier_tokens, price: @selected_price_ranges, stock: @selected_stock, sort: @sort }
       .merge(changes)
       .compact_blank
@@ -97,7 +108,7 @@ class ProductFilter
 
   def any_selected?
     [@selected_types, @selected_quilt_sizes, @selected_difficulties, @selected_supplier_tokens, @selected_price_ranges,
-     @selected_stock].any?(&:any?) || custom_price?
+     @selected_stock].any?(&:any?) || custom_price? || custom_quilt_size?
   end
 
   # whether the listing is narrowed by a search
@@ -105,6 +116,9 @@ class ProductFilter
 
   # whether the price filter is a custom min / max price (rather than price ranges)
   def custom_price? = @min_price.present? || @max_price.present?
+
+  # whether the quilt size filter is a custom min / max width and length (rather than quilt sizes)
+  def custom_quilt_size? = [@min_width, @max_width, @min_length, @max_length].any?(&:present?)
 
   # whether the listing has a type filter, and any of its products have a type to filter by
   def type_filter? = types.any?
@@ -132,6 +146,9 @@ class ProductFilter
 
   # whether the quilt size filter applies: only while the quilt type is selected
   def quilt_size_filter? = quilt_sizes? && @selected_types == [QUILT_TYPE]
+
+  # whether the custom quilt size has a min / max length (as well as width)
+  def quilt_lengths? = quilt_sizes? && @quilt_length_attr.present?
 
   # the quilt size options: [key, label, count], counting the products that match the other filters
   def quilt_size_options
@@ -171,12 +188,15 @@ class ProductFilter
   def suppliers = @products.map { |product| supplier(product) }.uniq.sort_by { |supplier| supplier.handle.downcase }
 
   # each product's [supplier token, PRICE_RANGES key (nil without a price), type (nil without one), QUILT_SIZES key
-  # (nil without a width), difficulty (nil without one), price (nil without one), STOCK_STATUSES key], so the filter
-  # drawer can count the matching products as boxes are checked, before the filters are applied
+  # (nil without a width), difficulty (nil without one), price (nil without one), STOCK_STATUSES key, quilt width and
+  # length (nil for any other product, or without one)], so the filter drawer can count the matching products as boxes
+  # are checked, before the filters are applied
   def facets
     @products.map do |product|
+      quilt = type(product) == QUILT_TYPE
       [supplier(product).token, price_range_key(product), type(product), quilt_size_key(product), difficulty(product),
-       price(product)&.to_f, stock_key(product)]
+       price(product)&.to_f, stock_key(product), (quilt_width(product)&.to_f if quilt),
+       (quilt_length(product)&.to_f if quilt)]
     end
   end
 
@@ -209,14 +229,20 @@ class ProductFilter
 
   def supplier_tokens =@products.map { |product| supplier(product).token }.uniq
 
-  # a price param as a number (nil when it's blank, not a number, or not positive)
-  def price_param(value)
-    price = Float(value.to_s, exception: false)
-    price if price&.positive?
+  # a min / max param pair (ex: min_price / max_price) as numbers, swapped when the min is over the max
+  def number_range_params(min, max)
+    min, max = number_param(min), number_param(max)
+    min && max && min > max ? [max, min] : [min, max]
   end
 
-  # a price limit for the listing's params (ex: 100 rather than 100.0)
-  def price_value(price) = price && (price % 1).zero? ? price.to_i : price
+  # a price / size param as a number (nil when it's blank, not a number, or not positive)
+  def number_param(value)
+    number = Float(value.to_s, exception: false)
+    number if number&.positive?
+  end
+
+  # a price / size limit for the listing's params (ex: 100 rather than 100.0)
+  def number_value(number) = number && (number % 1).zero? ? number.to_i : number
 
   # whether every keyword is in the product's name or description
   def keyword_match?(product)
@@ -229,6 +255,17 @@ class ProductFilter
   def price_limit_match?(product)
     price = price(product)
     price.present? && (@min_price.nil? || price >= @min_price) && (@max_price.nil? || price <= @max_price)
+  end
+
+  # whether the quilt's width and length are within the custom min / max width and length (inclusive)
+  def quilt_size_limit_match?(product)
+    within?(quilt_width(product), @min_width, @max_width) && within?(quilt_length(product), @min_length, @max_length)
+  end
+
+  # whether a value is within an inclusive min / max; nil limits are open, and with no limits any value (or none) is
+  def within?(value, min, max)
+    return true if min.nil? && max.nil?
+    value.present? && (min.nil? || value >= min) && (max.nil? || value <= max)
   end
 
   # whether the product matches every selected filter, leaving out the given ones (:type, :size, :difficulty,
@@ -248,6 +285,7 @@ class ProductFilter
   end
 
   def quilt_size_match?(product)
+    return quilt_size_limit_match?(product) if custom_quilt_size?
     return true if @selected_quilt_sizes.empty?
     @selected_quilt_sizes.any? { |key| in_range?(quilt_width(product), *QUILT_SIZES[key].drop(1)) }
   end
@@ -330,6 +368,13 @@ class ProductFilter
   def quilt_width(product)
     return if @quilt_size_attr.nil?
     value = product.attr_value(@quilt_size_attr)
+    value if value.is_a?(Numeric)
+  end
+
+  # the product's length for the custom quilt size, in inches (nil without a length attr, or when it isn't set)
+  def quilt_length(product)
+    return if @quilt_length_attr.nil?
+    value = product.attr_value(@quilt_length_attr)
     value if value.is_a?(Numeric)
   end
 
