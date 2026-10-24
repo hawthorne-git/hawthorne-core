@@ -2,11 +2,15 @@
 # (see ProductFilter), by asking Claude to pick from the listing's filter options. words that aren't an option (ex:
 # "christmas", "batik") come back as keywords, matched against the products' names and descriptions. the model, max
 # tokens and instructions come from the default AI model prompt of the PROMPT_TYPE prompt type (the listing's options
-# are added to the instructions here); each call is logged as an AiGeneration with its cost. answers are cached by
-# search; when Claude can't answer (ex: no model prompt, an error or a timeout), the search's own words are the keywords
+# are added to the instructions here). answers are cached by search; when Claude can't answer (ex: no model prompt, an
+# error or a timeout), the search's own words are the keywords. each search is saved (see Search) with how it was
+# answered, and each call to Claude is logged as an AiGeneration with its cost, pointing at the search
 class ProductSearch
 
   PROMPT_TYPE = 'Product / Sewing Kit / Search'
+
+  # the saved search's search_type
+  SEARCH_TYPE = 'Product / Sewing Kit'
 
   EFFORT = :low
 
@@ -35,15 +39,42 @@ class ProductSearch
 
   # text: what the shopper typed
   # filter: a ProductFilter for the whole listing (nothing selected or searched), whose options the search picks from
-  def initialize(text, filter:)
+  # user_id, user_session_token, ip: who searched, saved with the search
+  # voice: whether the shopper spoke the search (voice search) rather than typed it, saved with the search
+  def initialize(text, filter:, user_id: nil, user_session_token: nil, ip: nil, voice: false)
     @text = text.to_s.squish.first(MAX_LENGTH)
     @filter = filter
+    @shopper = { user_id:, user_session_token:, ip: }
+    @voice = voice
   end
 
   # the listing's params for this search: search (the text, shown in the search box), plus the filters, price limits
-  # and keywords it asked for
+  # and keywords it asked for. the search is saved (when there is one) with how long it took to answer, then Claude's
+  # call (when it was asked) is logged
   def params
-    answer = (cached_answer if @text.present?) || fallback_answer
+    return @params if defined?(@params)
+
+    started = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+    answer = cached_answer if @text.present?
+    answered_by = if answer.nil? then Search::ANSWERED_BY_FALLBACK
+                  elsif @result then Search::ANSWERED_BY_AI
+                  else Search::ANSWERED_BY_CACHE
+                  end
+    @params = listing_params(answer || fallback_answer)
+    duration_ms = ((Process.clock_gettime(Process::CLOCK_MONOTONIC) - started) * 1000).round
+
+    if @text.present?
+      search = save_search(answered_by, duration_ms)
+      log_generation(@result, search) if @result
+    end
+    @params
+  end
+
+  # -----------------------------------------------------------------------------
+
+  private
+
+  def listing_params(answer)
     {
       search: @text,
       keywords: answer['keywords'],
@@ -55,9 +86,14 @@ class ProductSearch
     }.merge(price_params(answer['min_price'], answer['max_price'])).compact_blank
   end
 
-  # -----------------------------------------------------------------------------
-
-  private
+  # saves the search, with how long it took to answer in milliseconds (the cache lookup, plus the call to Claude or the
+  # keyword fallback); nil when it couldn't be saved, since failing to save doesn't fail the search
+  def save_search(answered_by, duration_ms)
+    Search.create!(search_type: SEARCH_TYPE, text: @text, answered_by:, params: @params, voice: @voice, duration_ms:, **@shopper)
+  rescue => e
+    CapturedException.log(location: 'ProductSearch#save_search', note: { text: @text }, e:)
+    nil
+  end
 
   # Claude's answer for this search (nil when it can't answer); the same search with the same model prompt and options
   # is answered once, then served from the cache
@@ -73,6 +109,7 @@ class ProductSearch
     Rails.cache.fetch(key, expires_in: CACHE_FOR, skip_nil: true) { ask_claude }
   end
 
+  # Claude's answer; the call (its tokens, cost and answer) is kept as @result, to log once the search is saved
   def ask_claude
     result = Services::CaludeSvc.new.json_answer(
       model_api: model_prompt.ai_model.api_handle,
@@ -83,24 +120,24 @@ class ProductSearch
       schema: schema,
       timeout: TIMEOUT
     )
-    log_generation(result)
+    @result = result
     result[:answer]
   rescue => e
     CapturedException.log(location: 'ProductSearch', note: { text: @text }, e:)
     nil
   end
 
-  # logs the call and its cost, whether or not the answer is used; failing to log doesn't fail the search. item_id is
-  # 0 until searches are saved, when it becomes the search's row
-  def log_generation(result)
+  # logs the call and its cost against the search, whether or not the answer is used; failing to log doesn't fail the
+  # search. item_id is 0 when the search couldn't be saved
+  def log_generation(result, search)
     ai_model = model_prompt.ai_model
     input_cost = (result[:input_tokens] / 1_000_000.0) * ai_model.input_price_per_mtok
     output_cost = (result[:output_tokens] / 1_000_000.0) * ai_model.output_price_per_mtok
 
     AiGeneration.create!(
       ai_model_prompt_id: model_prompt.ai_model_prompt_id,
-      item_type: 'ProductSearch',
-      item_id: 0,
+      item_type: 'Search',
+      item_id: search&.search_id || 0,
       input_tokens: result[:input_tokens],
       output_tokens: result[:output_tokens],
       input_cost: input_cost,

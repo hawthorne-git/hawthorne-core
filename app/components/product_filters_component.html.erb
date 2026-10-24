@@ -355,8 +355,8 @@
   // - the price filter is price ranges or a custom min / max price (data-filter-custom-price), not both: checking a
   //   range clears the custom price, and typing a custom price unchecks the ranges. empty price boxes aren't submitted
   // - voice search (data-search-voice), in browsers that turn speech into text (Chrome, Edge, Safari; not Firefox):
-  //   tapping the mic listens, writing what's heard into the search box as it's said, then searches when the shopper
-  //   stops talking; tapping it again stops listening
+  //   tapping the mic listens, writing what's heard into the search box as it's said, then searches (with voice=1, so
+  //   the search is saved as spoken) when the shopper stops talking; tapping it again stops listening
   if (window.SpeechRecognition || window.webkitSpeechRecognition) {
     document.querySelectorAll('[data-search-voice]').forEach((button) => { button.hidden = false; });
   }
@@ -397,6 +397,12 @@
         button.setAttribute('aria-pressed', 'false');
         input.placeholder = blocked ? 'Allow the microphone in your browser to search by voice' : placeholder;
         if (heard) {
+          const voice = document.createElement('input');
+          voice.type = 'hidden';
+          voice.name = 'voice';
+          voice.value = '1';
+          voice.dataset.searchVoiceFlag = '';
+          form.append(voice);
           form.requestSubmit();
         } else {
           input.value = typed;
@@ -487,9 +493,11 @@
       event.target.querySelectorAll('[data-filter-custom-price]').forEach((input) => { input.disabled = input.value === ''; });
     });
 
-    // a page restored by the back button keeps the boxes disabled on submit, so they're turned back on
+    // a page restored by the back button keeps the boxes disabled on submit, so they're turned back on, and a voice
+    // search's flag, so a typed search from it isn't saved as spoken
     window.addEventListener('pageshow', () => {
       document.querySelectorAll('[data-filter-custom-price]').forEach((input) => { input.disabled = false; });
+      document.querySelectorAll('[data-search-voice-flag]').forEach((input) => { input.remove(); });
     });
   }
 </script>
