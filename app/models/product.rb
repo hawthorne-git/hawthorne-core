@@ -121,6 +121,9 @@ class Product < ActiveRecordBaseApp
 
   def sewing_kit? = product_type_id == ProductType.sewing_kit_id
 
+  # whether any is on hand (the same test as the admin's product list)
+  def in_stock? = inventory_on_hand.to_d.positive?
+
   # an active sewing kit with no Project set, so one can be set from its supplier main image (see Ai::SewingKitProjectJob)
   def project_classifiable? = active? && sewing_kit? && attr_value(:project).blank?
 

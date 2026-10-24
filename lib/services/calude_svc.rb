@@ -43,6 +43,38 @@ class Services::CaludeSvc
     }
   end
 
+  # Sends text to Claude with instructions (the system prompt) and a JSON schema its answer must match, thinking at the
+  # given effort (ex: :low). If Claude declines for policy reasons, the server retries on the model's default
+  # fallback. timeout: seconds to wait, without retrying (nil for the client's default, with retries).
+  #
+  # Returns { answer: Hash matching the schema, model: String, input_tokens: Integer, output_tokens: Integer }
+  #
+  # Raises when the request fails or times out, or Claude declines or runs out of tokens
+  def json_answer(model_api:, effort:, max_tokens:, instructions:, text:, schema:, timeout: nil)
+    msg = client.beta.messages.create(
+      model: model_api,
+      max_tokens: max_tokens,
+      system_: instructions,
+      output_config: { effort: effort, format: { type: 'json_schema', schema: schema } },
+      fallbacks: :default,
+      betas: ['server-side-fallback-2026-07-01'],
+      messages: [{ role: 'user', content: text }],
+      request_options: timeout ? { timeout: timeout, max_retries: 0 } : {}
+    )
+
+    raise "Claude declined (#{msg.stop_details&.category}): #{msg.stop_details&.explanation}" if msg.stop_reason == :refusal
+    raise "Claude ran out of tokens (max_tokens: #{max_tokens})" if msg.stop_reason == :max_tokens
+
+    text_block = msg.content.find { |b| b.type == :text } || raise('Claude response has no text')
+
+    {
+      answer: JSON.parse(text_block.text),
+      model: msg.model.to_s,
+      input_tokens: msg.usage.input_tokens,
+      output_tokens: msg.usage.output_tokens
+    }
+  end
+
   # -------------------------------------------------------------------------
 
   private
