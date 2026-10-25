@@ -3,18 +3,21 @@ module Ai
 
     queue_as :low
 
+    # the prompt type whose default AI model prompt sets the model and instructions
+    PROMPT_TYPE = 'Image / Alt Text'
+
     # -----------------------------------------------------------------------------------------
 
     def perform(image_id: nil)
       model_prompt = AiModelPrompt
                        .joins(ai_prompt: :ai_prompt_type)
                        .where(default_prompt: true, deleted: false)
-                       .where(ai_prompt_types: { handle: 'Image: Alt Text' })
+                       .where(ai_prompt_types: { handle: PROMPT_TYPE })
                        .includes(:ai_model, :ai_prompt)
                        .first
 
       unless model_prompt
-        CapturedException.log(location: 'Ai::ImageAltTextJob', note: 'no default model prompt found for Image: Alt Text')
+        CapturedException.log(location: 'Ai::ImageAltTextJob', note: "no default model prompt found for #{PROMPT_TYPE}")
         return
       end
 
