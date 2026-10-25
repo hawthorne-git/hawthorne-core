@@ -1,9 +1,9 @@
 # the type / quilt size / difficulty / supplier / price range / stock filters on a product listing page (see
 # ProductFiltersComponent), applied to a scope of products. a search (see ProductSearch) narrows the products first, by
-# keywords matched against their names / descriptions. the price filter is either price ranges or a custom min / max
-# price, not both; likewise the quilt size filter is either quilt sizes or a custom min / max width and length. prices
-# are per shopper (sale / member prices), so they are filtered in ruby rather than in sql. the on sale filter (in the
-# price range dropdown) goes with either
+# keywords matched against their names / descriptions / search text. the price filter is either price ranges or a
+# custom min / max price, not both; likewise the quilt size filter is either quilt sizes or a custom min / max width
+# and length. prices are per shopper (sale / member prices), so they are filtered in ruby rather than in sql. the on
+# sale filter (in the price range dropdown) goes with either
 class ProductFilter
 
   # the price range options, by param value: [label, min (inclusive), max (exclusive)]
@@ -49,11 +49,12 @@ class ProductFilter
 
   # scope: the listing's products; preload supplier_product_profile: [:supplier, :supplier_product_profile_prices]
   # params: the request's params (search = what the shopper typed, shown in the search box; keywords[] = words every
-  #   product's name or description must contain; type[] = a type attr value, only one at a time; size[] = QUILT_SIZES
-  #   keys, or min_width / max_width / min_length / max_length = a custom quilt size in inches, inclusive (which wins
-  #   over size[]); difficulty[] = difficulty attr values; supplier[] = supplier tokens; price[] = PRICE_RANGES keys, or
-  #   min_price / max_price = a custom price range, inclusive (which wins over price[]); sale = '1' for only products
-  #   on sale (see Product#on_sale?); stock[] = a STOCK_STATUSES key, only one at a time; sort = a SORTS key)
+  #   product's name, description or search text must contain; type[] = a type attr value, only one at a time;
+  #   size[] = QUILT_SIZES keys, or min_width / max_width / min_length / max_length = a custom quilt size in inches,
+  #   inclusive (which wins over size[]); difficulty[] = difficulty attr values; supplier[] = supplier tokens;
+  #   price[] = PRICE_RANGES keys, or min_price / max_price = a custom price range, inclusive (which wins over price[]);
+  #   sale = '1' for only products on sale (see Product#on_sale?); stock[] = a STOCK_STATUSES key, only one at a time;
+  #   sort = a SORTS key)
   # logged_in: whether the shopper is signed in, so members are filtered / sorted by their member price
   # type_attr: the key of the product attr the type filter looks at (ex: 'project'); nil for no type filter
   # quilt_size_attr: the key of the product attr holding a quilt's width in inches (ex: 'width'), which the quilt size
@@ -255,10 +256,10 @@ class ProductFilter
   # a price / size limit for the listing's params (ex: 100 rather than 100.0)
   def number_value(number) = number && (number % 1).zero? ? number.to_i : number
 
-  # whether every keyword is in the product's name or description
+  # whether every keyword is in the product's name, description or search text (see Ai::ProductSearchTextJob)
   def keyword_match?(product)
     return true if @keywords.empty?
-    text = "#{product.handle} #{product.description}".downcase
+    text = "#{product.handle} #{product.description} #{product.search_text}".downcase
     @keywords.all? { |keyword| text.include?(keyword) }
   end
 

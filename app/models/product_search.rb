@@ -202,10 +202,10 @@ class ProductSearch
   end
 
   # the search's own words as keywords, for when Claude can't answer: each as typed, or singular when only that is in a
-  # product's name or description (ex: fabrics => fabric), leaving out short and generic words, and words in no
-  # product's name or description (ex: difficult), so one stray word doesn't empty the listing
+  # product's name, description or search text (ex: fabrics => fabric), leaving out short and generic words, and words
+  # in no product's name, description or search text (ex: difficult), so one stray word doesn't empty the listing
   def fallback_answer
-    texts = @filter.products.map { |product| "#{product.handle} #{product.description}".downcase }
+    texts = @filter.products.map { |product| "#{product.handle} #{product.description} #{product.search_text}".downcase }
     words = @text.downcase.scan(/[[:alnum:]']+/).filter_map do |word|
       [word, word.delete_suffix('s')].find { |form| texts.any? { |text| text.include?(form) } }
     end

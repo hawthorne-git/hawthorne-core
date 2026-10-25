@@ -23,6 +23,11 @@ class ProductImage < ActiveRecordBaseApp
   after_commit -> { Ai::SewingKitProjectJob.perform_later(product_id:) }, on: :create,
                if: -> { image.image_type&.handle == Product::SUPPLIER_MAIN_IMAGE_TYPE && product.project_classifiable? }
 
+  # a sewing kit's search text is written from its supplier main image's visual description (see
+  # Ai::ProductSearchTextJob, which waits while the image hasn't been described yet)
+  after_commit -> { Ai::ProductSearchTextJob.perform_later(product_id:) }, on: :create,
+               if: -> { image.supplier_main_image? && product.sewing_kit? }
+
   # -----------------------------------------------------------------------------
 
 end

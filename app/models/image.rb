@@ -22,6 +22,10 @@ class Image < ActiveRecordBaseApp
   after_commit -> { Ai::ImageVisualDescriptionJob.perform_later(image_id:) }, on: [:create, :update],
                if: -> { supplier_main_image? && (saved_change_to_file_key? || saved_change_to_file_version? || saved_change_to_image_type_id?) }
 
+  # its products' search text is written from its visual description (see Ai::ProductSearchTextJob), so it's written
+  # again when the description is (by AI or by hand)
+  after_commit :queue_product_search_text, on: :update, if: -> { supplier_main_image? && saved_change_to_visual_description? }
+
   # -----------------------------------------------------------------------------
 
   self.table_name = 'images'
@@ -35,6 +39,12 @@ class Image < ActiveRecordBaseApp
   # -----------------------------------------------------------------------------
 
   private
+
+  def queue_product_search_text
+    ProductImage.where(image_id:, deleted: false).distinct.pluck(:product_id).each do |product_id|
+      Ai::ProductSearchTextJob.perform_later(product_id:)
+    end
+  end
 
   def reset_visual_description
     self.visual_description = nil

@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict 6C1nWW8bcgg9BK3RmddqDuBn6TRqz7xzg7l4HebMpacIl2J1G4GZAhQwR9Y1QnD
+\restrict c40QelTywkMDzA1CVZsQ7GqtyFC8myGsWP7ucwSkCLzKy07pZbS0RgHZqdtPOjh
 
 -- Dumped from database version 18.4 (Debian 18.4-1.pgdg12+1)
 -- Dumped by pg_dump version 18.4
@@ -796,10 +796,43 @@ CREATE TABLE public.products (
     handle text NOT NULL,
     supplier_product_profile_id bigint NOT NULL,
     attrs jsonb DEFAULT '{}'::jsonb NOT NULL,
+    search_text text,
+    search_text_ai_model_prompt_id bigint,
+    search_text_source_digest text,
+    update_search_text_with_ai boolean DEFAULT true NOT NULL,
     CONSTRAINT pick_location_or_pull_location CHECK (((pull_location_id IS NULL) OR (pick_location_id IS NULL))),
     CONSTRAINT pick_nbr_required_with_pick_location CHECK (((pick_location_id IS NULL) OR (pick_nbr IS NOT NULL))),
     CONSTRAINT pull_nbr_required_with_pull_location CHECK (((pull_location_id IS NULL) OR (pull_nbr IS NOT NULL)))
 );
+
+
+--
+-- Name: COLUMN products.search_text; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.products.search_text IS 'the words shoppers might search to find this product (themes, motifs, colors, style, project, fabric line / designer, other names), written by AI from the product''s name, description, attrs, supplier and supplier main image''s visual description; used by
+  product search';
+
+
+--
+-- Name: COLUMN products.search_text_ai_model_prompt_id; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.products.search_text_ai_model_prompt_id IS 'the AI model prompt (admin db ai_model_prompts) that wrote search_text';
+
+
+--
+-- Name: COLUMN products.search_text_source_digest; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.products.search_text_source_digest IS 'a fingerprint of what search_text was written from, so it''s only written again when one of those changes';
+
+
+--
+-- Name: COLUMN products.update_search_text_with_ai; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.products.update_search_text_with_ai IS 'whether AI may write search_text; turned off when it''s edited by hand, so the edit is kept';
 
 
 --
@@ -2127,5 +2160,5 @@ ALTER TABLE ONLY public.user_sites
 -- PostgreSQL database dump complete
 --
 
-\unrestrict 6C1nWW8bcgg9BK3RmddqDuBn6TRqz7xzg7l4HebMpacIl2J1G4GZAhQwR9Y1QnD
+\unrestrict c40QelTywkMDzA1CVZsQ7GqtyFC8myGsWP7ucwSkCLzKy07pZbS0RgHZqdtPOjh
 
