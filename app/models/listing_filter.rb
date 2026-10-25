@@ -1,5 +1,5 @@
-# a listing page loaded with filters or a non-default sort (ex: sewing kits, see ProductFilter), one row per load, so
-# which filters / sorts shoppers use (and which return nothing) can be seen. the plain listing isn't logged. bots
+# a listing page loaded with a search, filters or a non-default sort (ex: sewing kits, see ProductFilter), one row per
+# load, so which searches / filters / sorts shoppers use (and which return nothing) can be seen. the plain listing isn't logged. bots
 # aren't skipped here: their sessions are flagged later (see user_sessions.bot), so reports join on the session token
 class ListingFilter < ActiveRecordBaseLog
 

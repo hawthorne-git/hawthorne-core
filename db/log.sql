@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict G13Cn9VMqQwuhAZrEokVMb4IpgdPCGpDlSDOZY1PzhZZEdSEDctUBXaTAWHoLoo
+\restrict cgATHUCXpFukvK2NrlzYBVWvEsxmg1CQyUObfqAuOiKq7BrNEnGZKoFb504auZA
 
 -- Dumped from database version 18.4 (Debian 18.4-1.pgdg12+1)
 -- Dumped by pg_dump version 18.4
@@ -251,7 +251,7 @@ CREATE TABLE public.listing_filters (
 -- Name: TABLE listing_filters; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON TABLE public.listing_filters IS 'a listing page loaded with filters or a non-default sort (ex: sewing kits, collections, artists); one row per load, not per click, and not for the plain listing';
+COMMENT ON TABLE public.listing_filters IS 'a listing page loaded with a search, filters or a non-default sort (ex: sewing kits, collections, artists); one row per load, not per click, and not for the plain listing';
 
 
 --
@@ -1045,5 +1045,5 @@ ALTER TABLE ONLY public.employee_sessions
 -- PostgreSQL database dump complete
 --
 
-\unrestrict G13Cn9VMqQwuhAZrEokVMb4IpgdPCGpDlSDOZY1PzhZZEdSEDctUBXaTAWHoLoo
+\unrestrict cgATHUCXpFukvK2NrlzYBVWvEsxmg1CQyUObfqAuOiKq7BrNEnGZKoFb504auZA
 

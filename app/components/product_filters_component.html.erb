@@ -27,6 +27,10 @@
         <span class='product-search__detail'><%= detail %></span>
       <% end %>
       <%= link_to 'Clear search', @url, class: 'product-filters__clear' %>
+      <% if @filter.partial_keyword_match? %>
+        <%# no product matched every word, so these match some of them, best matches first %>
+        <span class='product-search__partial'>No kits match all of these words, so here are the closest matches.</span>
+      <% end %>
     </p>
   <% end %>
 <% end %>
@@ -220,7 +224,7 @@
         </svg>
       </summary>
       <div class='product-filters__panel product-filters__panel--right'>
-        <% ProductFilter::SORTS.each do |key, text| %>
+        <% @filter.sorts.each do |key, text| %>
           <% selected = key == @filter.sort %>
           <%= link_to listing_path(sort: key), class: "product-filters__sort#{' product-filters__sort--selected' if selected}", 'aria-current': (true if selected) do %>
             <span><%= text %></span>

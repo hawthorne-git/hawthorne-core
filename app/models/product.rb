@@ -67,8 +67,13 @@ class Product < ActiveRecordBaseApp
   # queued as a supplier main image is added (see ProductImage), since a form saves its images after the product
   after_commit -> { Ai::SewingKitProjectJob.perform_later(product_id:) }, on: [:create, :update], if: :project_classifiable?
 
-  # an active sewing kit's search text is written again as what it's written from changes (see Ai::ProductSearchTextJob,
-  # which skips one whose search text is up to date); also queued as its supplier main image is added or described
+  # turning AI back on for the search text (ex: after a hand edit) writes it again, even when nothing it's written from
+  # changed
+  before_save -> { self.search_text_source_digest = nil }, if: -> { will_save_change_to_update_search_text_with_ai?(to: true) }
+
+  # an active sewing kit's search text is written again as what it's written from changes, or AI is turned back on for
+  # it (see Ai::ProductSearchTextJob, which skips one whose search text is up to date); also queued as its supplier
+  # main image is added or described
   after_commit -> { Ai::ProductSearchTextJob.perform_later(product_id:) }, on: [:create, :update], if: :search_text_source_changed?
 
   # -----------------------------------------------------------------------------
@@ -125,10 +130,12 @@ class Product < ActiveRecordBaseApp
 
   def sewing_kit? = product_type_id == ProductType.sewing_kit_id
 
-  # whether the last save changed what an active sewing kit's search text is written from (see Ai::ProductSearchTextJob)
+  # whether the last save changed what an active sewing kit's search text is written from, or turned AI back on for it
+  # (see Ai::ProductSearchTextJob)
   def search_text_source_changed?
     active? && sewing_kit? && update_search_text_with_ai? &&
-      %w[handle description attrs supplier_id product_type_id deleted].any? { |column| saved_change_to_attribute?(column) }
+      %w[handle description attrs supplier_id product_type_id deleted update_search_text_with_ai]
+        .any? { |column| saved_change_to_attribute?(column) }
   end
 
   # whether any is on hand (the same test as the admin's product list)

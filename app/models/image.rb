@@ -14,13 +14,14 @@ class Image < ActiveRecordBaseApp
   validate :image_type_active_when_activating
 
   # a replaced file (see ImageHelper#attach_image_helper bumping file_version) is described again, even over a hand
-  # edit, since the old visual description no longer matches it
-  before_update :reset_visual_description, if: :file_version_changed?
+  # edit, since the old visual description no longer matches it; so is one AI is turned back on for (ex: after a hand
+  # edit)
+  before_update :reset_visual_description,
+                if: -> { file_version_changed? || will_save_change_to_update_visual_description_with_ai?(to: true) }
 
-  # a supplier main image is described for product search once its file is uploaded or replaced, or it becomes a
-  # supplier main image (see Ai::ImageVisualDescriptionJob, which skips one that doesn't need it)
-  after_commit -> { Ai::ImageVisualDescriptionJob.perform_later(image_id:) }, on: [:create, :update],
-               if: -> { supplier_main_image? && (saved_change_to_file_key? || saved_change_to_file_version? || saved_change_to_image_type_id?) }
+  # a supplier main image is described for product search once its file is uploaded or replaced, it becomes a supplier
+  # main image, or AI is turned back on for it (see Ai::ImageVisualDescriptionJob, which skips one that doesn't need it)
+  after_commit -> { Ai::ImageVisualDescriptionJob.perform_later(image_id:) }, on: [:create, :update], if: :visual_description_wanted?
 
   # its products' search text is written from its visual description (see Ai::ProductSearchTextJob), so it's written
   # again when the description is (by AI or by hand)
@@ -39,6 +40,13 @@ class Image < ActiveRecordBaseApp
   # -----------------------------------------------------------------------------
 
   private
+
+  # whether the last save means a supplier main image should be described (again)
+  def visual_description_wanted?
+    supplier_main_image? &&
+      (%w[file_key file_version image_type_id].any? { |column| saved_change_to_attribute?(column) } ||
+        saved_change_to_update_visual_description_with_ai?(to: true))
+  end
 
   def queue_product_search_text
     ProductImage.where(image_id:, deleted: false).distinct.pluck(:product_id).each do |product_id|

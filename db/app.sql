@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict c40QelTywkMDzA1CVZsQ7GqtyFC8myGsWP7ucwSkCLzKy07pZbS0RgHZqdtPOjh
+\restrict ugoT9HHaKa0BAQ87Yc3knx8SN6IWHZDENZKjaJeIkBgvnivOJgP4OWo8af115QK
 
 -- Dumped from database version 18.4 (Debian 18.4-1.pgdg12+1)
 -- Dumped by pg_dump version 18.4
@@ -800,6 +800,7 @@ CREATE TABLE public.products (
     search_text_ai_model_prompt_id bigint,
     search_text_source_digest text,
     update_search_text_with_ai boolean DEFAULT true NOT NULL,
+    search_vector tsvector GENERATED ALWAYS AS (((setweight(to_tsvector('english'::regconfig, COALESCE(handle, ''::text)), 'A'::"char") || setweight(to_tsvector('english'::regconfig, regexp_replace(COALESCE(search_text, ''::text), '^[^:\n]+:'::text, ''::text, 'gn'::text)), 'B'::"char")) || setweight(to_tsvector('english'::regconfig, COALESCE(description, ''::text)), 'C'::"char"))) STORED,
     CONSTRAINT pick_location_or_pull_location CHECK (((pull_location_id IS NULL) OR (pick_location_id IS NULL))),
     CONSTRAINT pick_nbr_required_with_pick_location CHECK (((pick_location_id IS NULL) OR (pick_nbr IS NOT NULL))),
     CONSTRAINT pull_nbr_required_with_pull_location CHECK (((pull_location_id IS NULL) OR (pull_nbr IS NOT NULL)))
@@ -833,6 +834,13 @@ COMMENT ON COLUMN public.products.search_text_source_digest IS 'a fingerprint of
 --
 
 COMMENT ON COLUMN public.products.update_search_text_with_ai IS 'whether AI may write search_text; turned off when it''s edited by hand, so the edit is kept';
+
+
+--
+-- Name: COLUMN products.search_vector; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.products.search_vector IS 'the words product search matches on, kept up to date by postgres: the name (weighted most), then the search text (without its line labels), then the description';
 
 
 --
@@ -1816,6 +1824,13 @@ CREATE INDEX products_idx_attrs ON public.products USING gin (attrs jsonb_path_o
 
 
 --
+-- Name: products_idx_search_vector; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX products_idx_search_vector ON public.products USING gin (search_vector);
+
+
+--
 -- Name: suppliers_uk_abbreviation; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -2160,5 +2175,5 @@ ALTER TABLE ONLY public.user_sites
 -- PostgreSQL database dump complete
 --
 
-\unrestrict c40QelTywkMDzA1CVZsQ7GqtyFC8myGsWP7ucwSkCLzKy07pZbS0RgHZqdtPOjh
+\unrestrict ugoT9HHaKa0BAQ87Yc3knx8SN6IWHZDENZKjaJeIkBgvnivOJgP4OWo8af115QK
 

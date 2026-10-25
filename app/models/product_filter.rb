@@ -1,7 +1,7 @@
 # the type / quilt size / difficulty / supplier / price range / stock filters on a product listing page (see
 # ProductFiltersComponent), applied to a scope of products. a search (see ProductSearch) narrows the products first, by
-# keywords matched against their names / descriptions / search text. the price filter is either price ranges or a
-# custom min / max price, not both; likewise the quilt size filter is either quilt sizes or a custom min / max width
+# keywords matched against their names / search text / descriptions in postgres (see products.search_vector), best
+# matches first. the price filter is either price ranges or a custom min / max price, not both; likewise the quilt size filter is either quilt sizes or a custom min / max width
 # and length. prices are per shopper (sale / member prices), so they are filtered in ruby rather than in sql. the on
 # sale filter (in the price range dropdown) goes with either
 class ProductFilter
@@ -40,6 +40,11 @@ class ProductFilter
     'price-desc' => 'Price: High to Low'
   }.freeze
 
+  # the sort offered while the listing is searched, first (and the default): the best keyword matches first
+  SEARCH_SORTS = {
+    'best-match' => 'Best Match'
+  }.freeze
+
   # the most keywords a search matches on
   MAX_KEYWORDS = 5
 
@@ -49,12 +54,13 @@ class ProductFilter
 
   # scope: the listing's products; preload supplier_product_profile: [:supplier, :supplier_product_profile_prices]
   # params: the request's params (search = what the shopper typed, shown in the search box; keywords[] = words every
-  #   product's name, description or search text must contain; type[] = a type attr value, only one at a time;
+  #   product's name, search text or description must contain (whole words, in any form, see keyword_matches);
+  #   type[] = a type attr value, only one at a time;
   #   size[] = QUILT_SIZES keys, or min_width / max_width / min_length / max_length = a custom quilt size in inches,
   #   inclusive (which wins over size[]); difficulty[] = difficulty attr values; supplier[] = supplier tokens;
   #   price[] = PRICE_RANGES keys, or min_price / max_price = a custom price range, inclusive (which wins over price[]);
   #   sale = '1' for only products on sale (see Product#on_sale?); stock[] = a STOCK_STATUSES key, only one at a time;
-  #   sort = a SORTS key)
+  #   sort = a sorts key)
   # logged_in: whether the shopper is signed in, so members are filtered / sorted by their member price
   # type_attr: the key of the product attr the type filter looks at (ex: 'project'); nil for no type filter
   # quilt_size_attr: the key of the product attr holding a quilt's width in inches (ex: 'width'), which the quilt size
@@ -69,7 +75,7 @@ class ProductFilter
     @search = params[:search].to_s.squish.presence
     @keywords = Array(params[:keywords]).map { |keyword| keyword.to_s.squish.downcase }.compact_blank.uniq.first(MAX_KEYWORDS)
     @min_price, @max_price = number_range_params(params[:min_price], params[:max_price])
-    @products = scope.to_a.select { |product| keyword_match?(product) }
+    @products = keyword_matches(scope).to_a
     @type_attr = type_attr&.to_s
     @quilt_size_attr = quilt_size_attr&.to_s
     @quilt_length_attr = quilt_length_attr&.to_s
@@ -85,7 +91,7 @@ class ProductFilter
     @selected_price_ranges = custom_price? ? [] : Array(params[:price]).map(&:to_s) & PRICE_RANGES.keys
     @on_sale = params[:sale].to_s == '1'
     @selected_stock = (Array(params[:stock]).map(&:to_s) & STOCK_STATUSES.keys).first(1)
-    @sort = SORTS.key?(params[:sort].to_s) ? params[:sort].to_s : SORTS.keys.first
+    @sort = sorts.key?(params[:sort].to_s) ? params[:sort].to_s : sorts.keys.first
   end
 
   # -----------------------------------------------------------------------------
@@ -95,7 +101,14 @@ class ProductFilter
     @filtered ||= sorted(@products.select { |product| matches?(product) })
   end
 
-  def default_sort? = @sort == SORTS.keys.first
+  # the sort options: SEARCH_SORTS first (and the default) while the listing is searched, then SORTS
+  def sorts = searched? ? SEARCH_SORTS.merge(SORTS) : SORTS
+
+  def default_sort? = @sort == sorts.keys.first
+
+  # whether no product matched every keyword, so the ones matching any of them are shown instead (see keyword_matches);
+  # false when none match any of them either
+  def partial_keyword_match? = @partial_keyword_match.present? && @products.any?
 
   # the params for this listing with the given changes (ex: a different sort), leaving out empty / default values
   def params_with(**changes)
@@ -107,7 +120,7 @@ class ProductFilter
       sort: @sort }
       .merge(changes)
       .compact_blank
-      .reject { |key, value| key == :sort && value == SORTS.keys.first }
+      .reject { |key, value| key == :sort && value == sorts.keys.first }
   end
 
   def any_selected?
@@ -230,10 +243,11 @@ class ProductFilter
 
   private
 
-  # by name, or by the shopper's price (then name); products without a price go last
+  # by name, by best keyword match (then name), or by the shopper's price (then name); products without a price go last
   def sorted(products)
     by_name = products.sort_by { |product| product.handle.downcase }
     return by_name if @sort == 'name'
+    return by_name.sort_by.with_index { |product, i| [-product.attributes['search_rank'].to_f, i] } if @sort == 'best-match'
     priced, unpriced = by_name.partition { |product| price(product) }
     direction = @sort == 'price-desc' ? -1 : 1
     priced.sort_by.with_index { |product, i| [price(product) * direction, i] } + unpriced
@@ -256,11 +270,21 @@ class ProductFilter
   # a price / size limit for the listing's params (ex: 100 rather than 100.0)
   def number_value(number) = number && (number % 1).zero? ? number.to_i : number
 
-  # whether every keyword is in the product's name, description or search text (see Ai::ProductSearchTextJob)
-  def keyword_match?(product)
-    return true if @keywords.empty?
-    text = "#{product.handle} #{product.description} #{product.search_text}".downcase
-    @keywords.all? { |keyword| text.include?(keyword) }
+  # the scope narrowed to the products matching every keyword, each with its search_rank (how well it matches: a match
+  # in the name counts most, then the search text, then the description); when none match every keyword, the ones
+  # matching any of them. matched in postgres (see products.search_vector): whole words, in any form (ex: bunnies
+  # matches bunny), and a keyword of several words as a phrase (ex: table runner)
+  def keyword_matches(scope)
+    return scope if @keywords.empty?
+
+    queries = @keywords.map { |keyword| scope.klass.sanitize_sql_array(["phraseto_tsquery('english', ?)", keyword]) }
+    any = "(#{queries.join(' || ')})"
+    ranked = scope.select("products.*, ts_rank_cd(products.search_vector, #{any}) AS search_rank")
+    every = ranked.where("products.search_vector @@ (#{queries.join(' && ')})")
+    return every if every.exists?
+
+    @partial_keyword_match = true
+    ranked.where("products.search_vector @@ #{any}")
   end
 
   # whether the shopper's price is within the custom min / max price (inclusive)
