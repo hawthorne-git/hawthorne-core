@@ -35,8 +35,18 @@ class ProductSearch
   # the stock value the answer uses for either
   ANY_STOCK = 'any'
 
+  # the sort value the answer uses when the shopper doesn't ask for one, so the listing's current sort is kept
+  ANY_SORT = 'any'
+
   # the answer's quilt width / length limits, in inches (the same names as ProductFilter's params)
   QUILT_SIZE_LIMITS = %w[min_width max_width min_length max_length].freeze
+
+  # how to read the shopper asking for kits on sale (see ProductFilter's sale param)
+  ON_SALE_NOTE = <<~NOTE
+    On sale (on_sale): true only when the shopper asks for kits on sale, such as "on sale", "sale", "discounted",
+    "marked down", "clearance", "deals" or "bargains"; otherwise false. A price limit can go with it (ex: "on sale under
+    $100" is on_sale true and max_price 100). "cheap" or "affordable" alone is not on sale.
+  NOTE
 
   # -----------------------------------------------------------------------------
 
@@ -67,11 +77,14 @@ class ProductSearch
     duration_ms = ((Process.clock_gettime(Process::CLOCK_MONOTONIC) - started) * 1000).round
 
     if @text.present?
-      search = save_search(answered_by, duration_ms)
-      log_generation(@result, search) if @result
+      @search = save_search(answered_by, duration_ms)
+      log_generation(@result, @search) if @result
     end
     @params
   end
+
+  # the saved search's id, once params are made (nil without a search, or when it couldn't be saved)
+  def search_id = @search&.search_id
 
   # -----------------------------------------------------------------------------
 
@@ -85,7 +98,9 @@ class ProductSearch
       size: answer['sizes'],
       difficulty: answer['difficulties'],
       supplier: answer['suppliers'],
-      stock: [answer['stock']].compact - [ANY_STOCK]
+      sale: ('1' if answer['on_sale']),
+      stock: [answer['stock']].compact - [ANY_STOCK],
+      sort: (answer['sort'] unless answer['sort'] == ANY_SORT)
     }.merge(price_params(answer['min_price'], answer['max_price']), quilt_size_params(answer)).compact_blank
   end
 
@@ -207,7 +222,9 @@ class ProductSearch
         keywords: { type: 'array', items: { type: 'string' } },
         min_price: { anyOf: [{ type: 'number' }, { type: 'null' }] },
         max_price: { anyOf: [{ type: 'number' }, { type: 'null' }] },
-        stock: { type: 'string', enum: ProductFilter::STOCK_STATUSES.keys + [ANY_STOCK] }
+        on_sale: { type: 'boolean' },
+        stock: { type: 'string', enum: ProductFilter::STOCK_STATUSES.keys + [ANY_STOCK] },
+        sort: { type: 'string', enum: ProductFilter::SORTS.keys + [ANY_SORT] }
       }
       properties[:type] = { type: 'string', enum: @filter.types + [ANY_TYPE] } if @filter.type_filter?
       properties[:sizes] = { type: 'array', items: { type: 'string', enum: ProductFilter::QUILT_SIZES.keys } } if @filter.quilt_sizes?
@@ -229,7 +246,9 @@ class ProductSearch
       quilt_size_limits_note,
       (option_list('Difficulty (pick every level that fits)', @filter.difficulties.map { |value| [value, @filter.difficulty_label(value)] }) if @filter.difficulty_filter?),
       (option_list('Supplier (pick every one the shopper names)', @filter.suppliers.map { |supplier| [supplier.token, supplier.handle] }) if @filter.suppliers.any?),
-      option_list("Stock (pick one, or \"#{ANY_STOCK}\")", ProductFilter::STOCK_STATUSES.to_a)
+      option_list("Stock (pick one, or \"#{ANY_STOCK}\")", ProductFilter::STOCK_STATUSES.to_a),
+      option_list("Sort (pick one only when the shopper asks for an order, such as \"highest price first\", \"most expensive\", \"cheapest first\" or \"alphabetical\"; otherwise \"#{ANY_SORT}\")", ProductFilter::SORTS.to_a),
+      ON_SALE_NOTE
     ].compact.join("\n")
   end
 

@@ -42,12 +42,19 @@ class ProductFiltersComponent < ViewComponent::Base
   # what the search narrowed by beyond the filter chips: its keywords (ex: "batik")
   def search_details = @filter.keywords.map { |keyword| "“#{keyword}”" }
 
-  # the price range button's label: the custom price when there is one (ex: "Price Range: Up to $90"), else how many
-  # price ranges are checked
+  # the price range button's label: on sale when it's checked, then the custom price when there is one (ex: "Price
+  # Range: On Sale, Up to $90"), else how many price ranges are checked (ex: "Price Range (2)", "Price Range: On Sale,
+  # 2 ranges")
   def price_range_label
-    return label('Price Range', @filter.selected_price_ranges) unless @filter.custom_price?
-    min, max = [@filter.min_price, @filter.max_price].map { |price| price && number_to_currency(price, precision: (price % 1).zero? ? 0 : 2) }
-    "Price Range: #{range_text(min, max)}"
+    parts = []
+    parts << 'On Sale' if @filter.on_sale?
+    if @filter.custom_price?
+      min, max = [@filter.min_price, @filter.max_price].map { |price| price && number_to_currency(price, precision: (price % 1).zero? ? 0 : 2) }
+      parts << range_text(min, max)
+    elsif @filter.on_sale? && @filter.selected_price_ranges.any?
+      parts << pluralize(@filter.selected_price_ranges.size, 'range')
+    end
+    parts.any? ? "Price Range: #{parts.join(', ')}" : label('Price Range', @filter.selected_price_ranges)
   end
 
   # the quilt size button's label: the custom size when there is one (ex: "Size: W 50″ – 70″, L 60″ & up"), else how

@@ -2,7 +2,8 @@
 # ProductFiltersComponent), applied to a scope of products. a search (see ProductSearch) narrows the products first, by
 # keywords matched against their names / descriptions. the price filter is either price ranges or a custom min / max
 # price, not both; likewise the quilt size filter is either quilt sizes or a custom min / max width and length. prices
-# are per shopper (sale / member prices), so they are filtered in ruby rather than in sql
+# are per shopper (sale / member prices), so they are filtered in ruby rather than in sql. the on sale filter (in the
+# price range dropdown) goes with either
 class ProductFilter
 
   # the price range options, by param value: [label, min (inclusive), max (exclusive)]
@@ -51,8 +52,8 @@ class ProductFilter
   #   product's name or description must contain; type[] = a type attr value, only one at a time; size[] = QUILT_SIZES
   #   keys, or min_width / max_width / min_length / max_length = a custom quilt size in inches, inclusive (which wins
   #   over size[]); difficulty[] = difficulty attr values; supplier[] = supplier tokens; price[] = PRICE_RANGES keys, or
-  #   min_price / max_price = a custom price range, inclusive (which wins over price[]); stock[] = a STOCK_STATUSES
-  #   key, only one at a time; sort = a SORTS key)
+  #   min_price / max_price = a custom price range, inclusive (which wins over price[]); sale = '1' for only products
+  #   on sale (see Product#on_sale?); stock[] = a STOCK_STATUSES key, only one at a time; sort = a SORTS key)
   # logged_in: whether the shopper is signed in, so members are filtered / sorted by their member price
   # type_attr: the key of the product attr the type filter looks at (ex: 'project'); nil for no type filter
   # quilt_size_attr: the key of the product attr holding a quilt's width in inches (ex: 'width'), which the quilt size
@@ -81,6 +82,7 @@ class ProductFilter
     @selected_difficulties = Array(params[:difficulty]).map(&:to_s) & difficulties
     @selected_supplier_tokens = Array(params[:supplier]).map(&:to_s) & supplier_tokens
     @selected_price_ranges = custom_price? ? [] : Array(params[:price]).map(&:to_s) & PRICE_RANGES.keys
+    @on_sale = params[:sale].to_s == '1'
     @selected_stock = (Array(params[:stock]).map(&:to_s) & STOCK_STATUSES.keys).first(1)
     @sort = SORTS.key?(params[:sort].to_s) ? params[:sort].to_s : SORTS.keys.first
   end
@@ -100,7 +102,8 @@ class ProductFilter
       type: @selected_types, size: @selected_quilt_sizes, min_width: number_value(@min_width),
       max_width: number_value(@max_width), min_length: number_value(@min_length), max_length: number_value(@max_length),
       difficulty: @selected_difficulties,
-      supplier: @selected_supplier_tokens, price: @selected_price_ranges, stock: @selected_stock, sort: @sort }
+      supplier: @selected_supplier_tokens, price: @selected_price_ranges, sale: ('1' if @on_sale), stock: @selected_stock,
+      sort: @sort }
       .merge(changes)
       .compact_blank
       .reject { |key, value| key == :sort && value == SORTS.keys.first }
@@ -108,8 +111,11 @@ class ProductFilter
 
   def any_selected?
     [@selected_types, @selected_quilt_sizes, @selected_difficulties, @selected_supplier_tokens, @selected_price_ranges,
-     @selected_stock].any?(&:any?) || custom_price? || custom_quilt_size?
+     @selected_stock].any?(&:any?) || custom_price? || custom_quilt_size? || @on_sale
   end
+
+  # whether only products on sale are shown
+  def on_sale? = @on_sale
 
   # whether the listing is narrowed by a search
   def searched? = @search.present? || @keywords.any?
@@ -189,15 +195,20 @@ class ProductFilter
 
   # each product's [supplier token, PRICE_RANGES key (nil without a price), type (nil without one), QUILT_SIZES key
   # (nil without a width), difficulty (nil without one), price (nil without one), STOCK_STATUSES key, quilt width and
-  # length (nil for any other product, or without one)], so the filter drawer can count the matching products as boxes
-  # are checked, before the filters are applied
+  # length (nil for any other product, or without one), whether it's on sale], so the filter drawer can count the
+  # matching products as boxes are checked, before the filters are applied
   def facets
     @products.map do |product|
       quilt = type(product) == QUILT_TYPE
       [supplier(product).token, price_range_key(product), type(product), quilt_size_key(product), difficulty(product),
        price(product)&.to_f, stock_key(product), (quilt_width(product)&.to_f if quilt),
-       (quilt_length(product)&.to_f if quilt)]
+       (quilt_length(product)&.to_f if quilt), product.on_sale?(hawthorne)]
     end
+  end
+
+  # how many products on sale match the other filters, for the on sale option's count
+  def sale_count
+    @products.count { |product| matches?(product, except: :sale) && product.on_sale?(hawthorne) }
   end
 
   # the price range options: [key, label, count], counting the products that match the other filters
@@ -269,7 +280,7 @@ class ProductFilter
   end
 
   # whether the product matches every selected filter, leaving out the given ones (:type, :size, :difficulty,
-  # :supplier, :price, :stock), so an option's count can be what selecting it would add
+  # :supplier, :price, :sale, :stock), so an option's count can be what selecting it would add
   def matches?(product, except: [])
     except = Array(except)
     (except.include?(:type) || type_match?(product)) &&
@@ -277,6 +288,7 @@ class ProductFilter
       (except.include?(:difficulty) || difficulty_match?(product)) &&
       (except.include?(:supplier) || supplier_match?(product)) &&
       (except.include?(:price) || price_match?(product)) &&
+      (except.include?(:sale) || sale_match?(product)) &&
       (except.include?(:stock) || stock_match?(product))
   end
 
@@ -302,6 +314,10 @@ class ProductFilter
     return price_limit_match?(product) if custom_price?
     return true if @selected_price_ranges.empty?
     @selected_price_ranges.any? { |key| in_range?(price(product), *PRICE_RANGES[key].drop(1)) }
+  end
+
+  def sale_match?(product)
+    !@on_sale || product.on_sale?(hawthorne)
   end
 
   def stock_match?(product)

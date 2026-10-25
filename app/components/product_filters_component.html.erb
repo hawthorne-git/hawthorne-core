@@ -148,13 +148,19 @@
     </details>
 
     <details class='product-filters__dropdown'>
-      <summary class='product-filters__chip<%= ' product-filters__chip--active' if @filter.selected_price_ranges.any? || @filter.custom_price? %>'>
+      <summary class='product-filters__chip<%= ' product-filters__chip--active' if @filter.selected_price_ranges.any? || @filter.custom_price? || @filter.on_sale? %>'>
         <%= price_range_label %>
         <svg class='product-filters__chevron' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'>
           <path d='M5 8l5 5 5-5' />
         </svg>
       </summary>
       <div class='product-filters__panel'>
+        <%# on sale goes with the price ranges or custom price %>
+        <label class='product-filters__option product-filters__option--sale'>
+          <input type='checkbox' name='sale' value='1'<%= ' checked' if @filter.on_sale? %>>
+          <span>On Sale</span>
+          <span class='product-filters__count'><%= @filter.sale_count %></span>
+        </label>
         <% @filter.price_range_options.each do |key, text, count| %>
           <label class='product-filters__option'>
             <input type='checkbox' name='price[]' value='<%= key %>'<%= ' checked' if @filter.selected_price_ranges.include?(key) %>>
@@ -200,7 +206,7 @@
     </details>
 
     <% if @filter.any_selected? %>
-      <%= link_to 'Clear all', listing_path(type: [], size: [], min_width: nil, max_width: nil, min_length: nil, max_length: nil, difficulty: [], supplier: [], price: [], min_price: nil, max_price: nil, stock: []), class: 'product-filters__clear' %>
+      <%= link_to 'Clear all', listing_path(type: [], size: [], min_width: nil, max_width: nil, min_length: nil, max_length: nil, difficulty: [], supplier: [], price: [], min_price: nil, max_price: nil, sale: nil, stock: []), class: 'product-filters__clear' %>
     <% end %>
   </div>
 
@@ -334,6 +340,10 @@
             <path d='M5 8l5 5 5-5' />
           </svg>
         </summary>
+        <label class='product-filters__option product-filters__option--sale'>
+          <input type='checkbox' name='sale' value='1'<%= ' checked' if @filter.on_sale? %>>
+          <span>On Sale</span>
+        </label>
         <% ProductFilter::PRICE_RANGES.each do |key, (text, _, _)| %>
           <label class='product-filters__option'>
             <input type='checkbox' name='price[]' value='<%= key %>'<%= ' checked' if @filter.selected_price_ranges.include?(key) %>>
@@ -486,6 +496,7 @@
       const sizes = checked('size');
       const difficulties = checked('difficulty');
       const stock = checked('stock');
+      const sale = form.querySelector('input[name="sale"]')?.checked;
       // a custom min / max pair's limits (NaN when blank), swapped when the min is over the max
       const customRange = (name) => {
         const limit = (bound) => parseFloat(form.querySelector(`input[name="${bound}_${name}"]`)?.value);
@@ -508,10 +519,11 @@
         if (!custom(widthRange) && !custom(lengthRange)) return sizes.length === 0 || sizes.includes(key);
         return within(width, widthRange) && within(length, lengthRange);
       };
-      const total = JSON.parse(form.dataset.facets).filter(([supplier, price, type, size, difficulty, amount, stocked, width, length]) => {
+      const total = JSON.parse(form.dataset.facets).filter(([supplier, price, type, size, difficulty, amount, stocked, width, length, onSale]) => {
         return (suppliers.length === 0 || suppliers.includes(supplier)) && priceMatch(price, amount) &&
           (types.length === 0 || types.includes(type)) && sizeMatch(size, width, length) &&
-          (difficulties.length === 0 || difficulties.includes(difficulty)) && (stock.length === 0 || stock.includes(stocked));
+          (difficulties.length === 0 || difficulties.includes(difficulty)) && (stock.length === 0 || stock.includes(stocked)) &&
+          (!sale || onSale);
       }).length;
       form.querySelector('[data-filter-total]').textContent = total;
     };
