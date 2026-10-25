@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict pGmdVoKevCdBj1wWGHjq0XNybsQVj50cKVrRyJprHnVLzXAg63nHLKLfqlnVwkQ
+\restrict 6C1nWW8bcgg9BK3RmddqDuBn6TRqz7xzg7l4HebMpacIl2J1G4GZAhQwR9Y1QnD
 
 -- Dumped from database version 18.4 (Debian 18.4-1.pgdg12+1)
 -- Dumped by pg_dump version 18.4
@@ -404,8 +404,40 @@ CREATE TABLE public.images (
     alt_text text,
     file_version bigint DEFAULT 1 NOT NULL,
     alt_text_ai_model_prompt_id bigint,
-    update_alt_text_with_ai boolean DEFAULT true NOT NULL
+    update_alt_text_with_ai boolean DEFAULT true NOT NULL,
+    visual_description text,
+    visual_attrs jsonb,
+    visual_description_ai_model_prompt_id bigint,
+    update_visual_description_with_ai boolean DEFAULT true NOT NULL
 );
+
+
+--
+-- Name: COLUMN images.visual_description; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.images.visual_description IS 'a detailed description of what the image shows (colors, motifs, theme, style), written by AI from the image alone; richer than alt_text, and used to build product search text';
+
+
+--
+-- Name: COLUMN images.visual_attrs; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.images.visual_attrs IS 'the structured AI answer visual_description was written from (ex: {"colors": [...], "motifs": [...], "themes": [...], "style": [...]}); not changed by a hand edit of visual_description';
+
+
+--
+-- Name: COLUMN images.visual_description_ai_model_prompt_id; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.images.visual_description_ai_model_prompt_id IS 'the AI model prompt (admin db ai_model_prompts) that wrote visual_description';
+
+
+--
+-- Name: COLUMN images.update_visual_description_with_ai; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.images.update_visual_description_with_ai IS 'whether AI may write visual_description; turned off when it''s edited by hand, so the edit is kept';
 
 
 --
@@ -2095,5 +2127,5 @@ ALTER TABLE ONLY public.user_sites
 -- PostgreSQL database dump complete
 --
 
-\unrestrict pGmdVoKevCdBj1wWGHjq0XNybsQVj50cKVrRyJprHnVLzXAg63nHLKLfqlnVwkQ
+\unrestrict 6C1nWW8bcgg9BK3RmddqDuBn6TRqz7xzg7l4HebMpacIl2J1G4GZAhQwR9Y1QnD
 
