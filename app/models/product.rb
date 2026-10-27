@@ -35,6 +35,8 @@ class Product < ActiveRecordBaseApp
   has_many :product_images, -> { order(:order_nbr) }
   has_many :images, through: :product_images
 
+  has_many :product_embeddings
+
   # the product form's image uploads (not stored on products; see the image roles above)
   attr_accessor :main_image_file, :supplier_main_image_file, :additional_image_files, :sewing_kit_requirements_image_file
 
@@ -75,6 +77,11 @@ class Product < ActiveRecordBaseApp
   # it (see Ai::ProductSearchTextJob, which skips one whose search text is up to date); also queued as its supplier
   # main image is added or described
   after_commit -> { Ai::ProductSearchTextJob.perform_later(product_id:) }, on: [:create, :update], if: :search_text_source_changed?
+
+  # an active sewing kit is embedded again as its name or search text changes (see Ai::ProductEmbeddingJob, which skips
+  # one whose embedding is up to date)
+  after_commit -> { Ai::ProductEmbeddingJob.perform_later(product_id:) }, on: [:create, :update],
+               if: -> { active? && sewing_kit? && (saved_change_to_search_text? || saved_change_to_handle?) }
 
   # -----------------------------------------------------------------------------
 
@@ -129,6 +136,24 @@ class Product < ActiveRecordBaseApp
   # -----------------------------------------------------------------------------
 
   def sewing_kit? = product_type_id == ProductType.sewing_kit_id
+
+  # the active products of the same type most alike this one, most alike first: the ones whose embeddings (see
+  # ProductEmbedding, with the model in use) are nearest its own. none when it has no embedding yet. preload what the
+  # caller shows with includes (ex: product_images, supplier_product_profile)
+  def similar_products(limit: 8, includes: [])
+    model = ProductEmbedding.model_api
+    own = ProductEmbedding.where(product_id:, model:).select(:embedding)
+    return Product.none if model.nil? || !own.exists?
+
+    Product.active
+           .where(product_type_id:)
+           .where.not(product_id:)
+           .joins(:product_embeddings)
+           .where(product_embeddings: { model: })
+           .includes(includes)
+           .order(Arel.sql("product_embeddings.embedding <=> (#{own.to_sql})"))
+           .limit(limit)
+  end
 
   # whether the last save changed what an active sewing kit's search text is written from, or turned AI back on for it
   # (see Ai::ProductSearchTextJob)

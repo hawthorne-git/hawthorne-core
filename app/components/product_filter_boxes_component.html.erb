@@ -1,0 +1,24 @@
+<div class='product-filters__custom-price'>
+  <span class='product-filters__custom-price-or'>or</span>
+  <% @rows.each do |row| %>
+    <div class='product-filters__custom-price-boxes<%= ' product-filters__custom-size-boxes' if row[:label] %>'>
+      <% if row[:label] %>
+        <span class='product-filters__custom-size-side'><%= row[:label] %></span>
+      <% end %>
+      <% [['min', 'Min', 'Minimum'], ['max', 'Max', 'Maximum']].each do |bound, placeholder, word| %>
+        <% if bound == 'max' %>
+          <span>to</span>
+        <% end %>
+        <label class='product-filters__price-box'>
+          <% if @prefix %>
+            <span><%= @prefix %></span>
+          <% end %>
+          <input type='number' name='<%= bound %>_<%= row[:name] %>' value='<%= box_value(row[bound.to_sym]) %>' min='0' step='<%= @step %>' inputmode='decimal' placeholder='<%= placeholder %>' aria-label='<%= word %> <%= row[:aria] %>' data-filter-custom-<%= @kind %>>
+          <% if @suffix %>
+            <span><%= @suffix %></span>
+          <% end %>
+        </label>
+      <% end %>
+    </div>
+  <% end %>
+</div>

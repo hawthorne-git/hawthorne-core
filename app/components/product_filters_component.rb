@@ -39,8 +39,11 @@ class ProductFiltersComponent < ViewComponent::Base
     safe_join(fields)
   end
 
-  # what the search narrowed by beyond the filter chips: its keywords (ex: "batik")
-  def search_details = @filter.keywords.map { |keyword| "“#{keyword}”" }
+  # what the search narrowed by beyond the filter chips: its keywords, with their related words to show on hover
+  # (ex: ['“ocean”', 'Also matches: nautical, beach'])
+  def search_details
+    @filter.keyword_groups.map { |word, related| ["“#{word}”", ("Also matches: #{related.join(', ')}" if related.any?)] }
+  end
 
   # the price range button's label: on sale when it's checked, then the custom price when there is one (ex: "Price
   # Range: On Sale, Up to $90"), else how many price ranges are checked (ex: "Price Range (2)", "Price Range: On Sale,
@@ -68,19 +71,27 @@ class ProductFiltersComponent < ViewComponent::Base
     "Size: #{parts.join(', ')}"
   end
 
-  # the custom quilt size's rows of min / max boxes: [side, label, min, max] (length only when the filter has one)
-  def quilt_size_sides
-    sides = [['width', 'Width', @filter.min_width, @filter.max_width]]
-    sides << ['length', 'Length', @filter.min_length, @filter.max_length] if @filter.quilt_lengths?
-    sides
+  # the custom min / max price boxes, in the filter bar and the filter drawer (see ProductFilterBoxesComponent)
+  def price_boxes
+    rows = [{ name: 'price', aria: 'price', min: @filter.min_price, max: @filter.max_price }]
+    render(ProductFilterBoxesComponent.new(kind: :price, rows:, prefix: '$', step: @price_step || 'any'))
   end
 
-  # a custom price / size box's value (ex: 90 rather than 90.0; blank without one)
-  def number_box_value(number) = number && ((number % 1).zero? ? number.to_i : number)
+  # the custom quilt size's min / max boxes, a row for width and (when the filter has one) length
+  def size_boxes
+    rows = [{ name: 'width', label: 'Width', aria: 'width, in inches', min: @filter.min_width, max: @filter.max_width }]
+    if @filter.quilt_lengths?
+      rows << { name: 'length', label: 'Length', aria: 'length, in inches', min: @filter.min_length, max: @filter.max_length }
+    end
+    render(ProductFilterBoxesComponent.new(kind: :size, rows:, suffix: '″'))
+  end
 
   # -----------------------------------------------------------------------------
 
   private
+
+  # a number without a needless decimal (ex: 90 rather than 90.0)
+  def number_box_value(number) = number && ((number % 1).zero? ? number.to_i : number)
 
   # a min / max as text (ex: "$50 – $90", "Up to $90", "$50 & up"); at least one is given
   def range_text(min, max)

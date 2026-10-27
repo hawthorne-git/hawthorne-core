@@ -24,7 +24,9 @@ class ListingFilter < ActiveRecordBaseLog
   # sort applied), results (how many items it showed), search_id (the search the filters came straight from), and who
   # loaded it. nil when it's a repeat, or couldn't be saved, since failing to log doesn't fail the listing
   def self.log(listing_type:, params:, results:, search_id: nil, user_id: nil, user_session_token: nil, ip: nil)
-    return if user_session_token.present? &&
+    # a load that came straight from a search is always logged, so the search is linked to it (ex: the same search
+    # run again)
+    return if search_id.nil? && user_session_token.present? &&
       where(listing_type:, user_session_token:, created_at: REPEAT_WITHIN.ago..).where('params = ?::jsonb', params.to_json).exists?
 
     create!(listing_type:, params:, results:, search_id:, user_id:, user_session_token:, ip:)

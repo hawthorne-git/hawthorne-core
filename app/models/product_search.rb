@@ -1,7 +1,8 @@
 # turns what a shopper types in a listing's search box (ex: "an easy quilt kit under $100") into the listing's params
 # (see ProductFilter), by asking Claude to pick from the listing's filter options. words that aren't an option (ex:
-# "christmas", "batik") come back as keywords, matched against the products' names and descriptions. the model, max
-# tokens and instructions come from the default AI model prompt of the PROMPT_TYPE prompt type (the listing's options
+# "christmas", "batik") come back as keywords, each with a few related words that can match instead (ex: ocean =>
+# nautical, beach), matched against the products' names, search text and descriptions. the model, max tokens and
+# instructions come from the default AI model prompt of the PROMPT_TYPE prompt type (the listing's options
 # are added to the instructions here). answers are cached by search; when Claude can't answer (ex: no model prompt, an
 # error or a timeout), the search's own words are the keywords. each search is saved (see Search) with how it was
 # answered, and each call to Claude is logged as an AiGeneration with its cost, pointing at the search
@@ -41,6 +42,17 @@ class ProductSearch
   # the answer's quilt width / length limits, in inches (the same names as ProductFilter's params)
   QUILT_SIZE_LIMITS = %w[min_width max_width min_length max_length].freeze
 
+  # how to add related words to the keywords (see ProductFilter::RELATED_SEPARATOR): kits described in other words than
+  # the shopper's are found too
+  KEYWORDS_NOTE = <<~NOTE
+    Keywords (keywords): each keyword is an object with the word and its related words. For each keyword, add up to
+    #{ProductFilter::MAX_RELATED_WORDS} related words a kit matching it might be described with instead: synonyms and closely related themes or
+    motifs (ex: "ocean" has related words "nautical", "beach", "seaside", "sailboat"; "baby" has "nursery", "crib",
+    "baby shower"). Stay close to the keyword's meaning and don't broaden it (ex: "blue" is too broad for "ocean"). A
+    proper name (a fabric line, designer, brand, character or story) gets no related words. Use lowercase and the
+    singular, as for the keywords.
+  NOTE
+
   # how to read the shopper asking for kits on sale (see ProductFilter's sale param)
   ON_SALE_NOTE = <<~NOTE
     On sale (on_sale): true only when the shopper asks for kits on sale, such as "on sale", "sale", "discounted",
@@ -62,8 +74,8 @@ class ProductSearch
   end
 
   # the listing's params for this search: search (the text, shown in the search box), plus the filters, price limits,
-  # quilt width / length limits and keywords it asked for. the search is saved (when there is one) with how long it took to answer, then Claude's
-  # call (when it was asked) is logged
+  # quilt width / length limits and keywords it asked for. the search is saved (when there is one) with how long it
+  # took to answer, then Claude's call (when it was asked) is logged
   def params
     return @params if defined?(@params)
 
@@ -93,7 +105,7 @@ class ProductSearch
   def listing_params(answer)
     {
       search: @text,
-      keywords: answer['keywords'],
+      keywords: keyword_params(answer['keywords']),
       type: [answer['type']].compact - [ANY_TYPE],
       size: answer['sizes'],
       difficulty: answer['difficulties'],
@@ -102,6 +114,17 @@ class ProductSearch
       stock: [answer['stock']].compact - [ANY_STOCK],
       sort: (answer['sort'] unless answer['sort'] == ANY_SORT)
     }.merge(price_params(answer['min_price'], answer['max_price']), quilt_size_params(answer)).compact_blank
+  end
+
+  # the keywords as the listing's keywords[] params: each with its related words after ProductFilter::RELATED_SEPARATOR
+  # (ex: 'ocean|nautical|beach'), tidied by ProductFilter.keyword_param (which drops one whose keyword is blank); a
+  # fallback keyword (a plain word) has none
+  def keyword_params(keywords)
+    Array(keywords).filter_map do |keyword|
+      words = keyword.is_a?(Hash) ? [keyword['word'], *Array(keyword['related'])] : [keyword]
+      param = words.map { |word| word.to_s.delete(ProductFilter::RELATED_SEPARATOR) }.join(ProductFilter::RELATED_SEPARATOR)
+      ProductFilter.keyword_param(param)
+    end
   end
 
   # saves the search, with how long it took to answer in milliseconds (the cache lookup, plus the call to Claude or the
@@ -178,12 +201,14 @@ class ProductSearch
                       .first
   end
 
-  # the search's price limits: on the price ranges' edges (ex: under $100, over $150), the ranges they cover, so they
-  # show as the price range filter; otherwise (ex: under $90) the exact limits
+  # the search's price limits (swapped when the min is over the max): on the price ranges' edges (ex: under $100, over
+  # $150), the ranges they cover, so they show as the price range filter; otherwise (ex: under $90, or exactly $100,
+  # which no range covers) the exact limits
   def price_params(min, max)
     min = nil unless min&.positive?
     max = nil unless max&.positive?
     return {} if min.nil? && max.nil?
+    min, max = max, min if min && max && min > max
 
     edges = ProductFilter::PRICE_RANGES.values.flat_map { |(_, low, high)| [low, high] }.compact
     return { min_price: min, max_price: max } unless [min, max].compact.all? { |price| edges.include?(price) }
@@ -191,7 +216,7 @@ class ProductSearch
     ranges = ProductFilter::PRICE_RANGES.select do |_, (_, low, high)|
       (min.nil? || (low && low >= min)) && (max.nil? || (high && high <= max))
     end
-    { price: ranges.keys }
+    ranges.any? ? { price: ranges.keys } : { min_price: min, max_price: max }
   end
 
   # the search's quilt width / length limits, in inches (ex: at least 30" wide); these win over quilt sizes, which are
@@ -201,25 +226,31 @@ class ProductSearch
     limits.any? ? limits.merge(size: nil) : {}
   end
 
-  # the search's own words as keywords, for when Claude can't answer: each as typed, or singular when only that is in a
-  # product's name, description or search text (ex: fabrics => fabric), leaving out short and generic words, and words
-  # in no product's name, description or search text (ex: difficult), so one stray word doesn't empty the listing
+  # the search's own words as keywords, for when Claude can't answer: the ones some product in the listing has as a whole
+  # word, in any form (ex: fabrics matches fabric), checked in postgres as ProductFilter matches them (see
+  # products.search_vector), leaving out short and generic words, so one stray word doesn't empty the listing
   def fallback_answer
-    texts = @filter.products.map { |product| "#{product.handle} #{product.description} #{product.search_text}".downcase }
-    words = @text.downcase.scan(/[[:alnum:]']+/).filter_map do |word|
-      [word, word.delete_suffix('s')].find { |form| texts.any? { |text| text.include?(form) } }
-    end
-    words = words.reject do |word|
+    words = @text.downcase.scan(/[[:alnum:]']+/).uniq.reject do |word|
       word.size < 3 || word.match?(/\A\d+\z/) || STOP_WORDS.include?(word) || STOP_WORDS.include?(word.delete_suffix('s'))
     end
-    { 'keywords' => words.uniq.first(ProductFilter::MAX_KEYWORDS) }
+    products = Product.where(product_id: @filter.products.map(&:product_id))
+    words = words.select { |word| products.where("search_vector @@ plainto_tsquery('english', ?)", word).exists? }
+    { 'keywords' => words.first(ProductFilter::MAX_KEYWORDS) }
   end
 
   # the answer's shape: only the listing's options can be picked
   def schema
     @schema ||= begin
       properties = {
-        keywords: { type: 'array', items: { type: 'string' } },
+        keywords: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: { word: { type: 'string' }, related: { type: 'array', items: { type: 'string' } } },
+            required: %w[word related],
+            additionalProperties: false
+          }
+        },
         min_price: { anyOf: [{ type: 'number' }, { type: 'null' }] },
         max_price: { anyOf: [{ type: 'number' }, { type: 'null' }] },
         on_sale: { type: 'boolean' },
@@ -248,7 +279,8 @@ class ProductSearch
       (option_list('Supplier (pick every one the shopper names)', @filter.suppliers.map { |supplier| [supplier.token, supplier.handle] }) if @filter.suppliers.any?),
       option_list("Stock (pick one, or \"#{ANY_STOCK}\")", ProductFilter::STOCK_STATUSES.to_a),
       option_list("Sort (pick one only when the shopper asks for an order, such as \"highest price first\", \"most expensive\", \"cheapest first\" or \"alphabetical\"; otherwise \"#{ANY_SORT}\")", ProductFilter::SORTS.to_a),
-      ON_SALE_NOTE
+      ON_SALE_NOTE,
+      KEYWORDS_NOTE
     ].compact.join("\n")
   end
 

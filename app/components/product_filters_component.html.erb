@@ -23,13 +23,20 @@
       <% if @filter.search.present? %>
         Results for “<%= @filter.search %>”
       <% end %>
-      <% search_details.each do |detail| %>
-        <span class='product-search__detail'><%= detail %></span>
+      <% search_details.each do |detail, related| %>
+        <span class='product-search__detail' title='<%= related %>'><%= detail %></span>
       <% end %>
-      <%= link_to 'Clear search', @url, class: 'product-filters__clear' %>
+      <%# clears the search only, keeping the filters and sort %>
+      <%= link_to 'Clear search', listing_path(search: nil, keywords: []), class: 'product-filters__clear' %>
       <% if @filter.partial_keyword_match? %>
-        <%# no product matched every word, so these match some of them, best matches first %>
-        <span class='product-search__partial'>No kits match all of these words, so here are the closest matches.</span>
+        <%# few or no products matched every word, so ones matching some of them are shown too, best matches first %>
+        <span class='product-search__partial'>
+          <% if @filter.every_keyword_count.zero? %>
+            No kits match all of these words, so here are the closest matches.
+          <% else %>
+            Only <%= pluralize(@filter.every_keyword_count, 'kit') %> <%= @filter.every_keyword_count == 1 ? 'matches' : 'match' %> all of these words, so close matches are included too.
+          <% end %>
+        </span>
       <% end %>
     </p>
   <% end %>
@@ -89,23 +96,7 @@
               <span class='product-filters__count'><%= count %></span>
             </label>
           <% end %>
-          <div class='product-filters__custom-price'>
-            <span class='product-filters__custom-price-or'>or</span>
-            <% quilt_size_sides.each do |side, text, min, max| %>
-              <div class='product-filters__custom-price-boxes product-filters__custom-size-boxes'>
-                <span class='product-filters__custom-size-side'><%= text %></span>
-                <label class='product-filters__price-box'>
-                  <input type='number' name='min_<%= side %>' value='<%= number_box_value(min) %>' min='0' step='any' inputmode='decimal' placeholder='Min' aria-label='Minimum <%= side %>, in inches' data-filter-custom-size>
-                  <span>″</span>
-                </label>
-                <span>to</span>
-                <label class='product-filters__price-box'>
-                  <input type='number' name='max_<%= side %>' value='<%= number_box_value(max) %>' min='0' step='any' inputmode='decimal' placeholder='Max' aria-label='Maximum <%= side %>, in inches' data-filter-custom-size>
-                  <span>″</span>
-                </label>
-              </div>
-            <% end %>
-          </div>
+          <%= size_boxes %>
           <button type='submit' class='product-filters__apply'>Apply</button>
         </div>
       </details>
@@ -172,20 +163,7 @@
             <span class='product-filters__count'><%= count %></span>
           </label>
         <% end %>
-        <div class='product-filters__custom-price'>
-          <span class='product-filters__custom-price-or'>or</span>
-          <div class='product-filters__custom-price-boxes'>
-            <label class='product-filters__price-box'>
-              <span>$</span>
-              <input type='number' name='min_price' value='<%= number_box_value(@filter.min_price) %>' min='0' step='<%= @price_step || 'any' %>' inputmode='decimal' placeholder='Min' aria-label='Minimum price' data-filter-custom-price>
-            </label>
-            <span>to</span>
-            <label class='product-filters__price-box'>
-              <span>$</span>
-              <input type='number' name='max_price' value='<%= number_box_value(@filter.max_price) %>' min='0' step='<%= @price_step || 'any' %>' inputmode='decimal' placeholder='Max' aria-label='Maximum price' data-filter-custom-price>
-            </label>
-          </div>
-        </div>
+        <%= price_boxes %>
         <button type='submit' class='product-filters__apply'>Apply</button>
       </div>
     </details>
@@ -242,7 +220,7 @@
 
 <%# the filter drawer: every filter in one window on the left, opened by the filter button; nothing applies until view %>
 <dialog id='filter-drawer' class='filter-drawer' aria-label='Filter'>
-  <%= form_with url: @url, method: :get, class: 'filter-drawer__form', html: { novalidate: true }, data: { turbo: false, facets: @filter.facets.to_json } do %>
+  <%= form_with url: @url, method: :get, class: 'filter-drawer__form', html: { novalidate: true }, data: { turbo: false, facets: @filter.facets.to_json, min_every_keyword_matches: ProductFilter::MIN_EVERY_KEYWORD_MATCHES } do %>
     <% unless @filter.default_sort? %>
       <input type='hidden' name='sort' value='<%= @filter.sort %>'>
     <% end %>
@@ -285,23 +263,7 @@
               <span><%= text %></span>
             </label>
           <% end %>
-          <div class='product-filters__custom-price'>
-            <span class='product-filters__custom-price-or'>or</span>
-            <% quilt_size_sides.each do |side, text, min, max| %>
-              <div class='product-filters__custom-price-boxes product-filters__custom-size-boxes'>
-                <span class='product-filters__custom-size-side'><%= text %></span>
-                <label class='product-filters__price-box'>
-                  <input type='number' name='min_<%= side %>' value='<%= number_box_value(min) %>' min='0' step='any' inputmode='decimal' placeholder='Min' aria-label='Minimum <%= side %>, in inches' data-filter-custom-size>
-                  <span>″</span>
-                </label>
-                <span>to</span>
-                <label class='product-filters__price-box'>
-                  <input type='number' name='max_<%= side %>' value='<%= number_box_value(max) %>' min='0' step='any' inputmode='decimal' placeholder='Max' aria-label='Maximum <%= side %>, in inches' data-filter-custom-size>
-                  <span>″</span>
-                </label>
-              </div>
-            <% end %>
-          </div>
+          <%= size_boxes %>
         </details>
       <% end %>
 
@@ -354,20 +316,7 @@
             <span><%= text %></span>
           </label>
         <% end %>
-        <div class='product-filters__custom-price'>
-          <span class='product-filters__custom-price-or'>or</span>
-          <div class='product-filters__custom-price-boxes'>
-            <label class='product-filters__price-box'>
-              <span>$</span>
-              <input type='number' name='min_price' value='<%= number_box_value(@filter.min_price) %>' min='0' step='<%= @price_step || 'any' %>' inputmode='decimal' placeholder='Min' aria-label='Minimum price' data-filter-custom-price>
-            </label>
-            <span>to</span>
-            <label class='product-filters__price-box'>
-              <span>$</span>
-              <input type='number' name='max_price' value='<%= number_box_value(@filter.max_price) %>' min='0' step='<%= @price_step || 'any' %>' inputmode='decimal' placeholder='Max' aria-label='Maximum price' data-filter-custom-price>
-            </label>
-          </div>
-        </div>
+        <%= price_boxes %>
       </details>
 
       <details class='filter-drawer__section' open>
@@ -397,13 +346,18 @@
   // registered once per page:
   // - one filter dropdown open at a time, and a click outside closes it
   // - a single-choice filter (data-filter-single, ex: type, stock) unchecks its other boxes when one is checked
+  // - a filter dropdown closed without applying puts its boxes back as they were, so another dropdown's apply doesn't
+  //   submit them
   // - the filter drawer closes on a backdrop click, opens / closes for browsers without invoker commands, and its
-  //   view button counts the products matching the checked boxes (from the form's data-facets), as they change
+  //   view button counts the products matching the checked boxes (from the form's data-facets), as they change: with
+  //   a search, the ones matching every keyword, or all of them when fewer than data-min-every-keyword-matches do (as
+  //   ProductFilter#keyword_count counts)
   // - a drawer section for one type (data-filter-when-type, ex: quilt size) shows only while that type is checked, and
   //   is cleared when it hides
   // - the price filter is price ranges or a custom min / max price (data-filter-custom-price), not both: checking a
   //   range clears the custom price, and typing a custom price unchecks the ranges. likewise the quilt size filter is
-  //   quilt sizes or a custom min / max width and length (data-filter-custom-size). empty boxes aren't submitted
+  //   quilt sizes or a custom min / max width and length (data-filter-custom-size). empty boxes aren't submitted,
+  //   and a limit that isn't above 0 is no limit, as on the server (see ProductFilter#number_param)
   // - voice search (data-search-voice), in browsers that turn speech into text (Chrome, Edge, Safari; not Firefox):
   //   tapping the mic listens, writing what's heard into the search box as it's said, then searches (with voice=1, so
   //   the search is saved as spoken) once the shopper pauses for a second; tapping it again stops listening
@@ -485,6 +439,12 @@
       stopAfter(VOICE_START);
     });
 
+    // a custom box's value as a limit: NaN when it's blank or not above 0
+    const positive = (value) => {
+      const number = parseFloat(value);
+      return number > 0 ? number : NaN;
+    };
+
     const updateTotal = (form) => {
       const checked = (name) => [...form.querySelectorAll(`input[name="${name}[]"]:checked`)].map((input) => input.value);
       const types = checked('type');
@@ -501,9 +461,9 @@
       const difficulties = checked('difficulty');
       const stock = checked('stock');
       const sale = form.querySelector('input[name="sale"]')?.checked;
-      // a custom min / max pair's limits (NaN when blank), swapped when the min is over the max
+      // a custom min / max pair's limits (NaN when blank or not above 0), swapped when the min is over the max
       const customRange = (name) => {
-        const limit = (bound) => parseFloat(form.querySelector(`input[name="${bound}_${name}"]`)?.value);
+        const limit = (bound) => positive(form.querySelector(`input[name="${bound}_${name}"]`)?.value);
         const [min, max] = [limit('min'), limit('max')];
         return min > max ? [max, min] : [min, max];
       };
@@ -523,12 +483,14 @@
         if (!custom(widthRange) && !custom(lengthRange)) return sizes.length === 0 || sizes.includes(key);
         return within(width, widthRange) && within(length, lengthRange);
       };
-      const total = JSON.parse(form.dataset.facets).filter(([supplier, price, type, size, difficulty, amount, stocked, width, length, onSale]) => {
+      const matching = JSON.parse(form.dataset.facets).filter(([supplier, price, type, size, difficulty, amount, stocked, width, length, onSale]) => {
         return (suppliers.length === 0 || suppliers.includes(supplier)) && priceMatch(price, amount) &&
           (types.length === 0 || types.includes(type)) && sizeMatch(size, width, length) &&
           (difficulties.length === 0 || difficulties.includes(difficulty)) && (stock.length === 0 || stock.includes(stocked)) &&
           (!sale || onSale);
-      }).length;
+      });
+      const every = matching.filter((facet) => facet[10]).length;
+      const total = every >= parseInt(form.dataset.minEveryKeywordMatches, 10) ? every : matching.length;
       form.querySelector('[data-filter-total]').textContent = total;
     };
 
@@ -555,6 +517,14 @@
       }
     });
 
+    // toggle doesn't bubble, so it's listened for on the way down
+    document.addEventListener('toggle', (event) => {
+      const dropdown = event.target;
+      if (!(dropdown instanceof HTMLDetailsElement) || !dropdown.matches('.product-filters__dropdown') || dropdown.open) return;
+      dropdown.querySelectorAll('input[type="checkbox"]').forEach((input) => { input.checked = input.defaultChecked; });
+      dropdown.querySelectorAll('input[type="number"]').forEach((input) => { input.value = input.defaultValue; });
+    }, true);
+
     document.addEventListener('change', (event) => {
       if (event.target.matches('input[data-filter-single]') && event.target.checked) {
         event.target.form.querySelectorAll(`input[name="${event.target.name}"]`).forEach((input) => {
@@ -574,7 +544,7 @@
     document.addEventListener('input', (event) => {
       const ranges = event.target.matches('[data-filter-custom-price]') ? 'price' : event.target.matches('[data-filter-custom-size]') ? 'size' : null;
       if (!ranges) return;
-      if (event.target.value !== '') {
+      if (!isNaN(positive(event.target.value))) {
         event.target.form.querySelectorAll(`input[name="${ranges}[]"]`).forEach((input) => { input.checked = false; });
       }
       const form = event.target.closest('.filter-drawer__form');
@@ -582,7 +552,7 @@
     });
 
     document.addEventListener('submit', (event) => {
-      event.target.querySelectorAll('[data-filter-custom-price], [data-filter-custom-size]').forEach((input) => { input.disabled = input.value === ''; });
+      event.target.querySelectorAll('[data-filter-custom-price], [data-filter-custom-size]').forEach((input) => { input.disabled = isNaN(positive(input.value)); });
       if (!event.target.matches('.product-search')) return;
       if (event.target.dataset.searching) {
         event.preventDefault();

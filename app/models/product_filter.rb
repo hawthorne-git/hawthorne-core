@@ -1,9 +1,10 @@
 # the type / quilt size / difficulty / supplier / price range / stock filters on a product listing page (see
 # ProductFiltersComponent), applied to a scope of products. a search (see ProductSearch) narrows the products first, by
 # keywords matched against their names / search text / descriptions in postgres (see products.search_vector), best
-# matches first. the price filter is either price ranges or a custom min / max price, not both; likewise the quilt size filter is either quilt sizes or a custom min / max width
-# and length. prices are per shopper (sale / member prices), so they are filtered in ruby rather than in sql. the on
-# sale filter (in the price range dropdown) goes with either
+# matches first. the price filter is either price ranges or a custom min / max price, not both; likewise the quilt
+# size filter is either quilt sizes or a custom min / max width and length. prices are per shopper (sale / member
+# prices), so they are filtered in ruby rather than in sql. the on sale filter (in the price range dropdown) goes with
+# either
 class ProductFilter
 
   # the price range options, by param value: [label, min (inclusive), max (exclusive)]
@@ -48,13 +49,26 @@ class ProductFilter
   # the most keywords a search matches on
   MAX_KEYWORDS = 5
 
+  # a keyword's related words (see ProductSearch) go with it in its param, after this (ex: 'ocean|nautical|beach')
+  RELATED_SEPARATOR = '|'
+
+  # the most related words a keyword matches on
+  MAX_RELATED_WORDS = 5
+
+  # how much a related word's match counts toward a product's search_rank, against the keyword's own
+  RELATED_WEIGHT = 0.5
+
+  # when fewer products than this match every keyword (after the filters), the ones matching some of them are shown too
+  MIN_EVERY_KEYWORD_MATCHES = 3
+
   attr_reader :search, :keywords, :min_price, :max_price, :min_width, :max_width, :min_length, :max_length,
               :selected_types, :selected_quilt_sizes, :selected_difficulties, :selected_supplier_tokens,
               :selected_price_ranges, :selected_stock, :sort
 
   # scope: the listing's products; preload supplier_product_profile: [:supplier, :supplier_product_profile_prices]
   # params: the request's params (search = what the shopper typed, shown in the search box; keywords[] = words every
-  #   product's name, search text or description must contain (whole words, in any form, see keyword_matches);
+  #   product's name, search text or description must contain (whole words, in any form, see keyword_matches), each
+  #   with any related words that can match instead after RELATED_SEPARATOR (ex: 'ocean|nautical|beach');
   #   type[] = a type attr value, only one at a time;
   #   size[] = QUILT_SIZES keys, or min_width / max_width / min_length / max_length = a custom quilt size in inches,
   #   inclusive (which wins over size[]); difficulty[] = difficulty attr values; supplier[] = supplier tokens;
@@ -73,7 +87,7 @@ class ProductFilter
                  difficulty_attr: nil)
     @logged_in = logged_in
     @search = params[:search].to_s.squish.presence
-    @keywords = Array(params[:keywords]).map { |keyword| keyword.to_s.squish.downcase }.compact_blank.uniq.first(MAX_KEYWORDS)
+    @keywords = Array(params[:keywords]).filter_map { |keyword| self.class.keyword_param(keyword) }.uniq.first(MAX_KEYWORDS)
     @min_price, @max_price = number_range_params(params[:min_price], params[:max_price])
     @products = keyword_matches(scope).to_a
     @type_attr = type_attr&.to_s
@@ -96,6 +110,17 @@ class ProductFilter
 
   # -----------------------------------------------------------------------------
 
+  # a keywords[] param, tidied: a lowercase keyword, then at most MAX_RELATED_WORDS related words after
+  # RELATED_SEPARATOR (ex: ' Ocean |NAUTICAL' => 'ocean|nautical'); nil when the keyword itself is blank, so a related
+  # word never stands in for it
+  def self.keyword_param(value)
+    word, *related = value.to_s.split(RELATED_SEPARATOR).map { |part| part.squish.downcase }
+    return if word.blank?
+    [word, *(related.compact_blank.uniq - [word]).first(MAX_RELATED_WORDS)].join(RELATED_SEPARATOR)
+  end
+
+  # -----------------------------------------------------------------------------
+
   # the products matching every selected filter (all of them when none are selected), in the selected sort order
   def products
     @filtered ||= sorted(@products.select { |product| matches?(product) })
@@ -106,9 +131,21 @@ class ProductFilter
 
   def default_sort? = @sort == sorts.keys.first
 
-  # whether no product matched every keyword, so the ones matching any of them are shown instead (see keyword_matches);
-  # false when none match any of them either
-  def partial_keyword_match? = @partial_keyword_match.present? && @products.any?
+  # whether fewer than MIN_EVERY_KEYWORD_MATCHES products match every keyword along with the selected filters, so the
+  # ones matching only some keywords are shown too, after them; false when there are none of those to add
+  def partial_keyword_match?
+    return @partial_keyword_match if defined?(@partial_keyword_match)
+
+    @partial_keyword_match = if @keyword_group_count.to_i < 2 then false
+                             else
+                               matching = @products.select { |product| matches?(product, except: :keywords) }
+                               @every_keyword_count = matching.count { |product| every_keyword_match?(product) }
+                               @every_keyword_count < MIN_EVERY_KEYWORD_MATCHES && matching.size > @every_keyword_count
+                             end
+  end
+
+  # how many products match every keyword along with the selected filters, when partial matches are shown too
+  def every_keyword_count = partial_keyword_match? ? @every_keyword_count : 0
 
   # the params for this listing with the given changes (ex: a different sort), leaving out empty / default values
   def params_with(**changes)
@@ -134,6 +171,18 @@ class ProductFilter
   # whether the listing is narrowed by a search
   def searched? = @search.present? || @keywords.any?
 
+  # each keyword with its related words: [keyword, related words] (ex: ['ocean', ['nautical', 'beach']])
+  def keyword_groups
+    @keywords.map { |keyword| keyword.split(RELATED_SEPARATOR).then { |word, *related| [word, related] } }
+  end
+
+  # the params to log for this listing (see ListingFilter): the keywords as the shopper's own words, so the same search
+  # groups together whatever related words were added; those are kept by keyword under related
+  def logged_params
+    related = keyword_groups.to_h.select { |_, words| words.any? }
+    params_with(keywords: keyword_groups.map(&:first)).merge(related:).compact_blank
+  end
+
   # whether the price filter is a custom min / max price (rather than price ranges)
   def custom_price? = @min_price.present? || @max_price.present?
 
@@ -146,9 +195,9 @@ class ProductFilter
   # the type options, in the type attr's option order: [type, label, count], counting the products that match the
   # other filters (the quilt size filter only for the quilt type) so each count is what selecting that type would add
   def type_options
-    matching = @products.select { |product| matches?(product, except: [:type, :size]) }
+    matching = @products.select { |product| matches?(product, except: [:type, :size, :keywords]) }
     types.map do |value|
-      count = matching.count { |product| type(product) == value && (value != QUILT_TYPE || quilt_size_match?(product)) }
+      count = keyword_count(matching.select { |product| type(product) == value && (value != QUILT_TYPE || quilt_size_match?(product)) })
       [value, type_label(value), count]
     end
   end
@@ -172,9 +221,9 @@ class ProductFilter
 
   # the quilt size options: [key, label, count], counting the products that match the other filters
   def quilt_size_options
-    matching = @products.select { |product| matches?(product, except: :size) }
+    matching = @products.select { |product| matches?(product, except: [:size, :keywords]) }
     QUILT_SIZES.map do |key, (label, min, max)|
-      [key, label, matching.count { |product| in_range?(quilt_width(product), min, max) }]
+      [key, label, keyword_count(matching.select { |product| in_range?(quilt_width(product), min, max) })]
     end
   end
 
@@ -184,8 +233,10 @@ class ProductFilter
   # the difficulty options, in the difficulty attr's option order: [difficulty, label, count], counting the products
   # that match the other filters so each count is what selecting that difficulty would add
   def difficulty_options
-    matching = @products.select { |product| matches?(product, except: :difficulty) }
-    difficulties.map { |value| [value, difficulty_label(value), matching.count { |product| difficulty(product) == value }] }
+    matching = @products.select { |product| matches?(product, except: [:difficulty, :keywords]) }
+    difficulties.map do |value|
+      [value, difficulty_label(value), keyword_count(matching.select { |product| difficulty(product) == value })]
+    end
   end
 
   # a difficulty's name (ex: 'confident_beginner' => 'Confident Beginner'): its option's handle, or the value
@@ -200,60 +251,67 @@ class ProductFilter
   # count is what selecting that supplier would add. every supplier in the listing is an option, even with no matching
   # products, so a selected supplier stays checked (and isn't dropped when the filters are applied again)
   def supplier_options
-    matching = @products.select { |product| matches?(product, except: :supplier) }
-    suppliers.map { |supplier| [supplier, matching.count { |product| supplier(product) == supplier }] }
+    matching = @products.select { |product| matches?(product, except: [:supplier, :keywords]) }
+    suppliers.map { |supplier| [supplier, keyword_count(matching.select { |product| supplier(product) == supplier })] }
   end
 
   # every supplier in the listing, by name (the filter drawer lists them all, whatever else is selected)
-  def suppliers = @products.map { |product| supplier(product) }.uniq.sort_by { |supplier| supplier.handle.downcase }
+  def suppliers = @suppliers ||= @products.map { |product| supplier(product) }.uniq.sort_by { |supplier| supplier.handle.downcase }
 
   # each product's [supplier token, PRICE_RANGES key (nil without a price), type (nil without one), QUILT_SIZES key
   # (nil without a width), difficulty (nil without one), price (nil without one), STOCK_STATUSES key, quilt width and
-  # length (nil for any other product, or without one), whether it's on sale], so the filter drawer can count the
-  # matching products as boxes are checked, before the filters are applied
+  # length (nil for any other product, or without one), whether it's on sale, whether it matches every keyword], so
+  # the filter drawer can count the matching products as boxes are checked, before the filters are applied (counting
+  # like keyword_count, with MIN_EVERY_KEYWORD_MATCHES)
   def facets
     @products.map do |product|
       quilt = type(product) == QUILT_TYPE
       [supplier(product).token, price_range_key(product), type(product), quilt_size_key(product), difficulty(product),
        price(product)&.to_f, stock_key(product), (quilt_width(product)&.to_f if quilt),
-       (quilt_length(product)&.to_f if quilt), product.on_sale?(hawthorne)]
+       (quilt_length(product)&.to_f if quilt), product.on_sale?(hawthorne), every_keyword_match?(product)]
     end
   end
 
   # how many products on sale match the other filters, for the on sale option's count
   def sale_count
-    @products.count { |product| matches?(product, except: :sale) && product.on_sale?(hawthorne) }
+    keyword_count(@products.select { |product| matches?(product, except: [:sale, :keywords]) && product.on_sale?(hawthorne) })
   end
 
   # the price range options: [key, label, count], counting the products that match the other filters
   def price_range_options
-    matching = @products.select { |product| matches?(product, except: :price) }
+    matching = @products.select { |product| matches?(product, except: [:price, :keywords]) }
     PRICE_RANGES.map do |key, (label, min, max)|
-      [key, label, matching.count { |product| in_range?(price(product), min, max) }]
+      [key, label, keyword_count(matching.select { |product| in_range?(price(product), min, max) })]
     end
   end
 
   # the stock options: [key, label, count], counting the products that match the other filters
   def stock_options
-    matching = @products.select { |product| matches?(product, except: :stock) }
-    STOCK_STATUSES.map { |key, label| [key, label, matching.count { |product| stock_key(product) == key }] }
+    matching = @products.select { |product| matches?(product, except: [:stock, :keywords]) }
+    STOCK_STATUSES.map { |key, label| [key, label, keyword_count(matching.select { |product| stock_key(product) == key })] }
   end
 
   # -----------------------------------------------------------------------------
 
   private
 
-  # by name, by best keyword match (then name), or by the shopper's price (then name); products without a price go last
+  # by name, by best keyword match (more keywords matched, then search_rank, then name: so with partial keyword
+  # matches, the ones matching every keyword come first), or by the shopper's price (then name); products without a
+  # price go last. a name / price sort orders every product the same way, partial keyword matches or not
   def sorted(products)
     by_name = products.sort_by { |product| product.handle.downcase }
     return by_name if @sort == 'name'
-    return by_name.sort_by.with_index { |product, i| [-product.attributes['search_rank'].to_f, i] } if @sort == 'best-match'
+    if @sort == 'best-match'
+      return by_name.sort_by.with_index do |product, i|
+        [-product.attributes['keywords_matched'].to_i, -product.attributes['search_rank'].to_f, i]
+      end
+    end
     priced, unpriced = by_name.partition { |product| price(product) }
     direction = @sort == 'price-desc' ? -1 : 1
     priced.sort_by.with_index { |product, i| [price(product) * direction, i] } + unpriced
   end
 
-  def supplier_tokens =@products.map { |product| supplier(product).token }.uniq
+  def supplier_tokens = @products.map { |product| supplier(product).token }.uniq
 
   # a min / max param pair (ex: min_price / max_price) as numbers, swapped when the min is over the max
   def number_range_params(min, max)
@@ -270,22 +328,42 @@ class ProductFilter
   # a price / size limit for the listing's params (ex: 100 rather than 100.0)
   def number_value(number) = number && (number % 1).zero? ? number.to_i : number
 
-  # the scope narrowed to the products matching every keyword, each with its search_rank (how well it matches: a match
-  # in the name counts most, then the search text, then the description); when none match every keyword, the ones
-  # matching any of them. matched in postgres (see products.search_vector): whole words, in any form (ex: bunnies
-  # matches bunny), and a keyword of several words as a phrase (ex: table runner)
+  # the scope narrowed to the products matching any keyword (by the keyword or one of its related words), each with how
+  # many keywords it matches (keywords_matched) and its search_rank (how well it matches: a match in the name counts
+  # most, then the search text, then the description, and a related word's match counts RELATED_WEIGHT of the
+  # keyword's own). which of them are shown is decided along with the filters (see keyword_match?). matched in
+  # postgres (see products.search_vector): whole words, in any form (ex: bunnies matches bunny), and a keyword of
+  # several words as a phrase (ex: table runner)
   def keyword_matches(scope)
     return scope if @keywords.empty?
 
-    queries = @keywords.map { |keyword| scope.klass.sanitize_sql_array(["phraseto_tsquery('english', ?)", keyword]) }
-    any = "(#{queries.join(' || ')})"
-    ranked = scope.select("products.*, ts_rank_cd(products.search_vector, #{any}) AS search_rank")
-    every = ranked.where("products.search_vector @@ (#{queries.join(' && ')})")
-    return every if every.exists?
+    query = ->(word) { scope.klass.sanitize_sql_array(["phraseto_tsquery('english', ?)", word]) }
+    either = ->(words) { "(#{words.map(&query).join(' || ')})" }
+    groups = keyword_groups.map { |word, related| either.([word, *related]) }
+    related = keyword_groups.flat_map(&:last)
+    @keyword_group_count = groups.size
 
-    @partial_keyword_match = true
-    ranked.where("products.search_vector @@ #{any}")
+    rank = "ts_rank_cd(products.search_vector, #{either.(keyword_groups.map(&:first))})"
+    rank += " + #{RELATED_WEIGHT} * ts_rank_cd(products.search_vector, #{either.(related)})" if related.any?
+    matched = groups.map { |group| "(products.search_vector @@ #{group})::int" }.join(' + ')
+    scope.select("products.*, #{rank} AS search_rank, #{matched} AS keywords_matched")
+         .where("products.search_vector @@ (#{groups.join(' || ')})")
   end
+
+  # how many of the products (each matching some keyword) would be shown for the keywords: the ones matching every
+  # keyword, or all of them when fewer than MIN_EVERY_KEYWORD_MATCHES do (see partial_keyword_match?); so an option's
+  # count is what the listing would show with it selected
+  def keyword_count(products)
+    every = products.count { |product| every_keyword_match?(product) }
+    every >= MIN_EVERY_KEYWORD_MATCHES ? every : products.size
+  end
+
+  # whether the product matches every keyword (true without any)
+  def every_keyword_match?(product) = product.attributes['keywords_matched'].to_i >= @keyword_group_count.to_i
+
+  # whether the product is shown for the keywords: it matches every one, or only some while partial matches are shown
+  # (see partial_keyword_match?)
+  def keyword_match?(product) = every_keyword_match?(product) || partial_keyword_match?
 
   # whether the shopper's price is within the custom min / max price (inclusive)
   def price_limit_match?(product)
@@ -304,11 +382,12 @@ class ProductFilter
     value.present? && (min.nil? || value >= min) && (max.nil? || value <= max)
   end
 
-  # whether the product matches every selected filter, leaving out the given ones (:type, :size, :difficulty,
-  # :supplier, :price, :sale, :stock), so an option's count can be what selecting it would add
+  # whether the product matches the keywords and every selected filter, leaving out the given ones (:keywords, :type,
+  # :size, :difficulty, :supplier, :price, :sale, :stock), so an option's count can be what selecting it would add
   def matches?(product, except: [])
     except = Array(except)
-    (except.include?(:type) || type_match?(product)) &&
+    (except.include?(:keywords) || keyword_match?(product)) &&
+      (except.include?(:type) || type_match?(product)) &&
       (except.include?(:size) || quilt_size_match?(product)) &&
       (except.include?(:difficulty) || difficulty_match?(product)) &&
       (except.include?(:supplier) || supplier_match?(product)) &&
