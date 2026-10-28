@@ -9,6 +9,9 @@ class Search < ActiveRecordBaseLog
   ANSWERED_BY_CACHE = 'CACHE'
   ANSWERED_BY_FALLBACK = 'FALLBACK'
 
+  # a search naming one product by its supplier SKU or GTIN, which goes straight to it (see ProductSearch#product)
+  ANSWERED_BY_IDENTIFIER = 'IDENTIFIER'
+
   # -----------------------------------------------------------------------------
 
   self.table_name = 'searches'

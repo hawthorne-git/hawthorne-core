@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict cGkcwwfykC6iMWQr7r1oDOVTPGtA3SmIvHkvdhZzGPhlEkiocwSGx6tUpobiedu
+\restrict kpFqo0vp1pjDbqZuCrWiKKotZqprWqJooWUmkcdd0pgoUV8H2joSZGsdDYoVVYx
 
 -- Dumped from database version 18.4 (Debian 18.4-1.pgdg12+1)
 -- Dumped by pg_dump version 18.4
@@ -313,7 +313,7 @@ CREATE TABLE public.searches (
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     voice boolean DEFAULT false NOT NULL,
     duration_ms integer,
-    CONSTRAINT searches_ck_answered_by CHECK ((answered_by = ANY (ARRAY['AI'::text, 'CACHE'::text, 'FALLBACK'::text])))
+    CONSTRAINT searches_ck_answered_by CHECK ((answered_by = ANY (ARRAY['AI'::text, 'CACHE'::text, 'FALLBACK'::text, 'IDENTIFIER'::text])))
 );
 
 
@@ -1045,5 +1045,5 @@ ALTER TABLE ONLY public.employee_sessions
 -- PostgreSQL database dump complete
 --
 
-\unrestrict cGkcwwfykC6iMWQr7r1oDOVTPGtA3SmIvHkvdhZzGPhlEkiocwSGx6tUpobiedu
+\unrestrict kpFqo0vp1pjDbqZuCrWiKKotZqprWqJooWUmkcdd0pgoUV8H2joSZGsdDYoVVYx
 

@@ -33,8 +33,11 @@ class ProductDetailsComponent < ViewComponent::Base
     ((regular - shopper) / regular * 100).round
   end
 
-  # the main image, then the additional images in order
-  def images = [@product.main_image, *@product.additional_images].compact
+  # the main image, then (for a sewing kit) the supplier main image, then the additional images in order
+  def images
+    supplier_main_image = @product.supplier_main_image if @product.sewing_kit?
+    [@product.main_image, supplier_main_image, *@product.additional_images].compact.uniq
+  end
 
   def image(image)
     render ImageComponent.new(image:, widths: IMAGE_WIDTHS, sizes: IMAGE_SIZES, alt: image.alt_text.presence || @product.handle)

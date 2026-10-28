@@ -39,6 +39,9 @@ class ProductSearch
   # the sort value the answer uses when the shopper doesn't ask for one, so the listing's current sort is kept
   ANY_SORT = 'any'
 
+  # the fewest letters / digits a search naming a product by its SKU / GTIN has (and a SKU's number must be)
+  MIN_SKU_DIGITS = 5
+
   # the answer's quilt width / length limits, in inches (the same names as ProductFilter's params)
   QUILT_SIZE_LIMITS = %w[min_width max_width min_length max_length].freeze
 
@@ -98,6 +101,22 @@ class ProductSearch
   # the saved search's id, once params are made (nil without a search, or when it couldn't be saved)
   def search_id = @search&.search_id
 
+  # the one product the search names by its supplier SKU or GTIN (see identifier_match), so the listing can go straight
+  # to it, without asking Claude; the search is saved as answered by Search::ANSWERED_BY_IDENTIFIER. nil when it
+  # names none, so the search is turned into params instead
+  def product
+    return @product if defined?(@product)
+
+    started = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+    @product = identifier_match
+    if @product
+      @params = { search: @text, product_id: @product.product_id }
+      duration_ms = ((Process.clock_gettime(Process::CLOCK_MONOTONIC) - started) * 1000).round
+      @search = save_search(Search::ANSWERED_BY_IDENTIFIER, duration_ms)
+    end
+    @product
+  end
+
   # -----------------------------------------------------------------------------
 
   private
@@ -126,6 +145,27 @@ class ProductSearch
       ProductFilter.keyword_param(param)
     end
   end
+
+  # the one listing product whose supplier SKU or GTIN the search is, ignoring case, spaces and punctuation (ex:
+  # "KT-19330", "kt 19330", "KIT2QTOB.POOLPARTY"), or a SKU's number (at least MIN_SKU_DIGITS digits in a row of it,
+  # ex: "19330", "80007" for 80007QK-X), or its GTIN with or without leading zeros (ex: "0889333575597"); nil when the
+  # search isn't one, or matches several (ex: a number in more than one SKU)
+  def identifier_match
+    query = identifier(@text)
+    return if query.length < MIN_SKU_DIGITS || !query.match?(/\d/)
+
+    # a search of digits only can also be a SKU's number, or a GTIN (compared without leading zeros)
+    digits = query.sub(/\A0+/, '').presence if query.match?(/\A\d+\z/)
+    matches = @filter.products.select do |product|
+      sku = identifier(product.supplier_sku)
+      gtin = product.gtin.to_s.gsub(/\D/, '').sub(/\A0+/, '')
+      sku == query || (digits && (sku.include?(query) || gtin == digits))
+    end
+    matches.first if matches.one?
+  end
+
+  # a SKU / GTIN as compared: lowercase letters and digits only
+  def identifier(value) = value.to_s.downcase.gsub(/[^a-z0-9]/, '')
 
   # saves the search, with how long it took to answer in milliseconds (the cache lookup, plus the call to Claude or the
   # keyword fallback); nil when it couldn't be saved, since failing to save doesn't fail the search
