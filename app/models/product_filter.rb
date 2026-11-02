@@ -61,7 +61,7 @@ class ProductFilter
   # when fewer products than this match every keyword (after the filters), the ones matching some of them are shown too
   MIN_EVERY_KEYWORD_MATCHES = 3
 
-  attr_reader :search, :keywords, :min_price, :max_price, :min_width, :max_width, :min_length, :max_length,
+  attr_reader :search, :keywords, :sku, :min_price, :max_price, :min_width, :max_width, :min_length, :max_length,
               :selected_types, :selected_quilt_sizes, :selected_difficulties, :selected_supplier_tokens,
               :selected_price_ranges, :selected_stock, :sort
 
@@ -69,6 +69,7 @@ class ProductFilter
   # params: the request's params (search = what the shopper typed, shown in the search box; keywords[] = words every
   #   product's name, search text or description must contain (whole words, in any form, see keyword_matches), each
   #   with any related words that can match instead after RELATED_SEPARATOR (ex: 'ocean|nautical|beach');
+  #   sku = part of a supplier SKU every product's must have, ignoring case, spaces and punctuation (ex: '80010qk');
   #   type[] = a type attr value, only one at a time;
   #   size[] = QUILT_SIZES keys, or min_width / max_width / min_length / max_length = a custom quilt size in inches,
   #   inclusive (which wins over size[]); difficulty[] = difficulty attr values; supplier[] = supplier tokens;
@@ -88,8 +89,9 @@ class ProductFilter
     @logged_in = logged_in
     @search = params[:search].to_s.squish.presence
     @keywords = Array(params[:keywords]).filter_map { |keyword| self.class.keyword_param(keyword) }.uniq.first(MAX_KEYWORDS)
+    @sku = params[:sku].to_s.downcase.gsub(/[^a-z0-9]/, '').presence
     @min_price, @max_price = number_range_params(params[:min_price], params[:max_price])
-    @products = keyword_matches(scope).to_a
+    @products = sku_matches(keyword_matches(scope)).to_a
     @type_attr = type_attr&.to_s
     @quilt_size_attr = quilt_size_attr&.to_s
     @quilt_length_attr = quilt_length_attr&.to_s
@@ -149,7 +151,7 @@ class ProductFilter
 
   # the params for this listing with the given changes (ex: a different sort), leaving out empty / default values
   def params_with(**changes)
-    { search: @search, keywords: @keywords, min_price: number_value(@min_price), max_price: number_value(@max_price),
+    { search: @search, keywords: @keywords, sku: @sku, min_price: number_value(@min_price), max_price: number_value(@max_price),
       type: @selected_types, size: @selected_quilt_sizes, min_width: number_value(@min_width),
       max_width: number_value(@max_width), min_length: number_value(@min_length), max_length: number_value(@max_length),
       difficulty: @selected_difficulties,
@@ -169,7 +171,7 @@ class ProductFilter
   def on_sale? = @on_sale
 
   # whether the listing is narrowed by a search
-  def searched? = @search.present? || @keywords.any?
+  def searched? = @search.present? || @keywords.any? || @sku.present?
 
   # each keyword with its related words: [keyword, related words] (ex: ['ocean', ['nautical', 'beach']])
   def keyword_groups
@@ -348,6 +350,13 @@ class ProductFilter
     matched = groups.map { |group| "(products.search_vector @@ #{group})::int" }.join(' + ')
     scope.select("products.*, #{rank} AS search_rank, #{matched} AS keywords_matched")
          .where("products.search_vector @@ (#{groups.join(' || ')})")
+  end
+
+  # the scope narrowed to the products whose supplier SKU has the sku param in it, ignoring case, spaces and
+  # punctuation (ex: 80010qk matches 80010QK-X)
+  def sku_matches(scope)
+    return scope if @sku.nil?
+    scope.where("regexp_replace(lower(products.supplier_sku), '[^a-z0-9]', '', 'g') LIKE ?", "%#{@sku}%")
   end
 
   # how many of the products (each matching some keyword) would be shown for the keywords: the ones matching every

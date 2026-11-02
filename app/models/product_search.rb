@@ -83,12 +83,18 @@ class ProductSearch
     return @params if defined?(@params)
 
     started = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-    answer = cached_answer if @text.present?
-    answered_by = if answer.nil? then Search::ANSWERED_BY_FALLBACK
-                  elsif @result then Search::ANSWERED_BY_AI
-                  else Search::ANSWERED_BY_CACHE
-                  end
-    @params = listing_params(answer || fallback_answer)
+    if sku_search?
+      # part of a SKU (ex: "80010QK" for 80010QK-X) lists the kits whose SKU has it, without asking Claude
+      @params = { search: @text, sku: identifier(@text) }
+      answered_by = Search::ANSWERED_BY_IDENTIFIER
+    else
+      answer = cached_answer if @text.present?
+      answered_by = if answer.nil? then Search::ANSWERED_BY_FALLBACK
+                    elsif @result then Search::ANSWERED_BY_AI
+                    else Search::ANSWERED_BY_CACHE
+                    end
+      @params = listing_params(answer || fallback_answer)
+    end
     duration_ms = ((Process.clock_gettime(Process::CLOCK_MONOTONIC) - started) * 1000).round
 
     if @text.present?
@@ -162,6 +168,15 @@ class ProductSearch
       sku == query || (digits && (sku.include?(query) || gtin == digits))
     end
     matches.first if matches.one?
+  end
+
+  # whether the search is part of some listing product's supplier SKU, ignoring case, spaces and punctuation (ex:
+  # "80010QK" for 80010QK-X), with at least MIN_SKU_DIGITS letters / digits and a digit; the listing then shows the
+  # products whose SKU has it (see ProductFilter's sku param)
+  def sku_search?
+    query = identifier(@text)
+    return false if query.length < MIN_SKU_DIGITS || !query.match?(/\d/)
+    @filter.products.any? { |product| identifier(product.supplier_sku).include?(query) }
   end
 
   # a SKU / GTIN as compared: lowercase letters and digits only

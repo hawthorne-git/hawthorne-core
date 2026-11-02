@@ -32,7 +32,7 @@ class ProductFiltersComponent < ViewComponent::Base
 
   # the search's params as hidden fields, so applying a filter keeps the search
   def search_fields
-    fields = @filter.params_with.slice(:search, :keywords).flat_map do |key, value|
+    fields = @filter.params_with.slice(:search, :keywords, :sku).flat_map do |key, value|
       name = value.is_a?(Array) ? "#{key}[]" : key
       Array(value).map { |item| hidden_field_tag(name, item, id: nil) }
     end
