@@ -61,10 +61,13 @@ module Ai
           raw_response: result.except(:input_tokens, :output_tokens)
         )
 
-        image.update!(
-          alt_text: result[:alt_text],
-          alt_text_ai_model_prompt_id: model_prompt.id
-        )
+        # the version history shows this job wrote it
+        PaperTrail.request(whodunnit: self.class.name, controller_info: { whodunnit_type: 'Job' }) do
+          image.update!(
+            alt_text: result[:alt_text],
+            alt_text_ai_model_prompt_id: model_prompt.id
+          )
+        end
 
       rescue => e
         CapturedException.log(location: 'Ai::ImageAltTextJob', note: { image_id: image.image_id }, e:)
