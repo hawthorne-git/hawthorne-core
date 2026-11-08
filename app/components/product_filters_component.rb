@@ -8,12 +8,14 @@ class ProductFiltersComponent < ViewComponent::Base
   # filter: a ProductFilter for the listing
   # url: the listing page's path, which the form submits to
   # search: whether to show the search box
+  # price: whether to show the price range filter (with on sale)
   # price_step: how much the custom price boxes' up / down arrows change the price, in dollars (nil for 1); any price
   #   can still be typed
-  def initialize(filter:, url:, search: false, price_step: nil)
+  def initialize(filter:, url:, search: false, price: true, price_step: nil)
     @filter = filter
     @url = url
     @search = search
+    @price = price
     @price_step = price_step
   end
 

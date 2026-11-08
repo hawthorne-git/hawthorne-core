@@ -25,6 +25,8 @@ class ProductType < ActiveRecordBaseApp
 
   def self.sewing_kit_id = @sewing_kit_id ||= find_by!(handle: 'Sewing Kit').id
 
+  def self.sample_card_id = @sample_card_id ||= find_by!(handle: 'Sample Card').id
+
   # -----------------------------------------------------------------------------
 
   # the abbreviation when there is one, else the name (handle)

@@ -142,31 +142,33 @@
       </div>
     </details>
 
-    <details class='product-filters__dropdown'>
-      <summary class='product-filters__chip<%= ' product-filters__chip--active' if @filter.selected_price_ranges.any? || @filter.custom_price? || @filter.on_sale? %>'>
-        <%= price_range_label %>
-        <svg class='product-filters__chevron' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'>
-          <path d='M5 8l5 5 5-5' />
-        </svg>
-      </summary>
-      <div class='product-filters__panel'>
-        <%# on sale goes with the price ranges or custom price %>
-        <label class='product-filters__option product-filters__option--sale'>
-          <input type='checkbox' name='sale' value='1'<%= ' checked' if @filter.on_sale? %>>
-          <span>On Sale</span>
-          <span class='product-filters__count'><%= @filter.sale_count %></span>
-        </label>
-        <% @filter.price_range_options.each do |key, text, count| %>
-          <label class='product-filters__option'>
-            <input type='checkbox' name='price[]' value='<%= key %>'<%= ' checked' if @filter.selected_price_ranges.include?(key) %>>
-            <span><%= text %></span>
-            <span class='product-filters__count'><%= count %></span>
+    <% if @price %>
+      <details class='product-filters__dropdown'>
+        <summary class='product-filters__chip<%= ' product-filters__chip--active' if @filter.selected_price_ranges.any? || @filter.custom_price? || @filter.on_sale? %>'>
+          <%= price_range_label %>
+          <svg class='product-filters__chevron' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'>
+            <path d='M5 8l5 5 5-5' />
+          </svg>
+        </summary>
+        <div class='product-filters__panel'>
+          <%# on sale goes with the price ranges or custom price %>
+          <label class='product-filters__option product-filters__option--sale'>
+            <input type='checkbox' name='sale' value='1'<%= ' checked' if @filter.on_sale? %>>
+            <span>On Sale</span>
+            <span class='product-filters__count'><%= @filter.sale_count %></span>
           </label>
-        <% end %>
-        <%= price_boxes %>
-        <button type='submit' class='product-filters__apply'>Apply</button>
-      </div>
-    </details>
+          <% @filter.price_range_options.each do |key, text, count| %>
+            <label class='product-filters__option'>
+              <input type='checkbox' name='price[]' value='<%= key %>'<%= ' checked' if @filter.selected_price_ranges.include?(key) %>>
+              <span><%= text %></span>
+              <span class='product-filters__count'><%= count %></span>
+            </label>
+          <% end %>
+          <%= price_boxes %>
+          <button type='submit' class='product-filters__apply'>Apply</button>
+        </div>
+      </details>
+    <% end %>
 
     <details class='product-filters__dropdown'>
       <summary class='product-filters__chip<%= ' product-filters__chip--active' if @filter.selected_stock.any? %>'>
@@ -299,25 +301,27 @@
         <% end %>
       </details>
 
-      <details class='filter-drawer__section' open>
-        <summary>
-          Price Range
-          <svg class='product-filters__chevron' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'>
-            <path d='M5 8l5 5 5-5' />
-          </svg>
-        </summary>
-        <label class='product-filters__option product-filters__option--sale'>
-          <input type='checkbox' name='sale' value='1'<%= ' checked' if @filter.on_sale? %>>
-          <span>On Sale</span>
-        </label>
-        <% ProductFilter::PRICE_RANGES.each do |key, (text, _, _)| %>
-          <label class='product-filters__option'>
-            <input type='checkbox' name='price[]' value='<%= key %>'<%= ' checked' if @filter.selected_price_ranges.include?(key) %>>
-            <span><%= text %></span>
+      <% if @price %>
+        <details class='filter-drawer__section' open>
+          <summary>
+            Price Range
+            <svg class='product-filters__chevron' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'>
+              <path d='M5 8l5 5 5-5' />
+            </svg>
+          </summary>
+          <label class='product-filters__option product-filters__option--sale'>
+            <input type='checkbox' name='sale' value='1'<%= ' checked' if @filter.on_sale? %>>
+            <span>On Sale</span>
           </label>
-        <% end %>
-        <%= price_boxes %>
-      </details>
+          <% ProductFilter::PRICE_RANGES.each do |key, (text, _, _)| %>
+            <label class='product-filters__option'>
+              <input type='checkbox' name='price[]' value='<%= key %>'<%= ' checked' if @filter.selected_price_ranges.include?(key) %>>
+              <span><%= text %></span>
+            </label>
+          <% end %>
+          <%= price_boxes %>
+        </details>
+      <% end %>
 
       <details class='filter-drawer__section' open>
         <summary>
