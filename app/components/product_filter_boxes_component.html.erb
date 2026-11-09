@@ -1,5 +1,7 @@
 <div class='product-filters__custom-price'>
-  <span class='product-filters__custom-price-or'>or</span>
+  <% if @divider %>
+    <span class='product-filters__custom-price-or'>or</span>
+  <% end %>
   <% @rows.each do |row| %>
     <div class='product-filters__custom-price-boxes<%= ' product-filters__custom-size-boxes' if row[:label] %>'>
       <% if row[:label] %>

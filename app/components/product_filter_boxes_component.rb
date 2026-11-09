@@ -9,12 +9,14 @@ class ProductFilterBoxesComponent < ViewComponent::Base
   #   current limits; nil for none)
   # prefix / suffix: shown in each box before / after its number (ex: '$', '″')
   # step: how much the boxes' up / down arrows change the number ('any' for 1); any number can still be typed
-  def initialize(kind:, rows:, prefix: nil, suffix: nil, step: 'any')
+  # divider: whether "or" goes above the boxes; false when the filter has no options for them to be an alternative to
+  def initialize(kind:, rows:, prefix: nil, suffix: nil, step: 'any', divider: true)
     @kind = kind
     @rows = rows
     @prefix = prefix
     @suffix = suffix
     @step = step
+    @divider = divider
   end
 
   # -----------------------------------------------------------------------------

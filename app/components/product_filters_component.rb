@@ -8,14 +8,23 @@ class ProductFiltersComponent < ViewComponent::Base
   # filter: a ProductFilter for the listing
   # url: the listing page's path, which the form submits to
   # search: whether to show the search box
-  # price: whether to show the price range filter (with on sale)
+  # search_example: what the search box's placeholder suggests searching for (ex: 'a lap quilt kit in stock')
+  # price_chip: whether the price range filter (with on sale) has a dropdown in the filter bar; without one it's only in
+  #   the filter drawer, opened by the filter button
+  # sale: whether the price range filter has on sale (for a listing whose products are never on sale)
+  # price_ranges: whether the price range filter in the filter drawer has the preset price ranges; without them it's
+  #   just the custom min / max boxes (for a listing whose prices are all low)
   # price_step: how much the custom price boxes' up / down arrows change the price, in dollars (nil for 1); any price
   #   can still be typed
-  def initialize(filter:, url:, search: false, price: true, price_step: nil)
+  def initialize(filter:, url:, search: false, search_example: 'a lap quilt kit in stock', price_chip: true,
+                 sale: true, price_ranges: true, price_step: nil)
     @filter = filter
     @url = url
     @search = search
-    @price = price
+    @search_example = search_example
+    @price_chip = price_chip
+    @sale = sale
+    @price_ranges = price_ranges
     @price_step = price_step
   end
 
@@ -32,9 +41,9 @@ class ProductFiltersComponent < ViewComponent::Base
     query.empty? ? @url : "#{@url}?#{query}"
   end
 
-  # the search's params as hidden fields, so applying a filter keeps the search
-  def search_fields
-    fields = @filter.params_with.slice(:search, :keywords, :sku).flat_map do |key, value|
+  # the given params as hidden fields, so applying a filter keeps them (ex: the search's search, keywords and sku)
+  def hidden_fields(*keys)
+    fields = @filter.params_with.slice(*keys).flat_map do |key, value|
       name = value.is_a?(Array) ? "#{key}[]" : key
       Array(value).map { |item| hidden_field_tag(name, item, id: nil) }
     end
@@ -76,7 +85,7 @@ class ProductFiltersComponent < ViewComponent::Base
   # the custom min / max price boxes, in the filter bar and the filter drawer (see ProductFilterBoxesComponent)
   def price_boxes
     rows = [{ name: 'price', aria: 'price', min: @filter.min_price, max: @filter.max_price }]
-    render(ProductFilterBoxesComponent.new(kind: :price, rows:, prefix: '$', step: @price_step || 'any'))
+    render(ProductFilterBoxesComponent.new(kind: :price, rows:, prefix: '$', step: @price_step || 'any', divider: @price_ranges))
   end
 
   # the custom quilt size's min / max boxes, a row for width and (when the filter has one) length

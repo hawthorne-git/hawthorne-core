@@ -8,7 +8,7 @@
       <circle cx='9' cy='9' r='5.5' />
       <path d='M13 13l4 4' />
     </svg>
-    <input type='search' name='q' value='<%= @filter.search %>' class='product-search__input' aria-label='Search' placeholder='Describe what you’re looking for, like a lap quilt kit in stock' autocomplete='off' maxlength='<%= ProductSearch::MAX_LENGTH %>'>
+    <input type='search' name='q' value='<%= @filter.search %>' class='product-search__input' aria-label='Search' placeholder='Describe what you’re looking for, like <%= @search_example %>' autocomplete='off' maxlength='<%= ProductSearch::MAX_LENGTH %>'>
     <%# voice search: shown only in browsers that can turn speech into text (see the script below) %>
     <button type='button' class='product-search__voice' aria-label='Search by voice' aria-pressed='false' title='Search by voice' data-search-voice hidden>
       <svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'>
@@ -47,7 +47,7 @@
   <% unless @filter.default_sort? %>
     <input type='hidden' name='sort' value='<%= @filter.sort %>'>
   <% end %>
-  <%= search_fields %>
+  <%= hidden_fields(:search, :keywords, :sku) %>
   <div class='product-filters__left'>
     <button type='button' class='product-filters__chip' commandfor='filter-drawer' command='show-modal'>
       <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' aria-hidden='true'>
@@ -142,7 +142,7 @@
       </div>
     </details>
 
-    <% if @price %>
+    <% if @price_chip %>
       <details class='product-filters__dropdown'>
         <summary class='product-filters__chip<%= ' product-filters__chip--active' if @filter.selected_price_ranges.any? || @filter.custom_price? || @filter.on_sale? %>'>
           <%= price_range_label %>
@@ -168,6 +168,9 @@
           <button type='submit' class='product-filters__apply'>Apply</button>
         </div>
       </details>
+    <% else %>
+      <%# price is only in the filter drawer: keep its selection when a filter here is applied %>
+      <%= hidden_fields(:price, :min_price, :max_price, :sale) %>
     <% end %>
 
     <details class='product-filters__dropdown'>
@@ -226,7 +229,7 @@
     <% unless @filter.default_sort? %>
       <input type='hidden' name='sort' value='<%= @filter.sort %>'>
     <% end %>
-    <%= search_fields %>
+    <%= hidden_fields(:search, :keywords, :sku) %>
     <div class='filter-drawer__header'>
       <h2 class='filter-drawer__title'>Filter</h2>
       <button type='button' class='filter-drawer__close' commandfor='filter-drawer' command='close' aria-label='Close'>&times;</button>
@@ -301,27 +304,29 @@
         <% end %>
       </details>
 
-      <% if @price %>
-        <details class='filter-drawer__section' open>
-          <summary>
-            Price Range
-            <svg class='product-filters__chevron' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'>
-              <path d='M5 8l5 5 5-5' />
-            </svg>
-          </summary>
+      <details class='filter-drawer__section' open>
+        <summary>
+          Price Range
+          <svg class='product-filters__chevron' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'>
+            <path d='M5 8l5 5 5-5' />
+          </svg>
+        </summary>
+        <% if @sale %>
           <label class='product-filters__option product-filters__option--sale'>
             <input type='checkbox' name='sale' value='1'<%= ' checked' if @filter.on_sale? %>>
             <span>On Sale</span>
           </label>
+        <% end %>
+        <% if @price_ranges %>
           <% ProductFilter::PRICE_RANGES.each do |key, (text, _, _)| %>
             <label class='product-filters__option'>
               <input type='checkbox' name='price[]' value='<%= key %>'<%= ' checked' if @filter.selected_price_ranges.include?(key) %>>
               <span><%= text %></span>
             </label>
           <% end %>
-          <%= price_boxes %>
-        </details>
-      <% end %>
+        <% end %>
+        <%= price_boxes %>
+      </details>
 
       <details class='filter-drawer__section' open>
         <summary>

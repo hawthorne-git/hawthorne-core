@@ -2,16 +2,25 @@
 # (see ProductFilter), by asking Claude to pick from the listing's filter options. words that aren't an option (ex:
 # "christmas", "batik") come back as keywords, each with a few related words that can match instead (ex: ocean =>
 # nautical, beach), matched against the products' names, search text and descriptions. the model, max tokens and
-# instructions come from the default AI model prompt of the PROMPT_TYPE prompt type (the listing's options
+# instructions come from the default AI model prompt of the listing's prompt type (see LISTINGS; the listing's options
 # are added to the instructions here). answers are cached by search; when Claude can't answer (ex: no model prompt, an
 # error or a timeout), the search's own words are the keywords. each search is saved (see Search) with how it was
 # answered, and each call to Claude is logged as an AiGeneration with its cost, pointing at the search
 class ProductSearch
 
-  PROMPT_TYPE = 'Product / Sewing Kit / Search'
+  # a listing that can be searched: prompt_type (the AI prompt type whose default model prompt answers its searches),
+  # search_type (the saved search's search_type, also its ListingFilter's listing_type), noun (what one of its products
+  # is called in Claude's instructions), sale (whether its products can be on sale, so the search can ask for on sale)
+  # and price_ranges (whether its filter shows ProductFilter::PRICE_RANGES, so a price on their edges picks them;
+  # otherwise prices are always a custom min / max)
+  Listing = Data.define(:prompt_type, :search_type, :noun, :sale, :price_ranges)
 
-  # the saved search's search_type
-  SEARCH_TYPE = 'Product / Sewing Kit'
+  LISTINGS = {
+    sewing_kit: Listing.new(prompt_type: 'Product / Sewing Kit / Search', search_type: 'Product / Sewing Kit', noun: 'kit',
+                            sale: true, price_ranges: true),
+    sample_card: Listing.new(prompt_type: 'Product / Sample Card / Search', search_type: 'Product / Sample Card',
+                             noun: 'sample card', sale: false, price_ranges: false)
+  }.freeze
 
   EFFORT = :low
 
@@ -45,20 +54,21 @@ class ProductSearch
   # the answer's quilt width / length limits, in inches (the same names as ProductFilter's params)
   QUILT_SIZE_LIMITS = %w[min_width max_width min_length max_length].freeze
 
-  # how to add related words to the keywords (see ProductFilter::RELATED_SEPARATOR): kits described in other words than
-  # the shopper's are found too
+  # how to add related words to the keywords (see ProductFilter::RELATED_SEPARATOR): products described in other words
+  # than the shopper's are found too. %{noun}: what one of the listing's products is called
   KEYWORDS_NOTE = <<~NOTE
     Keywords (keywords): each keyword is an object with the word and its related words. For each keyword, add up to
-    #{ProductFilter::MAX_RELATED_WORDS} related words a kit matching it might be described with instead: synonyms and closely related themes or
+    #{ProductFilter::MAX_RELATED_WORDS} related words a %{noun} matching it might be described with instead: synonyms and closely related themes or
     motifs (ex: "ocean" has related words "nautical", "beach", "seaside", "sailboat"; "baby" has "nursery", "crib",
     "baby shower"). Stay close to the keyword's meaning and don't broaden it (ex: "blue" is too broad for "ocean"). A
     proper name (a fabric line, designer, brand, character or story) gets no related words. Use lowercase and the
     singular, as for the keywords.
   NOTE
 
-  # how to read the shopper asking for kits on sale (see ProductFilter's sale param)
+  # how to read the shopper asking for products on sale (see ProductFilter's sale param). %{noun}: what one of the
+  # listing's products is called
   ON_SALE_NOTE = <<~NOTE
-    On sale (on_sale): true only when the shopper asks for kits on sale, such as "on sale", "sale", "discounted",
+    On sale (on_sale): true only when the shopper asks for %{noun}s on sale, such as "on sale", "sale", "discounted",
     "marked down", "clearance", "deals" or "bargains"; otherwise false. A price limit can go with it (ex: "on sale under
     $100" is on_sale true and max_price 100). "cheap" or "affordable" alone is not on sale.
   NOTE
@@ -67,11 +77,13 @@ class ProductSearch
 
   # text: what the shopper typed
   # filter: a ProductFilter for the whole listing (nothing selected or searched), whose options the search picks from
+  # listing: a LISTINGS key, the listing searched (ex: :sewing_kit)
   # user_id, user_session_token, ip: who searched, saved with the search
   # voice: whether the shopper spoke the search (voice search) rather than typed it, saved with the search
-  def initialize(text, filter:, user_id: nil, user_session_token: nil, ip: nil, voice: false)
+  def initialize(text, filter:, listing:, user_id: nil, user_session_token: nil, ip: nil, voice: false)
     @text = text.to_s.squish.first(MAX_LENGTH)
     @filter = filter
+    @listing = LISTINGS.fetch(listing)
     @shopper = { user_id:, user_session_token:, ip: }
     @voice = voice
   end
@@ -107,6 +119,9 @@ class ProductSearch
   # the saved search's id, once params are made (nil without a search, or when it couldn't be saved)
   def search_id = @search&.search_id
 
+  # the listing's search type (ex: 'Product / Sewing Kit'), which its ListingFilter rows are logged as too
+  def search_type = @listing.search_type
+
   # the one product the search names by its supplier SKU or GTIN (see identifier_match), so the listing can go straight
   # to it, without asking Claude; the search is saved as answered by Search::ANSWERED_BY_IDENTIFIER. nil when it
   # names none, so the search is turned into params instead
@@ -135,7 +150,7 @@ class ProductSearch
       size: answer['sizes'],
       difficulty: answer['difficulties'],
       supplier: answer['suppliers'],
-      sale: ('1' if answer['on_sale']),
+      sale: ('1' if @listing.sale && answer['on_sale']),
       stock: [answer['stock']].compact - [ANY_STOCK],
       sort: (answer['sort'] unless answer['sort'] == ANY_SORT)
     }.merge(price_params(answer['min_price'], answer['max_price']), quilt_size_params(answer)).compact_blank
@@ -185,7 +200,7 @@ class ProductSearch
   # saves the search, with how long it took to answer in milliseconds (the cache lookup, plus the call to Claude or the
   # keyword fallback); nil when it couldn't be saved, since failing to save doesn't fail the search
   def save_search(answered_by, duration_ms)
-    Search.create!(search_type: SEARCH_TYPE, text: @text, answered_by:, params: @params, voice: @voice, duration_ms:, **@shopper)
+    Search.create!(search_type:, text: @text, answered_by:, params: @params, voice: @voice, duration_ms:, **@shopper)
   rescue => e
     CapturedException.log(location: 'ProductSearch#save_search', note: { text: @text }, e:)
     nil
@@ -195,7 +210,7 @@ class ProductSearch
   # is answered once, then served from the cache
   def cached_answer
     unless model_prompt
-      CapturedException.log(location: 'ProductSearch', note: "no default model prompt found for #{PROMPT_TYPE}")
+      CapturedException.log(location: 'ProductSearch', note: "no default model prompt found for #{@listing.prompt_type}")
       return
     end
 
@@ -245,25 +260,26 @@ class ProductSearch
     CapturedException.log(location: 'ProductSearch#log_generation', note: { text: @text }, e:)
   end
 
-  # the PROMPT_TYPE prompt type's default AI model prompt (nil when there isn't one)
+  # the listing's prompt type's default AI model prompt (nil when there isn't one)
   def model_prompt
     return @model_prompt if defined?(@model_prompt)
     @model_prompt = AiModelPrompt
                       .joins(ai_prompt: :ai_prompt_type)
                       .where(default_prompt: true, deleted: false)
-                      .where(ai_prompt_types: { handle: PROMPT_TYPE })
+                      .where(ai_prompt_types: { handle: @listing.prompt_type })
                       .includes(:ai_model, :ai_prompt)
                       .first
   end
 
   # the search's price limits (swapped when the min is over the max): on the price ranges' edges (ex: under $100, over
   # $150), the ranges they cover, so they show as the price range filter; otherwise (ex: under $90, or exactly $100,
-  # which no range covers) the exact limits
+  # which no range covers), or when the listing has no price ranges, the exact limits
   def price_params(min, max)
     min = nil unless min&.positive?
     max = nil unless max&.positive?
     return {} if min.nil? && max.nil?
     min, max = max, min if min && max && min > max
+    return { min_price: min, max_price: max } unless @listing.price_ranges
 
     edges = ProductFilter::PRICE_RANGES.values.flat_map { |(_, low, high)| [low, high] }.compact
     return { min_price: min, max_price: max } unless [min, max].compact.all? { |price| edges.include?(price) }
@@ -308,10 +324,10 @@ class ProductSearch
         },
         min_price: { anyOf: [{ type: 'number' }, { type: 'null' }] },
         max_price: { anyOf: [{ type: 'number' }, { type: 'null' }] },
-        on_sale: { type: 'boolean' },
         stock: { type: 'string', enum: ProductFilter::STOCK_STATUSES.keys + [ANY_STOCK] },
         sort: { type: 'string', enum: ProductFilter::SORTS.keys + [ANY_SORT] }
       }
+      properties[:on_sale] = { type: 'boolean' } if @listing.sale
       properties[:type] = { type: 'string', enum: @filter.types + [ANY_TYPE] } if @filter.type_filter?
       properties[:sizes] = { type: 'array', items: { type: 'string', enum: ProductFilter::QUILT_SIZES.keys } } if @filter.quilt_sizes?
       quilt_size_limits.each { |key| properties[key.to_sym] = { anyOf: [{ type: 'number' }, { type: 'null' }] } }
@@ -334,8 +350,8 @@ class ProductSearch
       (option_list('Supplier (pick every one the shopper names)', @filter.suppliers.map { |supplier| [supplier.token, supplier.handle] }) if @filter.suppliers.any?),
       option_list("Stock (pick one, or \"#{ANY_STOCK}\")", ProductFilter::STOCK_STATUSES.to_a),
       option_list("Sort (pick one only when the shopper asks for an order, such as \"highest price first\", \"most expensive\", \"cheapest first\" or \"alphabetical\"; otherwise \"#{ANY_SORT}\")", ProductFilter::SORTS.to_a),
-      ON_SALE_NOTE,
-      KEYWORDS_NOTE
+      (format(ON_SALE_NOTE, noun: @listing.noun) if @listing.sale),
+      format(KEYWORDS_NOTE, noun: @listing.noun)
     ].compact.join("\n")
   end
 
