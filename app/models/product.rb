@@ -56,8 +56,10 @@ class Product < ActiveRecordBaseApp
   # adhering to it
   validate :sale_price_allowed, if: -> { sale_price_changed? || supplier_product_profile_id_changed? }
 
-  # attrs holds the product type's attributes (see ProductTypeAttr), keyed by attr key; each value must fit its data type
-  validate :attrs_match_product_type, if: -> { attrs_changed? || product_type_id_changed? }
+  # attrs holds the product type's attributes (see ProductTypeAttr), keyed by attr key; each value must fit its data type.
+  # also checked whenever the form's attrs were assigned (see assign_form_attrs), so saving the product's form with a
+  # required attribute still blank is stopped, even when that blank is unchanged
+  validate :attrs_match_product_type, if: -> { @form_attrs_assigned || attrs_changed? || product_type_id_changed? }
 
   # a GTIN identifies one product (products_uk_gtin)
   validate :gtin_unique, if: -> { gtin.present? && gtin_changed? }
@@ -177,6 +179,7 @@ class Product < ActiveRecordBaseApp
   # for its type is kept as typed, so validation reports it
   def assign_form_attrs(form_values)
     form_values = form_values.to_h.stringify_keys
+    @form_attrs_assigned = true
     self.attrs = (product_type&.product_type_attrs&.includes(:product_attr) || []).each_with_object({}) do |type_attr, result|
       value = cast_form_attr(type_attr.data_type, form_values[type_attr.key])
       result[type_attr.key] = value unless value.nil?
