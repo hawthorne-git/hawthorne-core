@@ -14,6 +14,16 @@ class DocumentType < ActiveRecordBaseApp
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'Word (.docx)'
   }.freeze
 
+  # each file type's extension, for its stored file's key (see HawthorneCore::DocumentHelper)
+  EXTENSIONS = {
+    'application/pdf' => '.pdf',
+    'image/jpeg' => '.jpg',
+    'image/png' => '.png',
+    'text/csv' => '.csv',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => '.xlsx',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => '.docx'
+  }.freeze
+
   # a slug is a storage folder path (documents/<slug>/<token>.<ext>), named like the image types' slugs: lowercase
   # words joined by underscores, in folders split by slashes (ex: product/sample_card/color_card)
   SLUG_FORMAT = %r{\A[a-z0-9]+(_[a-z0-9]+)*(/[a-z0-9]+(_[a-z0-9]+)*)*\z}
@@ -21,6 +31,10 @@ class DocumentType < ActiveRecordBaseApp
   validates :handle, presence: true, uniqueness: true
   validates :slug, presence: true, uniqueness: true, format: { with: SLUG_FORMAT, message: 'must be lowercase words joined by underscores, in folders split by slashes (ex: product/sample_card/color_card)', allow_blank: true }
   validate :content_types_known
+  validate :no_active_documents_when_inactivating
+  validate :slug_cannot_change_with_documents
+
+  has_many :documents
 
   # -----------------------------------------------------------------------------
 
@@ -42,6 +56,22 @@ class DocumentType < ActiveRecordBaseApp
       errors.add(:content_types, "can't be blank")
     elsif (unknown = content_types - CONTENT_TYPES.keys).any?
       errors.add(:content_types, "has unknown file types: #{unknown.join(', ')}")
+    end
+  end
+
+  # a document type cannot be set as inactive while active documents still use it
+  def no_active_documents_when_inactivating
+    return unless deleted? && deleted_changed?
+    if Document.where(document_type_id:, deleted: false).exists?
+      errors.add(:base, 'Cannot be set as inactive while it has active documents')
+    end
+  end
+
+  # the slug is its documents' storage folder, so it cannot change once any document (active or inactive) uses it
+  def slug_cannot_change_with_documents
+    return unless persisted? && slug_changed?
+    if Document.where(document_type_id:).exists?
+      errors.add(:slug, 'cannot be edited once the document type has documents')
     end
   end
 

@@ -1,10 +1,11 @@
 module Ai
   # writes a product's search text: the words shoppers might search to find it, as labeled lines (see KINDS for the
   # product types written for, and each one's fields), from its name, supplier, attrs, description and supplier main
-  # image's visual description (see ImageVisualDescriptionJob). text only, so it's cheap to write again. it's written
-  # again only when what it's written from changes (see search_text_source_digest), or, when the model prompt updates
-  # existing ones, when another model prompt wrote it. a product whose supplier main image is still waiting for its
-  # visual description waits too (the description being written queues it, see Image). the model and instructions come
+  # image's visual description (see ImageVisualDescriptionJob), and for a sample card, its pdf's summary (see
+  # DocumentSummaryJob). text only, so it's cheap to write again. it's written again only when what it's written from
+  # changes (see search_text_source_digest), or, when the model prompt updates existing ones, when another model prompt
+  # wrote it. a product whose supplier main image or sample card pdf is still waiting for its description / summary
+  # waits too (the description / summary being written queues it, see Image and Document). the model and instructions come
   # from the default AI model prompt of its kind's prompt type; each call is logged as an AiGeneration with its cost.
   # run without a product, it writes the next products in need
   class ProductSearchTextJob < HawthorneCore::ApplicationJob
@@ -65,6 +66,17 @@ module Ai
       'search_terms' => 'search terms'
     }.freeze
 
+    # a sample card pdf's summary attrs (see DocumentSummaryJob::SCHEMA) given with its summary, with their labels
+    # (shades are given as "number name", ex: "0001 White")
+    PDF_FIELDS = {
+      'brands' => 'brands',
+      'product_lines' => 'product lines',
+      'materials' => 'materials',
+      'color_families' => 'color families',
+      'shades' => 'shades',
+      'search_terms' => 'search terms'
+    }.freeze
+
     # the product types whose products get search text (and so are embedded, see ProductEmbeddingJob)
     def self.product_type_ids = KINDS.keys.map { |key| ProductType.public_send("#{key}_id") }
 
@@ -80,7 +92,7 @@ module Ai
 
         products = Product.active
                           .where(product_type_id: ProductType.public_send("#{key}_id"), update_search_text_with_ai: true)
-                          .includes(:supplier, product_images: { image: :image_type })
+                          .includes(:supplier, product_images: { image: :image_type }, product_documents: { document: :document_type })
                           .order(:product_id)
         products = products.where(product_id:) if product_id
         # a missing model prompt is only reported when there's a product of this kind to write
@@ -96,7 +108,7 @@ module Ai
 
         products.each do |product|
           break if written >= BATCH_SIZE
-          next if waiting_for_image?(product)
+          next if waiting_for_image?(product) || waiting_for_pdf?(product)
 
           source = source_text(product, kind)
           digest = Digest::SHA256.hexdigest(source)
@@ -179,6 +191,13 @@ module Ai
       image.present? && image.visual_description.blank? && image.update_visual_description_with_ai?
     end
 
+    # whether the product's sample card pdf is still waiting for its summary (one that AI won't summarize, ex: its
+    # summary was cleared by hand, doesn't hold the product up)
+    def waiting_for_pdf?(product)
+      pdf = product.sample_card_pdf
+      pdf.present? && pdf.summary.blank? && pdf.update_summary_with_ai?
+    end
+
     # written when there's none yet, what it's written from changed, or the model prompt updates ones another wrote
     def needs_writing?(product, digest, model_prompt)
       product.search_text.blank? ||
@@ -198,7 +217,18 @@ module Ai
         ['Main image', image&.visual_description.to_s.squish.presence]
       ]
       lines += VISUAL_FIELDS.map { |field, label| ["Main image #{label}", Array(visual[field]).join(', ').presence] }
+      pdf = product.sample_card_pdf
+      if pdf
+        pdf_attrs = pdf.summary_attrs || {}
+        lines << ['Color card PDF', pdf.summary.to_s.squish.presence]
+        lines += PDF_FIELDS.map { |field, label| ["Color card PDF #{label}", Array(pdf_attrs[field]).map { |value| pdf_value(value) }.compact_blank.join(', ').presence] }
+      end
       lines.select { |_, value| value.present? }.map { |label, value| "#{label}: #{value}" }.join("\n")
+    end
+
+    # a pdf summary attr's value as text: a shade as "number name" (ex: "0001 White"), anything else as is
+    def pdf_value(value)
+      value.is_a?(Hash) ? [value['number'], value['name']].map { |part| part.to_s.squish }.compact_blank.join(' ') : value.to_s.squish
     end
 
     # a detail's label and value (ex: ['Difficulty', 'Confident Beginner'])

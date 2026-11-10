@@ -20,6 +20,7 @@ module HawthorneCore
     initializer 'hawthorne_core.helpers' do
       ActiveSupport.on_load(:action_controller_base) do
         helper HawthorneCore::ImageHelper
+        helper HawthorneCore::DocumentHelper
       end
     end
 

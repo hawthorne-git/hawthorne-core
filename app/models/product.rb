@@ -13,6 +13,9 @@ class Product < ActiveRecordBaseApp
   ADDITIONAL_IMAGE_TYPE = 'Product / Additional'
   SEWING_KIT_REQUIREMENTS_IMAGE_TYPE = 'Product / Sewing Kit / Requirements'
 
+  # a sample card's pdf (ex: a maker's color card) is a document of this type (by handle); one per sample card
+  SAMPLE_CARD_DOCUMENT_TYPE = 'Product / Sample Card / Card'
+
   # -----------------------------------------------------------------------------
 
   self.table_name = 'products'
@@ -35,10 +38,20 @@ class Product < ActiveRecordBaseApp
   has_many :product_images, -> { order(:order_nbr) }
   has_many :images, through: :product_images
 
+  # its files (ex: a sample card's color card pdf), in order (product_documents.order_nbr)
+  has_many :product_documents, -> { order(:order_nbr) }
+  has_many :documents, through: :product_documents
+
   has_many :product_embeddings
 
   # the product form's image uploads (not stored on products; see the image roles above)
   attr_accessor :main_image_file, :supplier_main_image_file, :additional_image_files, :sewing_kit_requirements_image_file
+
+  # the product form's sample card pdf: the web link it's downloaded from (not stored on products; see ProductDocument)
+  attr_accessor :new_document_source_url
+
+  # the sample card pdf's document type (see SAMPLE_CARD_DOCUMENT_TYPE); nil when it's missing or inactive
+  def self.sample_card_document_type = DocumentType.active.find_by(handle: SAMPLE_CARD_DOCUMENT_TYPE)
 
   # supplier_id / product_type_id always follow the profile (kept on products for queries)
   before_validation :copy_from_supplier_product_profile
@@ -103,6 +116,13 @@ class Product < ActiveRecordBaseApp
     end
   end
 
+  # the active product documents (with active documents; ex: a sample card's color card pdf), by order; works off
+  # preloaded product_documents: { document: :document_type } when present
+  def active_product_documents = product_documents.select { |product_document| product_document.active? && product_document.document.active? }
+
+  # a sample card's pdf (see SAMPLE_CARD_DOCUMENT_TYPE); nil when it has none
+  def sample_card_pdf = active_product_documents.map(&:document).find(&:sample_card_pdf?)
+
   # -----------------------------------------------------------------------------
 
   # the list price on a marketplace: the profile's price there (nil without a profile / price)
@@ -138,6 +158,8 @@ class Product < ActiveRecordBaseApp
   # -----------------------------------------------------------------------------
 
   def sewing_kit? = product_type_id == ProductType.sewing_kit_id
+
+  def sample_card? = product_type_id == ProductType.sample_card_id
 
   # whether its product type gets AI search text and embeddings (ex: sewing kits, sample cards; see
   # Ai::ProductSearchTextJob::KINDS)
