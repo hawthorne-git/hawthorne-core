@@ -75,15 +75,15 @@ class Product < ActiveRecordBaseApp
   # changed
   before_save -> { self.search_text_source_digest = nil }, if: -> { will_save_change_to_update_search_text_with_ai?(to: true) }
 
-  # an active sewing kit's search text is written again as what it's written from changes, or AI is turned back on for
-  # it (see Ai::ProductSearchTextJob, which skips one whose search text is up to date); also queued as its supplier
-  # main image is added or described
+  # an active product with search text (ex: a sewing kit, see search_text?) has it written again as what it's written
+  # from changes, or AI is turned back on for it (see Ai::ProductSearchTextJob, which skips one whose search text is up
+  # to date); also queued as its supplier main image is added or described
   after_commit -> { Ai::ProductSearchTextJob.perform_later(product_id:) }, on: [:create, :update], if: :search_text_source_changed?
 
-  # an active sewing kit is embedded again as its name or search text changes (see Ai::ProductEmbeddingJob, which skips
-  # one whose embedding is up to date)
+  # an active product with search text is embedded again as its name or search text changes (see
+  # Ai::ProductEmbeddingJob, which skips one whose embedding is up to date)
   after_commit -> { Ai::ProductEmbeddingJob.perform_later(product_id:) }, on: [:create, :update],
-               if: -> { active? && sewing_kit? && (saved_change_to_search_text? || saved_change_to_handle?) }
+               if: -> { active? && search_text? && (saved_change_to_search_text? || saved_change_to_handle?) }
 
   # -----------------------------------------------------------------------------
 
@@ -139,6 +139,10 @@ class Product < ActiveRecordBaseApp
 
   def sewing_kit? = product_type_id == ProductType.sewing_kit_id
 
+  # whether its product type gets AI search text and embeddings (ex: sewing kits, sample cards; see
+  # Ai::ProductSearchTextJob::KINDS)
+  def search_text? = Ai::ProductSearchTextJob.product_type_ids.include?(product_type_id)
+
   # the active products of the same type most alike this one, most alike first: the ones whose embeddings (see
   # ProductEmbedding, with the model in use) are nearest its own. none when it has no embedding yet. preload what the
   # caller shows with includes (ex: product_images, supplier_product_profile)
@@ -157,10 +161,10 @@ class Product < ActiveRecordBaseApp
            .limit(limit)
   end
 
-  # whether the last save changed what an active sewing kit's search text is written from, or turned AI back on for it
+  # whether the last save changed what an active product's search text is written from, or turned AI back on for it
   # (see Ai::ProductSearchTextJob)
   def search_text_source_changed?
-    active? && sewing_kit? && update_search_text_with_ai? &&
+    active? && search_text? && update_search_text_with_ai? &&
       %w[handle description attrs supplier_id product_type_id deleted update_search_text_with_ai]
         .any? { |column| saved_change_to_attribute?(column) }
   end

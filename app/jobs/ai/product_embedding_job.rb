@@ -1,18 +1,19 @@
 module Ai
-  # embeds what a sewing kit means (its name and search text, see ProductSearchTextJob) with the embedding model of
-  # ProductEmbedding::PROMPT_TYPE's default AI model prompt, saved as its ProductEmbedding. a kit is embedded again only
-  # when that text changes (see product_embeddings.source_digest), and every kit is embedded again when the model
-  # changes (embeddings are kept per model). kits are embedded BATCH_SIZE to a request, and each request is logged as
-  # an AiGeneration with its cost (item_id the product when there's one, else 0, with the products in raw_response).
-  # queued as a kit's search text or name changes (see Product); run without a product, it embeds the kits in need
+  # embeds what a product with search text means (a sewing kit or sample card: its name and search text, see
+  # ProductSearchTextJob) with the embedding model of ProductEmbedding::PROMPT_TYPE's default AI model prompt, saved as
+  # its ProductEmbedding. a product is embedded again only when that text changes (see product_embeddings.source_digest),
+  # and every product is embedded again when the model changes (embeddings are kept per model). products are embedded
+  # BATCH_SIZE to a request, and each request is logged as an AiGeneration with its cost (item_id the product when
+  # there's one, else 0, with the products in raw_response). queued as a product's search text or name changes (see
+  # Product); run without a product, it embeds the products in need
   class ProductEmbeddingJob < HawthorneCore::ApplicationJob
 
     queue_as :low
 
-    # the most kits embedded in one request
+    # the most products embedded in one request
     BATCH_SIZE = 50
 
-    # the most kits embedded in one run without a product
+    # the most products embedded in one run without a product
     MAX_PER_RUN = 500
 
     # -----------------------------------------------------------------------------------------
@@ -27,7 +28,7 @@ module Ai
 
       model = model_prompt.ai_model.api_handle
       products = Product.active
-                        .where(product_type_id: ProductType.sewing_kit_id)
+                        .where(product_type_id: ProductSearchTextJob.product_type_ids)
                         .where.not(search_text: [nil, ''])
                         .order(:product_id)
       products = products.where(product_id:) if product_id
@@ -73,7 +74,7 @@ module Ai
 
     private
 
-    # what's embedded: the kit's name, then its search text (its themes, motifs, colors, style, ...)
+    # what's embedded: the product's name, then its search text (ex: a kit's themes, motifs, colors, style, ...)
     def source_text(product) = "#{product.handle}\n#{product.search_text}"
 
     # -----------------------------------------------------------------------------------------
