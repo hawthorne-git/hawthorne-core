@@ -5,8 +5,10 @@ class ProductTypeAttr < ActiveRecordBaseApp
   has_paper_trail versions: { class_name: 'Version' }
 
   # the tables a Reference attr may point at: table name => model class name. a product stores the id of a row in it
-  # (ex: 'colors' => 'Color'); add a table here before using it
-  REFERENCE_TABLES = {}.freeze
+  # (ex: 'thread_colors' => 'ThreadColor'); add a table here before using it
+  REFERENCE_TABLES = {
+    'thread_colors' => 'ThreadColor'
+  }.freeze
 
   # -----------------------------------------------------------------------------
 
