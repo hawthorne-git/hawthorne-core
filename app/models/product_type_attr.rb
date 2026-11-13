@@ -8,7 +8,8 @@ class ProductTypeAttr < ActiveRecordBaseApp
   # (ex: 'thread_colors' => 'ThreadColor'); add a table here before using it
   REFERENCE_TABLES = {
     'thread_colors' => 'ThreadColor',
-    'thread_lines' => 'ThreadLine'
+    'thread_lines' => 'ThreadLine',
+    'thread_line_packages' => 'ThreadLinePackage'
   }.freeze
 
   # -----------------------------------------------------------------------------

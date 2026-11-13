@@ -12,6 +12,9 @@ class ThreadLine < ActiveRecordBaseApp
 
   belongs_to :supplier
 
+  # the package sizes it comes in (ex: Small Spool, Large Spool, Cone)
+  has_many :thread_line_packages, -> { order(:order_nbr, :handle) }
+
   # -----------------------------------------------------------------------------
 
   self.table_name = 'thread_lines'

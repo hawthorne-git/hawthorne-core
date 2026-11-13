@@ -27,6 +27,8 @@ class ProductType < ActiveRecordBaseApp
 
   def self.sample_card_id = @sample_card_id ||= find_by!(handle: 'Sample Card').id
 
+  def self.thread_id = @thread_id ||= find_by!(handle: 'Thread').id
+
   # -----------------------------------------------------------------------------
 
   # the abbreviation when there is one, else the name (handle)
