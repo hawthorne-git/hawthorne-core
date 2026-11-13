@@ -2,10 +2,10 @@
 -- PostgreSQL database dump
 --
 
-\restrict l6xLNxG0dTGB2kqXbeMMqdEtPod4mYDmsIkPLzPtWmG8qs7GoY9VEOobb4spw7T
+\restrict WRDfRll8Wf3be3J9XNC51tvsN29ygArugKgY77HbTsFE67C6di8SPj50idHxlSG
 
 -- Dumped from database version 18.4 (Debian 18.4-1.pgdg12+1)
--- Dumped by pg_dump version 18.6
+-- Dumped by pg_dump version 18.4
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -963,5 +963,5 @@ ALTER TABLE ONLY public.tasks
 -- PostgreSQL database dump complete
 --
 
-\unrestrict l6xLNxG0dTGB2kqXbeMMqdEtPod4mYDmsIkPLzPtWmG8qs7GoY9VEOobb4spw7T
+\unrestrict WRDfRll8Wf3be3J9XNC51tvsN29ygArugKgY77HbTsFE67C6di8SPj50idHxlSG
 

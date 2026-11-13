@@ -19,6 +19,7 @@ class Supplier < ActiveRecordBaseApp
 
   has_many :supplier_product_profiles
   has_many :thread_colors
+  has_many :thread_lines
 
   # when a landed cost rate changes, flag this supplier's profiles and recalculate them in the background
   # (loaded cost is built on landed cost, so it's flagged too)

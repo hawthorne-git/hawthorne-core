@@ -7,7 +7,8 @@ class ProductTypeAttr < ActiveRecordBaseApp
   # the tables a Reference attr may point at: table name => model class name. a product stores the id of a row in it
   # (ex: 'thread_colors' => 'ThreadColor'); add a table here before using it
   REFERENCE_TABLES = {
-    'thread_colors' => 'ThreadColor'
+    'thread_colors' => 'ThreadColor',
+    'thread_lines' => 'ThreadLine'
   }.freeze
 
   # -----------------------------------------------------------------------------
