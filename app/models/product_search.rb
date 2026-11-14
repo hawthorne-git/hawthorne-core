@@ -19,7 +19,9 @@ class ProductSearch
     sewing_kit: Listing.new(prompt_type: 'Product / Sewing Kit / Search', search_type: 'Product / Sewing Kit', noun: 'kit',
                             sale: true, price_ranges: true),
     sample_card: Listing.new(prompt_type: 'Product / Sample Card / Search', search_type: 'Product / Sample Card',
-                             noun: 'sample card', sale: false, price_ranges: false)
+                             noun: 'sample card', sale: false, price_ranges: false),
+    thread: Listing.new(prompt_type: 'Product / Thread / Search', search_type: 'Product / Thread', noun: 'thread',
+                        sale: true, price_ranges: false)
   }.freeze
 
   EFFORT = :low
