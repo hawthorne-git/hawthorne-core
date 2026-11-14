@@ -71,8 +71,9 @@ class Product < ActiveRecordBaseApp
 
   # attrs holds the product type's attributes (see ProductTypeAttr), keyed by attr key; each value must fit its data type.
   # also checked whenever the form's attrs were assigned (see assign_form_attrs), so saving the product's form with a
-  # required attribute still blank is stopped, even when that blank is unchanged
-  validate :attrs_match_product_type, if: -> { @form_attrs_assigned || attrs_changed? || product_type_id_changed? }
+  # required attribute still blank is stopped, even when that blank is unchanged; and as the supplier or profile changes,
+  # since a Reference value must fit them (see reference_problem)
+  validate :attrs_match_product_type, if: -> { @form_attrs_assigned || attrs_changed? || product_type_id_changed? || supplier_id_changed? || supplier_product_profile_id_changed? }
 
   # a GTIN identifies one product (products_uk_gtin)
   validate :gtin_unique, if: -> { gtin.present? && gtin_changed? }
@@ -264,7 +265,23 @@ class Product < ActiveRecordBaseApp
     when 'Select' then "must be one of: #{type_attr.option_values.join(', ')}" unless type_attr.option_values.include?(value)
     when 'MultiSelect'
       "must be a list of: #{type_attr.option_values.join(', ')}" unless value.is_a?(Array) && value == value.uniq && (value - type_attr.option_values).empty?
-    when 'Reference' then 'must be an existing record' unless value.is_a?(Integer) && type_attr.reference_model&.exists?(value)
+    when 'Reference' then reference_problem(type_attr, value)
+    end
+  end
+
+  # a Reference value must be an existing record; one with a supplier must be the product's supplier's (ex: a thread
+  # color), and one with a supplier product profile must use the product's profile (ex: a thread line package, whose
+  # profile holds its spool's cost)
+  def reference_problem(type_attr, value)
+    model = type_attr.reference_model
+    record = value.is_a?(Integer) && model&.find_by(model.primary_key => value)
+    return 'must be an existing record' unless record
+
+    if supplier_id && record.respond_to?(:supplier) && record.supplier && record.supplier.supplier_id != supplier_id
+      "must be one of #{supplier&.handle || "the product's supplier"}'s"
+    elsif supplier_product_profile_id && record.respond_to?(:supplier_product_profile_id) && record.supplier_product_profile_id &&
+      record.supplier_product_profile_id != supplier_product_profile_id
+      "must use the product's supplier product profile (it uses #{record.supplier_product_profile&.handle})"
     end
   end
 

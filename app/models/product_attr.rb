@@ -41,8 +41,12 @@ class ProductAttr < ActiveRecordBaseApp
 
   def unit? = UNIT_DATA_TYPES.include?(data_type)
 
-  # whether any product has a value for this attr
-  def used? = Product.where('attrs ? :key', key: key_was || key).exists?
+  # whether any product has a value for this attr, and how many do (its key and data type are then locked)
+  def used? = used_products.exists?
+
+  def used_count = used_products.count
+
+  def used_products = Product.where('attrs ? :key', key: key_was || key)
 
   # -----------------------------------------------------------------------------
 
