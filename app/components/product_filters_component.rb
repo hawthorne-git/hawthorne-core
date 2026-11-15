@@ -1,7 +1,8 @@
 class ProductFiltersComponent < ViewComponent::Base
 
   # the filter bar above a product listing: filter (not wired up yet), type (when the filter has one), quilt size (while
-  # quilt is the selected type), difficulty (when the filter has one), supplier, price range and stock dropdowns, then
+  # quilt is the selected type), difficulty (when the filter has one), supplier, thread line (while a supplier with lines
+  # is selected), package (while a line with packages is selected), price range and stock dropdowns, then
   # the item count and sort by (not wired up yet) on the right. the dropdowns submit a get form back to the listing.
   # with search, a search box goes above the bar; it submits q, which the listing turns into params (see ProductSearch)
   #
@@ -11,18 +12,21 @@ class ProductFiltersComponent < ViewComponent::Base
   # search_example: what the search box's placeholder suggests searching for (ex: 'a lap quilt kit in stock')
   # price_chip: whether the price range filter (with on sale) has a dropdown in the filter bar; without one it's only in
   #   the filter drawer, opened by the filter button
+  # stock_chip: whether the stock filter has a dropdown in the filter bar; without one it's only in the filter drawer
+  #   (for a listing whose products are nearly all in stock)
   # sale: whether the price range filter has on sale (for a listing whose products are never on sale)
   # price_ranges: whether the price range filter in the filter drawer has the preset price ranges; without them it's
   #   just the custom min / max boxes (for a listing whose prices are all low)
   # price_step: how much the custom price boxes' up / down arrows change the price, in dollars (nil for 1); any price
   #   can still be typed
   def initialize(filter:, url:, search: false, search_example: 'a lap quilt kit in stock', price_chip: true,
-                 sale: true, price_ranges: true, price_step: nil)
+                 stock_chip: true, sale: true, price_ranges: true, price_step: nil)
     @filter = filter
     @url = url
     @search = search
     @search_example = search_example
     @price_chip = price_chip
+    @stock_chip = stock_chip
     @sale = sale
     @price_ranges = price_ranges
     @price_step = price_step
@@ -80,6 +84,14 @@ class ProductFiltersComponent < ViewComponent::Base
       "#{side} #{range_text(inches_text(min), inches_text(max))}" if min || max
     end
     "Size: #{parts.join(', ')}"
+  end
+
+  # a package's length after its name (ex: " · 1300M / 1422Y" for Large Spool), when it has one and its name doesn't
+  # already say it (ex: "150M / 164Y Spool")
+  def package_length(package)
+    length = package.length_label
+    return if length.nil? || package.handle.include?(length)
+    tag.span(" · #{length}", class: 'product-filters__detail')
   end
 
   # the custom min / max price boxes, in the filter bar and the filter drawer (see ProductFilterBoxesComponent)

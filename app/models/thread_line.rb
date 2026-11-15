@@ -12,8 +12,16 @@ class ThreadLine < ActiveRecordBaseApp
 
   belongs_to :supplier
 
+  # the line the brand recommends in the bobbin with this one (ex: Aurifil 50wt for 80wt); may be itself or another
+  # brand's line
+  belongs_to :bobbin_thread_line, class_name: 'ThreadLine', optional: true
+
   # the package sizes it comes in (ex: Small Spool, Large Spool, Cone)
   has_many :thread_line_packages, -> { order(:order_nbr, :handle) }
+
+  # what it's good for (ex: Quilting, rated 3; Hand Quilting), as its brand recommends it
+  has_many :thread_line_uses
+  has_many :thread_uses, through: :thread_line_uses
 
   # -----------------------------------------------------------------------------
 

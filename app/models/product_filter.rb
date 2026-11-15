@@ -1,5 +1,7 @@
-# the type / quilt size / difficulty / supplier / price range / stock filters on a product listing page (see
-# ProductFiltersComponent), applied to a scope of products. a search (see ProductSearch) narrows the products first, by
+# the type / quilt size / difficulty / supplier / thread line / package / price range / stock filters on a product
+# listing page (see ProductFiltersComponent), applied to a scope of products. the thread line filter offers the lines of
+# the selected suppliers, so it applies only while a supplier is selected; likewise the package filter offers the
+# selected lines' packages, and narrows only the lines with a package selected. a search (see ProductSearch) narrows the products first, by
 # keywords matched against their names / search text / descriptions in postgres (see products.search_vector), best
 # matches first. the price filter is either price ranges or a custom min / max price, not both; likewise the quilt
 # size filter is either quilt sizes or a custom min / max width and length. prices are per shopper (sale / member
@@ -41,6 +43,12 @@ class ProductFilter
     'price-desc' => 'Price: High to Low'
   }.freeze
 
+  # the sort offered first (and the default) by a listing with a thread color attr: by the colors' order, as on the
+  # supplier's color card (see color_sort_key)
+  COLOR_SORTS = {
+    'color' => 'Color'
+  }.freeze
+
   # the sort offered while the listing is searched, first (and the default): the best keyword matches first
   SEARCH_SORTS = {
     'best-match' => 'Best Match'
@@ -63,7 +71,7 @@ class ProductFilter
 
   attr_reader :search, :keywords, :sku, :min_price, :max_price, :min_width, :max_width, :min_length, :max_length,
               :selected_types, :selected_quilt_sizes, :selected_difficulties, :selected_supplier_tokens,
-              :selected_price_ranges, :selected_stock, :sort
+              :selected_thread_line_ids, :selected_package_ids, :selected_price_ranges, :selected_stock, :sort
 
   # scope: the listing's products; preload supplier_product_profile: [:supplier, :supplier_product_profile_prices]
   # params: the request's params (search = what the shopper typed, shown in the search box; keywords[] = words every
@@ -73,9 +81,11 @@ class ProductFilter
   #   type[] = a type attr value, only one at a time;
   #   size[] = QUILT_SIZES keys, or min_width / max_width / min_length / max_length = a custom quilt size in inches,
   #   inclusive (which wins over size[]); difficulty[] = difficulty attr values; supplier[] = supplier tokens;
+  #   line[] = thread line ids, of the selected suppliers' lines (ignored without a supplier selected);
+  #   package[] = thread line package ids, of the selected lines' packages (ignored without a line selected);
   #   price[] = PRICE_RANGES keys, or min_price / max_price = a custom price range, inclusive (which wins over price[]);
   #   sale = '1' for only products on sale (see Product#on_sale?); stock[] = a STOCK_STATUSES key, only one at a time;
-  #   sort = a sorts key)
+  #   sort = a sorts key, see sorts)
   # logged_in: whether the shopper is signed in, so members are filtered / sorted by their member price
   # type_attr: the key of the product attr the type filter looks at (ex: 'project'); nil for no type filter
   # quilt_size_attr: the key of the product attr holding a quilt's width in inches (ex: 'width'), which the quilt size
@@ -84,8 +94,14 @@ class ProductFilter
   #   quilt size's min / max length; nil for a custom quilt size by width only
   # difficulty_attr: the key of the product attr the difficulty filter looks at (ex: 'difficulty'); nil for no
   #   difficulty filter
+  # thread_line_attr: the key of the Reference product attr holding a thread's line package (a thread_line_packages
+  #   id, ex: 'thread_line_package'), which the package filter looks at, and whose line the thread line filter does; nil
+  #   for no thread line / package filter
+  # thread_color_attr: the key of the Reference product attr holding a thread's color (a thread_colors id, ex:
+  #   'thread_color'), which the color sort orders by (see COLOR_SORTS); nil for no color sort
+  # single_supplier: whether only one supplier can be selected at a time (ex: thread, whose lines are the supplier's own)
   def initialize(scope, params:, logged_in:, type_attr: nil, quilt_size_attr: nil, quilt_length_attr: nil,
-                 difficulty_attr: nil)
+                 difficulty_attr: nil, thread_line_attr: nil, thread_color_attr: nil, single_supplier: false)
     @logged_in = logged_in
     @search = params[:search].to_s.squish.presence
     @keywords = Array(params[:keywords]).filter_map { |keyword| self.class.keyword_param(keyword) }.uniq.first(MAX_KEYWORDS)
@@ -96,6 +112,8 @@ class ProductFilter
     @quilt_size_attr = quilt_size_attr&.to_s
     @quilt_length_attr = quilt_length_attr&.to_s
     @difficulty_attr = difficulty_attr&.to_s
+    @thread_line_attr = thread_line_attr&.to_s
+    @thread_color_attr = thread_color_attr&.to_s
     @selected_types = (Array(params[:type]).map(&:to_s) & types).first(1)
     if quilt_size_filter?
       @min_width, @max_width = number_range_params(params[:min_width], params[:max_width])
@@ -103,7 +121,11 @@ class ProductFilter
     end
     @selected_quilt_sizes = quilt_size_filter? && !custom_quilt_size? ? Array(params[:size]).map(&:to_s) & QUILT_SIZES.keys : []
     @selected_difficulties = Array(params[:difficulty]).map(&:to_s) & difficulties
+    @single_supplier = single_supplier
     @selected_supplier_tokens = Array(params[:supplier]).map(&:to_s) & supplier_tokens
+    @selected_supplier_tokens = @selected_supplier_tokens.first(1) if single_supplier
+    @selected_thread_line_ids = Array(params[:line]).map(&:to_s) & selected_suppliers_thread_lines.map { |line| line.id.to_s }
+    @selected_package_ids = Array(params[:package]).map(&:to_s) & selected_lines_packages.map { |package| package.id.to_s }
     @selected_price_ranges = custom_price? ? [] : Array(params[:price]).map(&:to_s) & PRICE_RANGES.keys
     @on_sale = params[:sale].to_s == '1'
     @selected_stock = (Array(params[:stock]).map(&:to_s) & STOCK_STATUSES.keys).first(1)
@@ -128,8 +150,12 @@ class ProductFilter
     @filtered ||= sorted(@products.select { |product| matches?(product) })
   end
 
-  # the sort options: SEARCH_SORTS first (and the default) while the listing is searched, then SORTS
-  def sorts = searched? ? SEARCH_SORTS.merge(SORTS) : SORTS
+  # the sort options: SEARCH_SORTS first (and the default) while the listing is searched, then COLOR_SORTS (with a
+  # thread color attr), then SORTS
+  def sorts
+    listing_sorts = @thread_color_attr ? COLOR_SORTS.merge(SORTS) : SORTS
+    searched? ? SEARCH_SORTS.merge(listing_sorts) : listing_sorts
+  end
 
   def default_sort? = @sort == sorts.keys.first
 
@@ -155,16 +181,17 @@ class ProductFilter
       type: @selected_types, size: @selected_quilt_sizes, min_width: number_value(@min_width),
       max_width: number_value(@max_width), min_length: number_value(@min_length), max_length: number_value(@max_length),
       difficulty: @selected_difficulties,
-      supplier: @selected_supplier_tokens, price: @selected_price_ranges, sale: ('1' if @on_sale), stock: @selected_stock,
-      sort: @sort }
+      supplier: @selected_supplier_tokens, line: @selected_thread_line_ids, package: @selected_package_ids,
+      price: @selected_price_ranges, sale: ('1' if @on_sale), stock: @selected_stock, sort: @sort }
       .merge(changes)
       .compact_blank
       .reject { |key, value| key == :sort && value == sorts.keys.first }
   end
 
   def any_selected?
-    [@selected_types, @selected_quilt_sizes, @selected_difficulties, @selected_supplier_tokens, @selected_price_ranges,
-     @selected_stock].any?(&:any?) || custom_price? || custom_quilt_size? || @on_sale
+    [@selected_types, @selected_quilt_sizes, @selected_difficulties, @selected_supplier_tokens,
+     @selected_thread_line_ids, @selected_package_ids, @selected_price_ranges, @selected_stock].any?(&:any?) ||
+      custom_price? || custom_quilt_size? || @on_sale
   end
 
   # whether only products on sale are shown
@@ -257,20 +284,78 @@ class ProductFilter
     suppliers.map { |supplier| [supplier, keyword_count(matching.select { |product| supplier(product) == supplier })] }
   end
 
+  # whether only one supplier can be selected at a time
+  def single_supplier? = @single_supplier
+
   # every supplier in the listing, by name (the filter drawer lists them all, whatever else is selected)
   def suppliers = @suppliers ||= @products.map { |product| supplier(product) }.uniq.sort_by { |supplier| supplier.handle.downcase }
 
+  # whether the listing has a thread line filter, and any of its products have a line to filter by (its section shows
+  # in the filter drawer while a supplier with lines is checked)
+  def thread_lines? = thread_lines.any?
+
+  # whether the thread line filter applies: only while a supplier with lines in the listing is selected
+  def thread_line_filter? = selected_suppliers_thread_lines.any?
+
+  # every thread line in the listing, grouped by supplier: [supplier, lines], suppliers by name and their lines in
+  # order (the filter drawer lists them all, showing only the checked suppliers' lines)
+  def thread_line_groups
+    suppliers.filter_map do |supplier|
+      lines = thread_lines.select { |line| line.supplier_id == supplier.id }
+      [supplier, lines] if lines.any?
+    end
+  end
+
+  # the selected suppliers' thread line options, grouped by supplier: [supplier, [[line, count]]], counting the
+  # products that match the other filters so each count is what selecting that line would add. every line of a
+  # selected supplier is an option, even with no matching products, so a selected line stays checked
+  def thread_line_options
+    matching = @products.select { |product| matches?(product, except: [:line, :keywords]) }
+    thread_line_groups.filter_map do |supplier, lines|
+      next unless @selected_supplier_tokens.include?(supplier.token)
+      [supplier, lines.map { |line| [line, keyword_count(matching.select { |product| thread_line(product) == line })] }]
+    end
+  end
+
+  # whether the listing has a package filter, and any of its products have a package to filter by (its section shows
+  # in the filter drawer while a line with packages is checked)
+  def packages? = packages.any?
+
+  # whether the package filter applies: only while a thread line with packages in the listing is selected
+  def package_filter? = selected_lines_packages.any?
+
+  # every package in the listing, grouped by thread line: [line, packages], lines and their packages in order (the
+  # filter drawer lists them all, showing only the checked lines' packages)
+  def package_groups
+    thread_lines.filter_map do |line|
+      line_packages = packages.select { |package| package.thread_line_id == line.id }
+      [line, line_packages] if line_packages.any?
+    end
+  end
+
+  # the selected lines' package options, grouped by line: [line, [[package, count]]], counting the products that match
+  # the other filters so each count is what selecting that package would add. every package of a selected line is an
+  # option, even with no matching products, so a selected package stays checked
+  def package_options
+    matching = @products.select { |product| matches?(product, except: [:package, :keywords]) }
+    package_groups.filter_map do |line, line_packages|
+      next unless @selected_thread_line_ids.include?(line.id.to_s)
+      [line, line_packages.map { |package| [package, keyword_count(matching.select { |product| package(product) == package })] }]
+    end
+  end
+
   # each product's [supplier token, PRICE_RANGES key (nil without a price), type (nil without one), QUILT_SIZES key
   # (nil without a width), difficulty (nil without one), price (nil without one), STOCK_STATUSES key, quilt width and
-  # length (nil for any other product, or without one), whether it's on sale, whether it matches every keyword], so
-  # the filter drawer can count the matching products as boxes are checked, before the filters are applied (counting
+  # length (nil for any other product, or without one), whether it's on sale, whether it matches every keyword, thread
+  # line id and package id (strings; nil without one)], so the filter drawer can count the matching products as boxes are checked, before the filters are applied (counting
   # like keyword_count, with MIN_EVERY_KEYWORD_MATCHES)
   def facets
     @products.map do |product|
       quilt = type(product) == QUILT_TYPE
       [supplier(product).token, price_range_key(product), type(product), quilt_size_key(product), difficulty(product),
        price(product)&.to_f, stock_key(product), (quilt_width(product)&.to_f if quilt),
-       (quilt_length(product)&.to_f if quilt), product.on_sale?(hawthorne), every_keyword_match?(product)]
+       (quilt_length(product)&.to_f if quilt), product.on_sale?(hawthorne), every_keyword_match?(product),
+       thread_line(product)&.id&.to_s, package(product)&.id&.to_s]
     end
   end
 
@@ -298,11 +383,13 @@ class ProductFilter
   private
 
   # by name, by best keyword match (more keywords matched, then search_rank, then name: so with partial keyword
-  # matches, the ones matching every keyword come first), or by the shopper's price (then name); products without a
-  # price go last. a name / price sort orders every product the same way, partial keyword matches or not
+  # matches, the ones matching every keyword come first), by color (see color_sort_key, then name) or by the shopper's
+  # price (then name); products without a price go last. a name / color / price sort orders every product the same
+  # way, partial keyword matches or not
   def sorted(products)
     by_name = products.sort_by { |product| product.handle.downcase }
     return by_name if @sort == 'name'
+    return by_name.sort_by.with_index { |product, i| [color_sort_key(product), i] } if @sort == 'color'
     if @sort == 'best-match'
       return by_name.sort_by.with_index do |product, i|
         [-product.attributes['keywords_matched'].to_i, -product.attributes['search_rank'].to_f, i]
@@ -314,6 +401,52 @@ class ProductFilter
   end
 
   def supplier_tokens = @products.map { |product| supplier(product).token }.uniq
+
+  # the selected suppliers' thread lines in the listing, in order: the ones the thread line filter offers
+  def selected_suppliers_thread_lines
+    @selected_suppliers_thread_lines ||= begin
+      ids = suppliers.select { |supplier| @selected_supplier_tokens.include?(supplier.token) }.map(&:id)
+      thread_lines.select { |line| ids.include?(line.supplier_id) }
+    end
+  end
+
+  # every thread line in the listing, in order: by order_nbr, then name, comparing numbers as numbers (ex: 8wt, 12wt,
+  # 28wt)
+  def thread_lines
+    @thread_lines ||= @products.filter_map { |product| thread_line(product) }
+                               .uniq
+                               .sort_by { |line| [line.order_nbr, natural_key(line.handle)] }
+  end
+
+  # the selected lines' packages in the listing, in order: the ones the package filter offers
+  def selected_lines_packages
+    @selected_lines_packages ||= packages.select { |package| @selected_thread_line_ids.include?(package.thread_line_id.to_s) }
+  end
+
+  # every package in the listing, in order: by order_nbr, then length, then name (ex: Small Spool, Large Spool, Cone)
+  def packages
+    @packages ||= @products.filter_map { |product| package(product) }
+                           .uniq
+                           .sort_by { |package| [package.order_nbr, package.length_m || 0, natural_key(package.handle)] }
+  end
+
+  # a product's place in the color sort: by supplier (by name), then its color's order_nbr (the supplier's color card
+  # order), then color number (comparing numbers as numbers, for a supplier without an order) and name, then its line
+  # and package in their filter order (ex: Aurifil 2110 Light Lemon: 12wt Small Spool, 12wt Large Spool, ..., 28wt
+  # Small Spool); a product without a color goes after its supplier's colors
+  def color_sort_key(product)
+    @line_ranks ||= thread_lines.each_with_index.to_h { |line, i| [line.id, i] }
+    @package_ranks ||= packages.each_with_index.to_h { |package, i| [package.id, i] }
+    color = thread_color(product)
+    package = package(product)
+    [supplier(product).handle.downcase, color ? 0 : 1, color&.order_nbr || 0, natural_key((color&.color_nbr).to_s),
+     (color&.handle).to_s.downcase, @line_ranks.fetch(package&.thread_line_id, -1), @package_ranks.fetch(package&.id, -1)]
+  end
+
+  # a name's sort key, comparing the numbers in it as numbers (ex: 8wt before 12wt)
+  def natural_key(text)
+    text.downcase.scan(/\d+|\D+/).map { |part| part.match?(/\d/) ? [0, part.to_i] : [1, part] }
+  end
 
   # a min / max param pair (ex: min_price / max_price) as numbers, swapped when the min is over the max
   def number_range_params(min, max)
@@ -392,7 +525,8 @@ class ProductFilter
   end
 
   # whether the product matches the keywords and every selected filter, leaving out the given ones (:keywords, :type,
-  # :size, :difficulty, :supplier, :price, :sale, :stock), so an option's count can be what selecting it would add
+  # :size, :difficulty, :supplier, :line, :package, :price, :sale, :stock), so an option's count can be what selecting
+  # it would add
   def matches?(product, except: [])
     except = Array(except)
     (except.include?(:keywords) || keyword_match?(product)) &&
@@ -400,6 +534,8 @@ class ProductFilter
       (except.include?(:size) || quilt_size_match?(product)) &&
       (except.include?(:difficulty) || difficulty_match?(product)) &&
       (except.include?(:supplier) || supplier_match?(product)) &&
+      (except.include?(:line) || thread_line_match?(product)) &&
+      (except.include?(:package) || package_match?(product)) &&
       (except.include?(:price) || price_match?(product)) &&
       (except.include?(:sale) || sale_match?(product)) &&
       (except.include?(:stock) || stock_match?(product))
@@ -421,6 +557,25 @@ class ProductFilter
 
   def supplier_match?(product)
     @selected_supplier_tokens.empty? || @selected_supplier_tokens.include?(supplier(product).token)
+  end
+
+  def thread_line_match?(product)
+    @selected_thread_line_ids.empty? || @selected_thread_line_ids.include?(thread_line(product)&.id.to_s)
+  end
+
+  # a selected package narrows only its own line, so a line without a package selected keeps all its packages (ex: 12wt
+  # Cone and 50wt checked shows 12wt cones and every 50wt)
+  def package_match?(product)
+    return true if @selected_package_ids.empty?
+    package = package(product)
+    return true unless package_lines_selected.include?(package&.thread_line_id)
+    @selected_package_ids.include?(package.id.to_s)
+  end
+
+  # the ids of the lines with a package selected
+  def package_lines_selected
+    @package_lines_selected ||= selected_lines_packages.select { |package| @selected_package_ids.include?(package.id.to_s) }
+                                                       .map(&:thread_line_id).uniq
   end
 
   def price_match?(product)
@@ -506,6 +661,31 @@ class ProductFilter
     value = product.attr_value(@quilt_length_attr)
     value if value.is_a?(Numeric)
   end
+
+  # the product's thread line package (nil without a thread line filter, or when it isn't set). every package in the
+  # listing is looked up, with its line, at once
+  def package(product)
+    return if @thread_line_attr.nil?
+    @thread_line_packages ||= begin
+      ids = @products.filter_map { |item| item.attr_value(@thread_line_attr) }.uniq
+      ThreadLinePackage.includes(:thread_line).where(thread_line_package_id: ids).index_by(&:id)
+    end
+    @thread_line_packages[product.attr_value(@thread_line_attr)]
+  end
+
+  # the product's thread color (nil without a color sort, or when it isn't set). every color in the listing is looked
+  # up at once
+  def thread_color(product)
+    return if @thread_color_attr.nil?
+    @thread_colors ||= begin
+      ids = @products.filter_map { |item| item.attr_value(@thread_color_attr) }.uniq
+      ThreadColor.where(thread_color_id: ids).index_by(&:id)
+    end
+    @thread_colors[product.attr_value(@thread_color_attr)]
+  end
+
+  # the product's thread line, via its package
+  def thread_line(product) = package(product)&.thread_line
 
   # the supplier via the (preloaded) profile; always the same as products.supplier_id
   def supplier(product) = product.supplier_product_profile.supplier

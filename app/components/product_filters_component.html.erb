@@ -74,7 +74,6 @@
               <span class='product-filters__count'><%= count %></span>
             </label>
           <% end %>
-          <button type='submit' class='product-filters__apply'>Apply</button>
         </div>
       </details>
     <% end %>
@@ -133,14 +132,76 @@
       <div class='product-filters__panel'>
         <% @filter.supplier_options.each do |supplier, count| %>
           <label class='product-filters__option'>
-            <input type='checkbox' name='supplier[]' value='<%= supplier.token %>'<%= ' checked' if @filter.selected_supplier_tokens.include?(supplier.token) %>>
+            <input type='checkbox' name='supplier[]' value='<%= supplier.token %>'<%= ' data-filter-single' if @filter.single_supplier? %><%= ' checked' if @filter.selected_supplier_tokens.include?(supplier.token) %>>
             <span><%= supplier.handle %></span>
             <span class='product-filters__count'><%= count %></span>
           </label>
         <% end %>
-        <button type='submit' class='product-filters__apply'>Apply</button>
+        <% unless @filter.single_supplier? %>
+          <button type='submit' class='product-filters__apply'>Apply</button>
+        <% end %>
       </div>
     </details>
+
+    <%# the selected suppliers' thread lines, under each supplier's name (lines of different suppliers can share a name) %>
+    <% if @filter.thread_line_filter? %>
+      <details class='product-filters__dropdown'>
+        <summary class='product-filters__chip<%= ' product-filters__chip--active' if @filter.selected_thread_line_ids.any? %>'>
+          <%= label('Thread Line', @filter.selected_thread_line_ids) %>
+          <svg class='product-filters__chevron' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'>
+            <path d='M5 8l5 5 5-5' />
+          </svg>
+        </summary>
+        <div class='product-filters__panel'>
+          <% @filter.thread_line_options.each do |supplier, lines| %>
+            <div class='product-filters__group' role='group' aria-label='<%= supplier.handle %>'>
+              <%# the supplier's name tells its lines apart from another's; with one supplier at a time it's left out %>
+              <% unless @filter.single_supplier? %>
+                <p class='product-filters__group-heading'><%= supplier.handle %></p>
+              <% end %>
+              <% lines.each do |line, count| %>
+                <label class='product-filters__option'>
+                  <input type='checkbox' name='line[]' value='<%= line.id %>'<%= ' checked' if @filter.selected_thread_line_ids.include?(line.id.to_s) %>>
+                  <span><%= line.handle %></span>
+                  <span class='product-filters__count'><%= count %></span>
+                </label>
+              <% end %>
+            </div>
+          <% end %>
+          <button type='submit' class='product-filters__apply'>Apply</button>
+        </div>
+      </details>
+    <% end %>
+
+    <%# the selected lines' packages, under each line's name while more than one line is selected %>
+    <% if @filter.package_filter? %>
+      <% package_options = @filter.package_options %>
+      <details class='product-filters__dropdown'>
+        <summary class='product-filters__chip<%= ' product-filters__chip--active' if @filter.selected_package_ids.any? %>'>
+          <%= label('Package', @filter.selected_package_ids) %>
+          <svg class='product-filters__chevron' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'>
+            <path d='M5 8l5 5 5-5' />
+          </svg>
+        </summary>
+        <div class='product-filters__panel'>
+          <% package_options.each do |line, packages| %>
+            <div class='product-filters__group' role='group' aria-label='<%= line.handle %>'>
+              <% if package_options.size > 1 %>
+                <p class='product-filters__group-heading'><%= line.handle %></p>
+              <% end %>
+              <% packages.each do |package, count| %>
+                <label class='product-filters__option'>
+                  <input type='checkbox' name='package[]' value='<%= package.id %>'<%= ' checked' if @filter.selected_package_ids.include?(package.id.to_s) %>>
+                  <span><%= package.handle %><%= package_length(package) %></span>
+                  <span class='product-filters__count'><%= count %></span>
+                </label>
+              <% end %>
+            </div>
+          <% end %>
+          <button type='submit' class='product-filters__apply'>Apply</button>
+        </div>
+      </details>
+    <% end %>
 
     <% if @price_chip %>
       <details class='product-filters__dropdown'>
@@ -173,27 +234,31 @@
       <%= hidden_fields(:price, :min_price, :max_price, :sale) %>
     <% end %>
 
-    <details class='product-filters__dropdown'>
-      <summary class='product-filters__chip<%= ' product-filters__chip--active' if @filter.selected_stock.any? %>'>
-        <%= label('Stock', @filter.selected_stock) %>
-        <svg class='product-filters__chevron' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'>
-          <path d='M5 8l5 5 5-5' />
-        </svg>
-      </summary>
-      <div class='product-filters__panel'>
-        <% @filter.stock_options.each do |key, text, count| %>
-          <label class='product-filters__option'>
-            <input type='checkbox' name='stock[]' value='<%= key %>' data-filter-single<%= ' checked' if @filter.selected_stock.include?(key) %>>
-            <span><%= text %></span>
-            <span class='product-filters__count'><%= count %></span>
-          </label>
-        <% end %>
-        <button type='submit' class='product-filters__apply'>Apply</button>
-      </div>
-    </details>
+    <% if @stock_chip %>
+      <details class='product-filters__dropdown'>
+        <summary class='product-filters__chip<%= ' product-filters__chip--active' if @filter.selected_stock.any? %>'>
+          <%= label('Stock', @filter.selected_stock) %>
+          <svg class='product-filters__chevron' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'>
+            <path d='M5 8l5 5 5-5' />
+          </svg>
+        </summary>
+        <div class='product-filters__panel'>
+          <% @filter.stock_options.each do |key, text, count| %>
+            <label class='product-filters__option'>
+              <input type='checkbox' name='stock[]' value='<%= key %>' data-filter-single<%= ' checked' if @filter.selected_stock.include?(key) %>>
+              <span><%= text %></span>
+              <span class='product-filters__count'><%= count %></span>
+            </label>
+          <% end %>
+        </div>
+      </details>
+    <% else %>
+      <%# stock is only in the filter drawer: keep its selection when a filter here is applied %>
+      <%= hidden_fields(:stock) %>
+    <% end %>
 
     <% if @filter.any_selected? %>
-      <%= link_to 'Clear all', listing_path(type: [], size: [], min_width: nil, max_width: nil, min_length: nil, max_length: nil, difficulty: [], supplier: [], price: [], min_price: nil, max_price: nil, sale: nil, stock: []), class: 'product-filters__clear' %>
+      <%= link_to 'Clear all', listing_path(type: [], size: [], min_width: nil, max_width: nil, min_length: nil, max_length: nil, difficulty: [], supplier: [], line: [], package: [], price: [], min_price: nil, max_price: nil, sale: nil, stock: []), class: 'product-filters__clear' %>
     <% end %>
   </div>
 
@@ -298,11 +363,61 @@
         </summary>
         <% @filter.suppliers.each do |supplier| %>
           <label class='product-filters__option'>
-            <input type='checkbox' name='supplier[]' value='<%= supplier.token %>'<%= ' checked' if @filter.selected_supplier_tokens.include?(supplier.token) %>>
+            <input type='checkbox' name='supplier[]' value='<%= supplier.token %>'<%= ' data-filter-single' if @filter.single_supplier? %><%= ' checked' if @filter.selected_supplier_tokens.include?(supplier.token) %>>
             <span><%= supplier.handle %></span>
           </label>
         <% end %>
       </details>
+
+      <%# shown while a supplier with lines is checked above, with only the checked suppliers' lines %>
+      <% if @filter.thread_lines? %>
+        <details class='filter-drawer__section' open data-filter-thread-lines<%= ' hidden' unless @filter.thread_line_filter? %>>
+          <summary>
+            Thread Line
+            <svg class='product-filters__chevron' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'>
+              <path d='M5 8l5 5 5-5' />
+            </svg>
+          </summary>
+          <% @filter.thread_line_groups.each do |supplier, lines| %>
+            <div class='product-filters__group' role='group' aria-label='<%= supplier.handle %>' data-filter-when-supplier='<%= supplier.token %>'<%= ' hidden' unless @filter.selected_supplier_tokens.include?(supplier.token) %>>
+              <%# the supplier's name tells its lines apart from another's; with one supplier at a time it's left out %>
+              <% unless @filter.single_supplier? %>
+                <p class='product-filters__group-heading'><%= supplier.handle %></p>
+              <% end %>
+              <% lines.each do |line| %>
+                <label class='product-filters__option'>
+                  <input type='checkbox' name='line[]' value='<%= line.id %>'<%= ' checked' if @filter.selected_thread_line_ids.include?(line.id.to_s) %>>
+                  <span><%= line.handle %></span>
+                </label>
+              <% end %>
+            </div>
+          <% end %>
+        </details>
+      <% end %>
+
+      <%# shown while a line with packages is checked above, with only the checked lines' packages (under each line's
+          name while more than one is checked) %>
+      <% if @filter.packages? %>
+        <details class='filter-drawer__section' open data-filter-packages<%= ' hidden' unless @filter.package_filter? %>>
+          <summary>
+            Package
+            <svg class='product-filters__chevron' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'>
+              <path d='M5 8l5 5 5-5' />
+            </svg>
+          </summary>
+          <% @filter.package_groups.each do |line, packages| %>
+            <div class='product-filters__group' role='group' aria-label='<%= line.handle %>' data-filter-when-line='<%= line.id %>'<%= ' hidden' unless @filter.selected_thread_line_ids.include?(line.id.to_s) %>>
+              <p class='product-filters__group-heading' data-filter-group-heading<%= ' hidden' unless @filter.selected_thread_line_ids.size > 1 %>><%= line.handle %></p>
+              <% packages.each do |package| %>
+                <label class='product-filters__option'>
+                  <input type='checkbox' name='package[]' value='<%= package.id %>'<%= ' checked' if @filter.selected_package_ids.include?(package.id.to_s) %>>
+                  <span><%= package.handle %><%= package_length(package) %></span>
+                </label>
+              <% end %>
+            </div>
+          <% end %>
+        </details>
+      <% end %>
 
       <details class='filter-drawer__section' open>
         <summary>
@@ -354,7 +469,8 @@
 <script>
   // registered once per page:
   // - one filter dropdown open at a time, and a click outside closes it
-  // - a single-choice filter (data-filter-single, ex: type, stock) unchecks its other boxes when one is checked
+  // - a single-choice filter (data-filter-single, ex: type, stock) unchecks its other boxes when one is checked; in a
+  //   filter bar dropdown it has no apply button, so checking or unchecking a box applies it straight away
   // - a filter dropdown closed without applying puts its boxes back as they were, so another dropdown's apply doesn't
   //   submit them
   // - the filter drawer closes on a backdrop click, opens / closes for browsers without invoker commands, and its
@@ -363,6 +479,11 @@
   //   ProductFilter#keyword_count counts)
   // - a drawer section for one type (data-filter-when-type, ex: quilt size) shows only while that type is checked, and
   //   is cleared when it hides
+  // - a supplier's thread lines in the drawer (data-filter-when-supplier) show only while that supplier is checked, and
+  //   are cleared when they hide; the thread line section (data-filter-thread-lines) shows while any of them do.
+  //   likewise a line's packages (data-filter-when-line) and the package section (data-filter-packages), whose line
+  //   names (data-filter-group-heading) show while more than one line's packages do. a checked package narrows only
+  //   its own line (as ProductFilter#package_match? does)
   // - the price filter is price ranges or a custom min / max price (data-filter-custom-price), not both: checking a
   //   range clears the custom price, and typing a custom price unchecks the ranges. likewise the quilt size filter is
   //   quilt sizes or a custom min / max width and length (data-filter-custom-size). empty boxes aren't submitted,
@@ -465,6 +586,28 @@
         }
       });
       const suppliers = checked('supplier');
+      form.querySelectorAll('[data-filter-when-supplier]').forEach((group) => {
+        group.hidden = !suppliers.includes(group.dataset.filterWhenSupplier);
+        if (group.hidden) group.querySelectorAll('input[type="checkbox"]').forEach((input) => { input.checked = false; });
+      });
+      form.querySelectorAll('[data-filter-thread-lines]').forEach((section) => {
+        section.hidden = !section.querySelector('[data-filter-when-supplier]:not([hidden])');
+      });
+      const lines = checked('line');
+      form.querySelectorAll('[data-filter-when-line]').forEach((group) => {
+        group.hidden = !lines.includes(group.dataset.filterWhenLine);
+        if (group.hidden) group.querySelectorAll('input[type="checkbox"]').forEach((input) => { input.checked = false; });
+      });
+      form.querySelectorAll('[data-filter-packages]').forEach((section) => {
+        const shown = section.querySelectorAll('[data-filter-when-line]:not([hidden])').length;
+        section.hidden = shown === 0;
+        section.querySelectorAll('[data-filter-group-heading]').forEach((heading) => { heading.hidden = shown < 2; });
+      });
+      const packages = checked('package');
+      // the lines with a package checked: only those are narrowed by package
+      const packageLines = [...form.querySelectorAll('[data-filter-when-line]')]
+        .filter((group) => group.querySelector('input[name="package[]"]:checked'))
+        .map((group) => group.dataset.filterWhenLine);
       const prices = checked('price');
       const sizes = checked('size');
       const difficulties = checked('difficulty');
@@ -492,8 +635,9 @@
         if (!custom(widthRange) && !custom(lengthRange)) return sizes.length === 0 || sizes.includes(key);
         return within(width, widthRange) && within(length, lengthRange);
       };
-      const matching = JSON.parse(form.dataset.facets).filter(([supplier, price, type, size, difficulty, amount, stocked, width, length, onSale]) => {
-        return (suppliers.length === 0 || suppliers.includes(supplier)) && priceMatch(price, amount) &&
+      const matching = JSON.parse(form.dataset.facets).filter(([supplier, price, type, size, difficulty, amount, stocked, width, length, onSale, everyKeyword, line, linePackage]) => {
+        return (suppliers.length === 0 || suppliers.includes(supplier)) && (lines.length === 0 || lines.includes(line)) &&
+          (!packageLines.includes(line) || packages.includes(linePackage)) && priceMatch(price, amount) &&
           (types.length === 0 || types.includes(type)) && sizeMatch(size, width, length) &&
           (difficulties.length === 0 || difficulties.includes(difficulty)) && (stock.length === 0 || stock.includes(stocked)) &&
           (!sale || onSale);
@@ -539,6 +683,10 @@
         event.target.form.querySelectorAll(`input[name="${event.target.name}"]`).forEach((input) => {
           if (input !== event.target) input.checked = false;
         });
+      }
+      if (event.target.matches('.product-filters__dropdown input[data-filter-single]')) {
+        event.target.form.requestSubmit();
+        return;
       }
       if (event.target.matches('input[name="price[]"]') && event.target.checked) {
         event.target.form.querySelectorAll('[data-filter-custom-price]').forEach((input) => { input.value = ''; });
